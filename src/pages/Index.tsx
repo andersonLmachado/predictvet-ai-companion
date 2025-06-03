@@ -1,16 +1,23 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import HeroSection from '@/components/homepage/HeroSection';
+import FeaturesSection from '@/components/homepage/FeaturesSection';
+import WhyChooseSection from '@/components/homepage/WhyChooseSection';
+import HowItWorksSection from '@/components/homepage/HowItWorksSection';
+import TestimonialsSection from '@/components/homepage/TestimonialsSection';
+import CTASection from '@/components/homepage/CTASection';
 
 const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Redireciona para a página de login
-    navigate('/login');
-  }, [navigate]);
-
-  return <div>Redirecionando...</div>;
+  return (
+    <div className="min-h-screen bg-white">
+      <HeroSection />
+      <FeaturesSection />
+      <WhyChooseSection />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <CTASection />
+    </div>
+  );
 };
 
 export default Index;
