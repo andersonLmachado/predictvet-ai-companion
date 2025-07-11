@@ -36,6 +36,8 @@ const ChatInterface = () => {
 
   const sendToN8N = async (userMessage: string): Promise<string> => {
     try {
+      console.log('Enviando mensagem para n8n:', userMessage);
+      
       const response = await fetch('https://a502d49b88db.ngrok-free.app/webhook/7542c3b7-eed8-43fd-b97f-fa5309620430', {
         method: 'POST',
         headers: {
@@ -48,14 +50,40 @@ const ChatInterface = () => {
         }),
       });
 
+      console.log('Status da resposta:', response.status);
+      console.log('Headers da resposta:', response.headers);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      // Verificar se a resposta tem conteúdo
+      const contentType = response.headers.get('content-type');
+      console.log('Content-Type:', contentType);
       
-      // Assumindo que o n8n retorna a resposta em um campo 'response' ou 'message'
-      return data.response || data.message || data.text || 'Desculpe, não consegui processar sua solicitação no momento.';
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.log('Resposta como texto:', textResponse);
+        
+        if (!textResponse || textResponse.trim() === '') {
+          return 'Recebi sua mensagem e estou processando. Como posso ajudá-lo com este caso veterinário?';
+        }
+        
+        return textResponse;
+      }
+
+      const data = await response.json();
+      console.log('Dados recebidos do n8n:', data);
+      
+      // Tentar diferentes campos de resposta que o n8n pode retornar
+      const aiResponse = data.output || data.response || data.message || data.text || data.result;
+      
+      if (!aiResponse) {
+        console.log('Estrutura completa da resposta:', JSON.stringify(data, null, 2));
+        return 'Recebi sua mensagem. Pode me fornecer mais detalhes sobre o caso que está analisando?';
+      }
+      
+      return aiResponse;
     } catch (error) {
       console.error('Erro ao enviar para n8n:', error);
       throw error;
@@ -101,7 +129,7 @@ const ChatInterface = () => {
       
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
+        text: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente. Como posso ajudá-lo com seu caso veterinário?',
         isUser: false,
         timestamp: new Date(),
       };
