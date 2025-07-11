@@ -34,15 +34,32 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const simulateAIResponse = (userMessage: string): string => {
-    const responses = [
-      `Entendi que você mencionou "${userMessage.slice(0, 50)}...". Com base nos sintomas descritos, recomendo alguns exames iniciais. Você pode me fornecer mais detalhes sobre a idade do animal e há quanto tempo os sintomas apareceram?`,
-      `Interessante caso! Para "${userMessage.slice(0, 30)}...", sugiro considerarmos algumas possibilidades diagnósticas. Pode me informar o histórico médico do paciente?`,
-      `Baseado na sua descrição, existem algumas opções de tratamento que podemos considerar. Vou detalhar as principais abordagens terapêuticas para este tipo de caso...`,
-      `Essa situação requer atenção especial. Recomendo agendar uma consulta presencial para avaliação mais detalhada. Enquanto isso, aqui estão algumas orientações iniciais...`
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
+  const sendToN8N = async (userMessage: string): Promise<string> => {
+    try {
+      const response = await fetch('https://a502d49b88db.ngrok-free.app/webhook/7542c3b7-eed8-43fd-b97f-fa5309620430', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          timestamp: new Date().toISOString(),
+          source: 'PredictVet Chat'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Assumindo que o n8n retorna a resposta em um campo 'response' ou 'message'
+      return data.response || data.message || data.text || 'Desculpe, não consegui processar sua solicitação no momento.';
+    } catch (error) {
+      console.error('Erro ao enviar para n8n:', error);
+      throw error;
+    }
   };
 
   const handleSendMessage = async () => {
@@ -63,21 +80,42 @@ const ChatInterface = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
-    // Simular resposta da IA (futuramente será integrada com Supabase Edge Function)
-    setTimeout(() => {
+    try {
+      // Enviar para n8n e aguardar resposta
+      const aiResponseText = await sendToN8N(currentMessage);
+      
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: simulateAIResponse(inputMessage),
+        text: aiResponseText,
         isUser: false,
         timestamp: new Date(),
       };
       
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Erro ao processar mensagem:', error);
+      
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
+        isUser: false,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, errorResponse]);
+      
+      toast({
+        title: "Erro de conexão",
+        description: "Não foi possível conectar com o assistente. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
