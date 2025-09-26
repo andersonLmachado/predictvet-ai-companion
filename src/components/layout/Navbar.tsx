@@ -36,9 +36,9 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
           <div className="flex items-center space-x-8">
             <Link to="/chat" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PV</span>
+                <span className="text-white font-bold text-sm">PL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">PredictVet</span>
+              <span className="text-xl font-bold text-gray-900">PredictLab</span>
             </Link>
             
             <div className="flex space-x-1">

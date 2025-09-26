@@ -22,7 +22,7 @@ const CTASection = () => {
             size="lg" 
             className="bg-white text-vet-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Começar Sua Jornada com o PredictVet
+            Começar Sua Jornada com o PredictLab
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </Link>

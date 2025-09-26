@@ -17,7 +17,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Olá! Sou o PredictVet, seu assistente veterinário com IA. Como posso ajudá-lo hoje? Você pode me enviar sintomas, perguntas sobre diagnósticos ou qualquer dúvida veterinária.',
+      text: 'Olá! Sou o PredictLab, seu assistente veterinário com IA. Como posso ajudá-lo hoje? Você pode me enviar sintomas, perguntas sobre diagnósticos ou qualquer dúvida veterinária.',
       isUser: false,
       timestamp: new Date(),
     }
@@ -46,7 +46,7 @@ const ChatInterface = () => {
         body: JSON.stringify({
           message: userMessage,
           timestamp: new Date().toISOString(),
-          source: 'PredictVet Chat'
+          source: 'PredictLab Chat'
         }),
       });
 

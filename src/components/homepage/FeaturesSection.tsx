@@ -35,7 +35,7 @@ const FeaturesSection = () => {
             Principais Funcionalidades
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Descubra como o PredictVet pode revolucionar sua prática veterinária
+            Descubra como o PredictLab pode revolucionar sua prática veterinária
           </p>
         </div>
 

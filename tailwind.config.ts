@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // Cores específicas do PredictVet
+        // Cores específicas do PredictLab
         'vet-blue': {
           50: '#EFF6FF',
           100: '#DBEAFE',

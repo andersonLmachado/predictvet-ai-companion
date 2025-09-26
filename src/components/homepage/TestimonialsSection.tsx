@@ -8,7 +8,7 @@ const TestimonialsSection = () => {
     {
       name: "Dr. Marina Silva",
       role: "Médica Veterinária - Clínica Pet Care",
-      content: "O PredictVet revolucionou minha prática clínica. A IA me ajuda a considerar diagnósticos que às vezes passariam despercebidos, e a gestão de pacientes ficou muito mais organizada.",
+      content: "O PredictLab revolucionou minha prática clínica. A IA me ajuda a considerar diagnósticos que às vezes passariam despercebidos, e a gestão de pacientes ficou muito mais organizada.",
       rating: 5
     },
     {
@@ -27,7 +27,7 @@ const TestimonialsSection = () => {
             O Que Nossos Usuários Dizem
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Conheça as experiências de veterinários que já transformaram sua prática com o PredictVet
+            Conheça as experiências de veterinários que já transformaram sua prática com o PredictLab
           </p>
         </div>
 
