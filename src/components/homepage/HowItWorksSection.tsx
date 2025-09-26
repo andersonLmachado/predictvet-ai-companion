@@ -8,7 +8,7 @@ const HowItWorksSection = () => {
       number: "1",
       icon: UserPlus,
       title: "Cadastre-se ou Faça Login",
-      description: "Crie sua conta gratuita em poucos minutos e acesse todas as funcionalidades do PredictVet."
+      description: "Crie sua conta gratuita em poucos minutos e acesse todas as funcionalidades do PredictLab."
     },
     {
       number: "2",
@@ -32,7 +32,7 @@ const HowItWorksSection = () => {
             Três Passos Simples para Começar
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comece a usar o PredictVet hoje mesmo e transforme sua prática veterinária
+            Comece a usar o PredictLab hoje mesmo e transforme sua prática veterinária
           </p>
         </div>
 

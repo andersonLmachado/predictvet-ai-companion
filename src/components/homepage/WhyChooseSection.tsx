@@ -35,7 +35,7 @@ const WhyChooseSection = () => {
             Seus Diferenciais
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Por que o PredictVet é a escolha ideal para sua clínica veterinária
+            Por que o PredictLab é a escolha ideal para sua clínica veterinária
           </p>
         </div>
 

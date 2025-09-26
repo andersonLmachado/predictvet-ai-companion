@@ -34,7 +34,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       await onLogin(email, password);
       toast({
         title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao PredictVet.",
+        description: "Bem-vindo ao PredictLab.",
       });
     } catch (error) {
       toast({
@@ -55,7 +55,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             <span className="text-white font-bold text-lg">PV</span>
           </div>
         </div>
-        <CardTitle className="text-2xl text-center">PredictVet</CardTitle>
+        <CardTitle className="text-2xl text-center">PredictLab</CardTitle>
         <CardDescription className="text-center">
           Faça login para acessar seu assistente veterinário
         </CardDescription>

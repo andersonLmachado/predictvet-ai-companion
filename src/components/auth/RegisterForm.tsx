@@ -53,7 +53,7 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
       await onRegister(email, password);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Bem-vindo ao PredictVet.",
+        description: "Bem-vindo ao PredictLab.",
       });
     } catch (error) {
       toast({
@@ -76,7 +76,7 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
         </div>
         <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
         <CardDescription className="text-center">
-          Registre-se para começar a usar o PredictVet
+          Registre-se para começar a usar o PredictLab
         </CardDescription>
       </CardHeader>
       <CardContent>
