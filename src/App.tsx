@@ -12,6 +12,7 @@ import ChatPage from "./pages/ChatPage";
 import RegisterPet from "./pages/RegisterPet";
 import Patients from "./pages/Patients";
 import PatientDetails from "./pages/PatientDetails";
+import Exams from "./pages/Exams";
 import NotFound from "./pages/NotFound";
 import MainLayout from "./components/layout/MainLayout";
 
@@ -58,6 +59,14 @@ const App = () => (
             element={
               <MainLayout>
                 <PatientDetails />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/exams"
+            element={
+              <MainLayout>
+                <Exams />
               </MainLayout>
             }
           />

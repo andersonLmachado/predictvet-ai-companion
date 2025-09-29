@@ -9,7 +9,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { MessageSquare, UserPlus, Users, LogOut } from 'lucide-react';
+import { MessageSquare, UserPlus, Users, FileText, LogOut } from 'lucide-react';
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -69,6 +69,16 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
                 >
                   <Users className="w-4 h-4" />
                   <span>Meus Pacientes</span>
+                </Button>
+              </Link>
+              
+              <Link to="/exams">
+                <Button 
+                  variant={location.pathname === '/exams' ? 'default' : 'ghost'}
+                  className="flex items-center space-x-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Exames</span>
                 </Button>
               </Link>
             </div>
