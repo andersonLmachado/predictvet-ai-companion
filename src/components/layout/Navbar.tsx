@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { MessageSquare, UserPlus, Users, FileText, LogOut } from 'lucide-react';
+import predictlabIcon from '@/assets/predictlab-icon.png';
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -35,9 +36,7 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/chat" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PL</span>
-              </div>
+              <img src={predictlabIcon} alt="PredictLab" className="w-8 h-8" />
               <span className="text-xl font-bold text-gray-900">PredictLab</span>
             </Link>
             
