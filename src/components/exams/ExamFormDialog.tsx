@@ -63,13 +63,13 @@ const ExamFormDialog = ({ open, onOpenChange, onSuccess }: ExamFormDialogProps) 
       if (!user) throw new Error('Usuário não autenticado');
 
       const { data, error } = await supabase
-        .from('patients')
+        .from('patients' as any)
         .select('id, name')
         .eq('veterinarian_id', user.id)
         .order('name');
 
       if (error) throw error;
-      return data;
+      return data as unknown as Array<{ id: string; name: string }>;
     },
     enabled: open,
   });
@@ -79,7 +79,7 @@ const ExamFormDialog = ({ open, onOpenChange, onSuccess }: ExamFormDialogProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { error } = await supabase.from('exams').insert({
+      const { error } = await supabase.from('exams' as any).insert({
         patient_id: values.patient_id,
         exam_type: values.exam_type,
         notes: values.notes,
