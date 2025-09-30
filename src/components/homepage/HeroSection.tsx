@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import predictlabIcon from '@/assets/predictlab-icon.png';
 
 const HeroSection = () => {
   return (
@@ -10,9 +11,7 @@ const HeroSection = () => {
         {/* Header/Navbar */}
         <div className="flex justify-between items-center mb-16">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-vet-blue-600 to-vet-green-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">PL</span>
-            </div>
+            <img src={predictlabIcon} alt="PredictLab" className="w-12 h-12" />
             <span className="text-2xl font-bold text-gray-800">PredictLab</span>
           </div>
           <Link to="/login">
