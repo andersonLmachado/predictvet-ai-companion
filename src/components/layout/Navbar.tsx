@@ -36,7 +36,7 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/chat" className="flex items-center space-x-2">
-              <img src={predictlabIcon} alt="PredictLab" className="w-8 h-8" />
+              <img src={predictlabIcon} alt="PredictLab" className="w-10 h-10 object-contain" />
               <span className="text-xl font-bold text-gray-900">PredictLab</span>
             </Link>
             

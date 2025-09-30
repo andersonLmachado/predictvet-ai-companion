@@ -11,7 +11,7 @@ const HeroSection = () => {
         {/* Header/Navbar */}
         <div className="flex justify-between items-center mb-16">
           <div className="flex items-center space-x-3">
-            <img src={predictlabIcon} alt="PredictLab" className="w-12 h-12" />
+            <img src={predictlabIcon} alt="PredictLab" className="w-14 h-14 object-contain" />
             <span className="text-2xl font-bold text-gray-800">PredictLab</span>
           </div>
           <Link to="/login">
