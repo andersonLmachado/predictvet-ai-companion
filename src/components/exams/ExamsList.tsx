@@ -29,12 +29,12 @@ const ExamsList = () => {
     queryKey: ['exams'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('exams')
+        .from('exams' as any)
         .select('*')
         .order('requested_at', { ascending: false });
 
       if (error) throw error;
-      return data as Exam[];
+      return data as unknown as Exam[];
     },
   });
 

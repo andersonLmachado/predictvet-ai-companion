@@ -56,6 +56,54 @@ export type Database = {
         }
         Relationships: []
       }
+      patients: {
+        Row: {
+          age: number | null
+          breed: string | null
+          created_at: string
+          id: string
+          name: string
+          owner_email: string | null
+          owner_name: string
+          owner_phone: string | null
+          sex: string | null
+          species: string
+          updated_at: string
+          veterinarian_id: string
+          weight: number | null
+        }
+        Insert: {
+          age?: number | null
+          breed?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          owner_email?: string | null
+          owner_name: string
+          owner_phone?: string | null
+          sex?: string | null
+          species: string
+          updated_at?: string
+          veterinarian_id: string
+          weight?: number | null
+        }
+        Update: {
+          age?: number | null
+          breed?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          owner_email?: string | null
+          owner_name?: string
+          owner_phone?: string | null
+          sex?: string | null
+          species?: string
+          updated_at?: string
+          veterinarian_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
