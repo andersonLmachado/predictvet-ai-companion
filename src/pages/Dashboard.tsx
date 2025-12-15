@@ -111,13 +111,31 @@ const Dashboard = () => {
     return "bg-red-500";
   };
 
+  const isFormValid = patientId.trim() !== "" && species !== "";
+
   return (
     <div className="container mx-auto py-8 px-4 pb-24 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard Veterinário</h1>
-        <p className="text-muted-foreground mt-2">
-          Análise inteligente de casos clínicos com IA
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard Veterinário</h1>
+          <p className="text-muted-foreground mt-2">
+            Análise inteligente de casos clínicos com IA
+          </p>
+        </div>
+        <Button
+          className={`h-12 px-8 text-lg ${!isFormValid && !isLoading ? "bg-muted text-muted-foreground hover:bg-muted" : ""}`}
+          onClick={handleAnalyze}
+          disabled={isLoading || !isFormValid}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Analisando...
+            </>
+          ) : (
+            "Analisar Caso"
+          )}
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -230,22 +248,6 @@ const Dashboard = () => {
               />
             </CardContent>
           </Card>
-
-          {/* Botão de Ação */}
-          <Button
-            className="w-full h-12 text-lg"
-            onClick={handleAnalyze}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Analisando...
-              </>
-            ) : (
-              "Analisar Caso"
-            )}
-          </Button>
         </div>
 
         {/* Interface de Resultados */}
