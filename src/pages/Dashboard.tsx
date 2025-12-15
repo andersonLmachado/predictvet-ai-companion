@@ -4,23 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, FileText, Stethoscope, TestTube, Loader2, X } from "lucide-react";
+import { AlertTriangle, FileText, Stethoscope, TestTube, Loader2, X, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-interface Diagnostic {
-  disease_name: string;
-  confidence_score: number;
-  justification: string;
+interface DadosGrafico {
+  eritrocitos: number;
+  hemoglobina: number;
+  hematocrito: number;
+  leucocitos: number;
 }
 
 interface AnalysisResponse {
-  top_diagnostics: Diagnostic[];
-  critical_alerts: string[];
-  chart_base64: string;
+  dados_grafico: DadosGrafico;
+  analise_clinica: string;
+  alertas: string[];
 }
 
 const Dashboard = () => {
@@ -105,11 +106,16 @@ const Dashboard = () => {
     }
   };
 
-  const getConfidenceColor = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-yellow-500";
-    return "bg-red-500";
+  const prepareChartData = (dados: DadosGrafico) => {
+    return [
+      { name: "Eritrócitos", value: dados.eritrocitos, unit: "M/µL" },
+      { name: "Hemoglobina", value: dados.hemoglobina, unit: "g/dL" },
+      { name: "Hematócrito", value: dados.hematocrito, unit: "%" },
+      { name: "Leucócitos", value: dados.leucocitos / 1000, unit: "K/µL" },
+    ];
   };
+
+  const CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
   const isFormValid = patientId.trim() !== "" && species !== "";
 
@@ -276,73 +282,67 @@ const Dashboard = () => {
 
           {result && (
             <div className="space-y-6">
-              {/* Alertas Críticos */}
-              {result.critical_alerts && result.critical_alerts.length > 0 && (
+              {/* Alertas */}
+              {result.alertas && result.alertas.length > 0 && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-5 w-5" />
-                  <AlertTitle className="text-lg font-semibold">Alertas Críticos</AlertTitle>
+                  <AlertTitle className="text-lg font-semibold">Alertas</AlertTitle>
                   <AlertDescription>
-                    <ul className="list-disc pl-4 mt-2 space-y-1">
-                      {result.critical_alerts.map((alert, index) => (
-                        <li key={index}>{alert}</li>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {result.alertas.map((alerta, index) => (
+                        <Badge key={index} variant="destructive" className="text-sm">
+                          {alerta}
+                        </Badge>
                       ))}
-                    </ul>
+                    </div>
                   </AlertDescription>
                 </Alert>
               )}
 
               {/* Gráfico de Exames */}
-              {result.chart_base64 && (
+              {result.dados_grafico && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Gráfico de Exames</CardTitle>
+                    <CardTitle>Hemograma</CardTitle>
                     <CardDescription>Visualização dos resultados laboratoriais</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <img
-                      src={`data:image/png;base64,${result.chart_base64}`}
-                      alt="Gráfico de exames"
-                      className="w-full rounded-lg border"
-                    />
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={prepareChartData(result.dados_grafico)} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis dataKey="name" type="category" width={100} />
+                        <Tooltip
+                          formatter={(value: number, name: string, props: any) => [
+                            `${value.toFixed(2)} ${props.payload.unit}`,
+                            props.payload.name,
+                          ]}
+                        />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                          {prepareChartData(result.dados_grafico).map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Diagnósticos */}
-              {result.top_diagnostics && result.top_diagnostics.length > 0 && (
+              {/* Laudo da IA */}
+              {result.analise_clinica && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Diagnósticos Sugeridos</CardTitle>
-                    <CardDescription>
-                      Baseado na análise dos dados fornecidos
-                    </CardDescription>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-primary" />
+                      Laudo da IA
+                    </CardTitle>
+                    <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {result.top_diagnostics.map((diagnostic, index) => (
-                      <div
-                        key={index}
-                        className="p-4 rounded-lg border bg-card"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-lg">
-                            {diagnostic.disease_name}
-                          </h4>
-                          <Badge
-                            variant="secondary"
-                            className={`${getConfidenceColor(diagnostic.confidence_score)} text-white`}
-                          >
-                            {diagnostic.confidence_score.toFixed(1)}%
-                          </Badge>
-                        </div>
-                        <Progress
-                          value={diagnostic.confidence_score}
-                          className="h-2 mb-3"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          {diagnostic.justification}
-                        </p>
-                      </div>
-                    ))}
+                  <CardContent>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {result.analise_clinica}
+                    </p>
                   </CardContent>
                 </Card>
               )}
