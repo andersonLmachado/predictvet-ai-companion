@@ -68,7 +68,7 @@ const Dashboard = () => {
     setResult(null);
 
     try {
-      const response = await fetch("http://localhost:8000/analisar", {
+      const response = await fetch("https://vet-api.predictlab.com.br/webhook/analisar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
