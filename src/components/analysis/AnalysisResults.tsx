@@ -1,12 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Brain } from "lucide-react";
+import { AlertTriangle, Brain, Droplets, FlaskConical, Microscope, AlertCircle, CheckCircle2 } from "lucide-react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend
 } from "recharts";
 
+// ========== HEMOGRAMA Types ==========
 export interface SerieVermelha {
   eritrocitos: number;
   hemoglobina: number;
@@ -21,13 +22,65 @@ export interface SerieBranca {
   monocitos: number;
 }
 
-export interface AnalysisResponse {
-  serie_vermelha: SerieVermelha;
-  serie_branca: SerieBranca;
-  analise_clinica: string;
-  alertas: string[];
+// ========== URINA Types ==========
+export interface ExameFisico {
+  densidade: number;
+  cor: string;
+  aspecto: string;
 }
 
+export interface ExameQuimico {
+  ph: number;
+  glicose_score?: number;
+  proteina_score?: number;
+  cetonas_score?: number;
+  bilirrubina_score?: number;
+  sangue_oculto_score?: number;
+  nitrito_score?: number;
+  leucocitos_score?: number;
+  urobilinogenio_score?: number;
+  acetona_score?: number;
+}
+
+export interface Sedimentoscopia {
+  leucocitos_campo: number;
+  hemacias_campo: number;
+  bacterias_score: number;
+  cilindros_score?: number;
+  cristais_score?: number;
+  celulas_epiteliais_score?: number;
+}
+
+export interface DadosGrafico {
+  exame_fisico: ExameFisico;
+  exame_quimico: ExameQuimico;
+  sedimentoscopia: Sedimentoscopia;
+}
+
+export interface Paciente {
+  nome: string;
+  especie: string;
+  idade: string;
+}
+
+// ========== Combined Response Type ==========
+export interface AnalysisResponse {
+  // Common fields
+  tipo_exame?: 'hemograma' | 'urina';
+  paciente?: Paciente;
+  alertas?: string[];
+  
+  // Hemograma fields
+  serie_vermelha?: SerieVermelha;
+  serie_branca?: SerieBranca;
+  analise_clinica?: string;
+  
+  // Urina fields
+  dados_grafico?: DadosGrafico;
+  analise_ia?: string;
+}
+
+// ========== Constants ==========
 const BAR_CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b"];
 
 const PIE_CHART_COLORS = [
@@ -37,6 +90,7 @@ const PIE_CHART_COLORS = [
   { name: "Monócitos", color: "#8b5cf6" },
 ];
 
+// ========== Hemograma Helpers ==========
 const prepareBarChartData = (dados: SerieVermelha) => {
   return [
     { name: "Eritrócitos", value: dados.eritrocitos, unit: "M/µL" },
@@ -52,40 +106,77 @@ const preparePieChartData = (dados: SerieBranca) => {
     { name: "Eosinófilos", value: dados.eosinofilos, color: "#f59e0b" },
     { name: "Monócitos", value: dados.monocitos, color: "#8b5cf6" },
   ];
-  
-  // Filter out items with value 0
   return items.filter(item => item.value > 0);
 };
 
-interface AnalysisResultsProps {
-  result: AnalysisResponse;
-}
+// ========== Urina Components ==========
+const GaugeChart = ({ value, min = 1000, max = 1060 }: { value: number; min?: number; max?: number }) => {
+  const safeMin = 1015;
+  const safeMax = 1045;
+  
+  const percentage = ((value - min) / (max - min)) * 100;
+  const clampedPercentage = Math.max(0, Math.min(100, percentage));
+  const isInSafeRange = value >= safeMin && value <= safeMax;
+  const safeStartPercent = ((safeMin - min) / (max - min)) * 100;
+  const safeEndPercent = ((safeMax - min) / (max - min)) * 100;
+  
+  return (
+    <div className="relative w-full max-w-[280px] mx-auto">
+      <svg viewBox="0 0 200 120" className="w-full">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="hsl(var(--muted))" strokeWidth="16" strokeLinecap="round" />
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="hsl(var(--destructive) / 0.3)" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${safeStartPercent * 2.51} 1000`} />
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="hsl(var(--chart-2))" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${(safeEndPercent - safeStartPercent) * 2.51} 1000`} strokeDashoffset={`-${safeStartPercent * 2.51}`} />
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="hsl(var(--destructive) / 0.3)" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${(100 - safeEndPercent) * 2.51} 1000`} strokeDashoffset={`-${safeEndPercent * 2.51}`} />
+        <g transform={`rotate(${-90 + clampedPercentage * 1.8}, 100, 100)`}>
+          <line x1="100" y1="100" x2="100" y2="35" stroke={isInSafeRange ? "hsl(var(--chart-2))" : "hsl(var(--destructive))"} strokeWidth="3" strokeLinecap="round" />
+          <circle cx="100" cy="100" r="8" fill={isInSafeRange ? "hsl(var(--chart-2))" : "hsl(var(--destructive))"} />
+        </g>
+        <text x="20" y="115" fontSize="10" fill="hsl(var(--muted-foreground))" textAnchor="middle">{min}</text>
+        <text x="180" y="115" fontSize="10" fill="hsl(var(--muted-foreground))" textAnchor="middle">{max}</text>
+      </svg>
+      <div className="text-center -mt-4">
+        <span className={`text-3xl font-bold ${isInSafeRange ? 'text-green-600' : 'text-destructive'}`}>{value}</span>
+        <p className="text-xs text-muted-foreground mt-1">Faixa normal: {safeMin} - {safeMax}</p>
+      </div>
+    </div>
+  );
+};
 
-export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
+const prepareChemicalData = (exame: ExameQuimico) => {
+  const scoreLabels: Record<number, string> = { 0: "Neg", 1: "+", 2: "++", 3: "+++", 4: "++++" };
+  const items = [];
+  
+  if (exame.glicose_score !== undefined) items.push({ name: "Glicose", value: exame.glicose_score, label: scoreLabels[Math.floor(exame.glicose_score)] || "Neg" });
+  if (exame.proteina_score !== undefined) items.push({ name: "Proteína", value: exame.proteina_score, label: scoreLabels[Math.floor(exame.proteina_score)] || "Neg" });
+  if (exame.cetonas_score !== undefined) items.push({ name: "Cetonas", value: exame.cetonas_score, label: scoreLabels[Math.floor(exame.cetonas_score)] || "Neg" });
+  if (exame.bilirrubina_score !== undefined) items.push({ name: "Bilirrubina", value: exame.bilirrubina_score, label: scoreLabels[Math.floor(exame.bilirrubina_score)] || "Neg" });
+  if (exame.sangue_oculto_score !== undefined) items.push({ name: "Sangue Oculto", value: exame.sangue_oculto_score, label: scoreLabels[Math.floor(exame.sangue_oculto_score)] || "Neg" });
+  if (exame.nitrito_score !== undefined) items.push({ name: "Nitrito", value: exame.nitrito_score, label: scoreLabels[Math.floor(exame.nitrito_score)] || "Neg" });
+  if (exame.leucocitos_score !== undefined) items.push({ name: "Leucócitos", value: exame.leucocitos_score, label: scoreLabels[Math.floor(exame.leucocitos_score)] || "Neg" });
+  if (exame.urobilinogenio_score !== undefined) items.push({ name: "Urobilinogênio", value: exame.urobilinogenio_score, label: scoreLabels[Math.floor(exame.urobilinogenio_score)] || "Neg" });
+  if (exame.acetona_score !== undefined) items.push({ name: "Acetona", value: exame.acetona_score, label: scoreLabels[Math.floor(exame.acetona_score)] || "Neg" });
+  
+  return items;
+};
+
+const StatusIndicator = ({ label, value, isAlert }: { label: string; value: string; isAlert: boolean }) => (
+  <div className={`flex items-center gap-3 p-3 rounded-lg border ${isAlert ? 'bg-destructive/10 border-destructive/30' : 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'}`}>
+    {isAlert ? <AlertCircle className="h-5 w-5 text-destructive" /> : <CheckCircle2 className="h-5 w-5 text-green-600" />}
+    <div>
+      <p className="text-sm font-medium">{label}</p>
+      <p className={`text-xs ${isAlert ? 'text-destructive' : 'text-green-600'}`}>{value}</p>
+    </div>
+  </div>
+);
+
+// ========== Hemograma View ==========
+const HemogramaView = ({ result }: { result: AnalysisResponse }) => {
   const pieData = result.serie_branca ? preparePieChartData(result.serie_branca) : [];
+  const analysisText = result.analise_clinica || result.analise_ia;
 
   return (
     <div className="space-y-6">
-      {/* Alertas */}
-      {result.alertas && result.alertas.length > 0 && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle className="text-lg font-semibold">Alertas</AlertTitle>
-          <AlertDescription>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {result.alertas.map((alerta, index) => (
-                <Badge key={index} variant="destructive" className="text-sm">
-                  {alerta}
-                </Badge>
-              ))}
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Gráficos */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Gráfico Série Vermelha - Bar Chart */}
         {result.serie_vermelha && (
           <Card>
             <CardHeader>
@@ -98,12 +189,7 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis dataKey="name" type="category" width={100} />
-                  <Tooltip
-                    formatter={(value: number, name: string, props: any) => [
-                      `${value.toFixed(2)} ${props.payload.unit}`,
-                      props.payload.name,
-                    ]}
-                  />
+                  <Tooltip formatter={(value: number, name: string, props: any) => [`${value.toFixed(2)} ${props.payload.unit}`, props.payload.name]} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {prepareBarChartData(result.serie_vermelha).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={BAR_CHART_COLORS[index % BAR_CHART_COLORS.length]} />
@@ -115,7 +201,6 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
           </Card>
         )}
 
-        {/* Gráfico Série Branca - Pie Chart */}
         {result.serie_branca && pieData.length > 0 && (
           <Card>
             <CardHeader>
@@ -123,35 +208,18 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
               <CardDescription>Leucograma - distribuição de glóbulos brancos</CardDescription>
               <div className="mt-2 p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">Leucócitos Totais</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {result.serie_branca.leucocitos_totais.toLocaleString()} /µL
-                </p>
+                <p className="text-2xl font-bold text-foreground">{result.serie_branca.leucocitos_totais.toLocaleString()} /µL</p>
               </div>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number, name: string) => [
-                      `${value.toLocaleString()} /µL`,
-                      name,
-                    ]}
-                  />
+                  <Tooltip formatter={(value: number, name: string) => [`${value.toLocaleString()} /µL`, name]} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -160,8 +228,7 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
         )}
       </div>
 
-      {/* Laudo da IA */}
-      {result.analise_clinica && (
+      {analysisText && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -171,12 +238,180 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
             <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {result.analise_clinica}
-            </p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{analysisText}</p>
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+};
+
+// ========== Urina View ==========
+const UrinaView = ({ result }: { result: AnalysisResponse }) => {
+  const dados = result.dados_grafico;
+  if (!dados) return null;
+
+  const chemicalData = dados.exame_quimico ? prepareChemicalData(dados.exame_quimico) : [];
+  const analysisText = result.analise_ia || result.analise_clinica;
+
+  return (
+    <div className="space-y-6">
+      {/* Patient Info */}
+      {result.paciente && (
+        <Card className="bg-muted/30">
+          <CardContent className="pt-4">
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span><strong>Paciente:</strong> {result.paciente.nome}</span>
+              <span><strong>Espécie:</strong> {result.paciente.especie}</span>
+              <span><strong>Idade:</strong> {result.paciente.idade}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {/* 1. Exame Físico - Gauge Chart */}
+        {dados.exame_fisico && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-cyan-600">
+                <Droplets className="h-5 w-5" />
+                Exame Físico
+              </CardTitle>
+              <CardDescription>Características físicas da urina</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-center mb-2">Densidade</p>
+                <GaugeChart value={dados.exame_fisico.densidade} />
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t">
+                <div className="text-center p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Cor</p>
+                  <p className="font-medium">{dados.exame_fisico.cor}</p>
+                </div>
+                <div className="text-center p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Aspecto</p>
+                  <p className="font-medium">{dados.exame_fisico.aspecto}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 2. Exame Químico - Bar Chart */}
+        {dados.exame_quimico && chemicalData.length > 0 && (
+          <Card className="xl:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-600">
+                <FlaskConical className="h-5 w-5" />
+                Exame Químico
+              </CardTitle>
+              <CardDescription>Análise bioquímica da urina</CardDescription>
+              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-sm text-muted-foreground">pH</p>
+                <p className="text-2xl font-bold text-foreground">{dados.exame_quimico.ph.toFixed(1)}</p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(200, chemicalData.length * 40)}>
+                <BarChart data={chemicalData} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                  <XAxis type="number" domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} tickFormatter={(value) => ({ 0: "Neg", 1: "+", 2: "++", 3: "+++", 4: "++++" }[value] || value.toString())} />
+                  <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: number) => [{ 0: "Negativo", 1: "+", 2: "++", 3: "+++", 4: "++++" }[Math.floor(value)] || value, "Resultado"]} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                    {chemicalData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.value > 0 ? "hsl(var(--destructive))" : "hsl(var(--chart-2))"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 3. Sedimentoscopia */}
+        {dados.sedimentoscopia && (
+          <Card className="lg:col-span-2 xl:col-span-3">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-600">
+                <Microscope className="h-5 w-5" />
+                Sedimentoscopia
+              </CardTitle>
+              <CardDescription>Análise microscópica do sedimento urinário</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="p-4 bg-muted/50 rounded-lg border text-center">
+                  <p className="text-sm text-muted-foreground mb-1">Leucócitos/Campo</p>
+                  <p className="text-3xl font-bold text-foreground">{dados.sedimentoscopia.leucocitos_campo}</p>
+                  <p className="text-xs text-muted-foreground mt-1">células/campo</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg border text-center">
+                  <p className="text-sm text-muted-foreground mb-1">Hemácias/Campo</p>
+                  <p className="text-3xl font-bold text-foreground">{dados.sedimentoscopia.hemacias_campo}</p>
+                  <p className="text-xs text-muted-foreground mt-1">células/campo</p>
+                </div>
+                <StatusIndicator label="Bactérias" value={dados.sedimentoscopia.bacterias_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.bacterias_score > 0} />
+                {dados.sedimentoscopia.cilindros_score !== undefined && (
+                  <StatusIndicator label="Cilindros" value={dados.sedimentoscopia.cilindros_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.cilindros_score > 0} />
+                )}
+                {dados.sedimentoscopia.cristais_score !== undefined && (
+                  <StatusIndicator label="Cristais" value={dados.sedimentoscopia.cristais_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.cristais_score > 0} />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {analysisText && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              Laudo da IA
+            </CardTitle>
+            <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{analysisText}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+// ========== Main Component ==========
+interface AnalysisResultsProps {
+  result: AnalysisResponse;
+}
+
+export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
+  // Determine exam type: explicit or inferred
+  const tipoExame = result.tipo_exame || (result.dados_grafico ? 'urina' : 'hemograma');
+
+  return (
+    <div className="space-y-6">
+      {/* Alertas */}
+      {result.alertas && result.alertas.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle className="text-lg font-semibold">Alertas</AlertTitle>
+          <AlertDescription>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {result.alertas.map((alerta, index) => (
+                <Badge key={index} variant="destructive" className="text-sm">{alerta}</Badge>
+              ))}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Render based on exam type */}
+      {tipoExame === 'urina' ? <UrinaView result={result} /> : <HemogramaView result={result} />}
     </div>
   );
 };
