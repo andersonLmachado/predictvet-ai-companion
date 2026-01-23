@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Brain, Droplets, FlaskConical, Microscope, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Brain, Droplets, FlaskConical, Microscope, AlertCircle, CheckCircle2, TestTube, Activity } from "lucide-react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend
@@ -22,7 +22,22 @@ export interface SerieBranca {
   monocitos: number;
 }
 
-// ========== URINA Types ==========
+export interface HemogramaData {
+  existe: boolean;
+  serie_vermelha?: SerieVermelha;
+  serie_branca?: SerieBranca;
+}
+
+// ========== BIOQUIMICA Types ==========
+export interface BioquimicaData {
+  existe: boolean;
+  creatinina?: number;
+  ureia?: number;
+  alt?: number;
+  fosfatase_alcalina?: number;
+}
+
+// ========== URINALISE Types ==========
 export interface ExameFisico {
   densidade: number;
   cor: string;
@@ -51,10 +66,11 @@ export interface Sedimentoscopia {
   celulas_epiteliais_score?: number;
 }
 
-export interface DadosGrafico {
-  exame_fisico: ExameFisico;
-  exame_quimico: ExameQuimico;
-  sedimentoscopia: Sedimentoscopia;
+export interface UrinaliseData {
+  existe: boolean;
+  exame_fisico?: ExameFisico;
+  exame_quimico?: ExameQuimico;
+  sedimentoscopia?: Sedimentoscopia;
 }
 
 export interface Paciente {
@@ -65,19 +81,25 @@ export interface Paciente {
 
 // ========== Combined Response Type ==========
 export interface AnalysisResponse {
-  // Common fields
-  tipo_exame?: 'hemograma' | 'urina';
   paciente?: Paciente;
   alertas?: string[];
+  analise_clinica?: string;
+  analise_ia?: string;
   
-  // Hemograma fields
+  // Modular sections
+  hemograma?: HemogramaData;
+  bioquimica?: BioquimicaData;
+  urinalise?: UrinaliseData;
+  
+  // Legacy support
+  tipo_exame?: 'hemograma' | 'urina';
   serie_vermelha?: SerieVermelha;
   serie_branca?: SerieBranca;
-  analise_clinica?: string;
-  
-  // Urina fields
-  dados_grafico?: DadosGrafico;
-  analise_ia?: string;
+  dados_grafico?: {
+    exame_fisico: ExameFisico;
+    exame_quimico: ExameQuimico;
+    sedimentoscopia: Sedimentoscopia;
+  };
 }
 
 // ========== Constants ==========
@@ -169,15 +191,31 @@ const StatusIndicator = ({ label, value, isAlert }: { label: string; value: stri
   </div>
 );
 
-// ========== Hemograma View ==========
-const HemogramaView = ({ result }: { result: AnalysisResponse }) => {
-  const pieData = result.serie_branca ? preparePieChartData(result.serie_branca) : [];
-  const analysisText = result.analise_clinica || result.analise_ia;
+const MetricCard = ({ label, value, unit }: { label: string; value: number | undefined; unit: string }) => {
+  if (value === undefined) return null;
+  return (
+    <Card className="text-center">
+      <CardContent className="pt-6">
+        <p className="text-sm text-muted-foreground mb-2">{label}</p>
+        <p className="text-3xl font-bold text-foreground">{value.toFixed(2)}</p>
+        <p className="text-xs text-muted-foreground mt-1">{unit}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+// ========== Hemograma Section ==========
+const HemogramaSection = ({ data }: { data: HemogramaData }) => {
+  const pieData = data.serie_branca ? preparePieChartData(data.serie_branca) : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold flex items-center gap-2 text-red-600">
+        <Activity className="h-5 w-5" />
+        Hemograma
+      </h2>
       <div className="grid gap-6 lg:grid-cols-2">
-        {result.serie_vermelha && (
+        {data.serie_vermelha && (
           <Card>
             <CardHeader>
               <CardTitle className="text-red-600">Série Vermelha</CardTitle>
@@ -185,13 +223,13 @@ const HemogramaView = ({ result }: { result: AnalysisResponse }) => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={prepareBarChartData(result.serie_vermelha)} layout="vertical">
+                <BarChart data={prepareBarChartData(data.serie_vermelha)} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis dataKey="name" type="category" width={100} />
                   <Tooltip formatter={(value: number, name: string, props: any) => [`${value.toFixed(2)} ${props.payload.unit}`, props.payload.name]} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {prepareBarChartData(result.serie_vermelha).map((_, index) => (
+                    {prepareBarChartData(data.serie_vermelha).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={BAR_CHART_COLORS[index % BAR_CHART_COLORS.length]} />
                     ))}
                   </Bar>
@@ -201,14 +239,14 @@ const HemogramaView = ({ result }: { result: AnalysisResponse }) => {
           </Card>
         )}
 
-        {result.serie_branca && pieData.length > 0 && (
+        {data.serie_branca && pieData.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="text-blue-600">Série Branca</CardTitle>
               <CardDescription>Leucograma - distribuição de glóbulos brancos</CardDescription>
               <div className="mt-2 p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">Leucócitos Totais</p>
-                <p className="text-2xl font-bold text-foreground">{result.serie_branca.leucocitos_totais.toLocaleString()} /µL</p>
+                <p className="text-2xl font-bold text-foreground">{data.serie_branca.leucocitos_totais.toLocaleString()} /µL</p>
               </div>
             </CardHeader>
             <CardContent>
@@ -227,51 +265,42 @@ const HemogramaView = ({ result }: { result: AnalysisResponse }) => {
           </Card>
         )}
       </div>
-
-      {analysisText && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              Laudo da IA
-            </CardTitle>
-            <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{analysisText}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
 
-// ========== Urina View ==========
-const UrinaView = ({ result }: { result: AnalysisResponse }) => {
-  const dados = result.dados_grafico;
-  if (!dados) return null;
+// ========== Bioquimica Section ==========
+const BioquimicaSection = ({ data }: { data: BioquimicaData }) => {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold flex items-center gap-2 text-amber-600">
+        <TestTube className="h-5 w-5" />
+        Bioquímica
+      </h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard label="Creatinina" value={data.creatinina} unit="mg/dL" />
+        <MetricCard label="Ureia" value={data.ureia} unit="mg/dL" />
+        <MetricCard label="ALT" value={data.alt} unit="U/L" />
+        <MetricCard label="Fosfatase Alcalina" value={data.fosfatase_alcalina} unit="U/L" />
+      </div>
+    </div>
+  );
+};
 
-  const chemicalData = dados.exame_quimico ? prepareChemicalData(dados.exame_quimico) : [];
-  const analysisText = result.analise_ia || result.analise_clinica;
+// ========== Urinalise Section ==========
+const UrinaliseSection = ({ data }: { data: UrinaliseData }) => {
+  const chemicalData = data.exame_quimico ? prepareChemicalData(data.exame_quimico) : [];
 
   return (
-    <div className="space-y-6">
-      {/* Patient Info */}
-      {result.paciente && (
-        <Card className="bg-muted/30">
-          <CardContent className="pt-4">
-            <div className="flex flex-wrap gap-4 text-sm">
-              <span><strong>Paciente:</strong> {result.paciente.nome}</span>
-              <span><strong>Espécie:</strong> {result.paciente.especie}</span>
-              <span><strong>Idade:</strong> {result.paciente.idade}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold flex items-center gap-2 text-cyan-600">
+        <Droplets className="h-5 w-5" />
+        Urinálise
+      </h2>
+      
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {/* 1. Exame Físico - Gauge Chart */}
-        {dados.exame_fisico && (
+        {/* A - Exame Físico - Gauge Chart */}
+        {data.exame_fisico && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-cyan-600">
@@ -283,24 +312,24 @@ const UrinaView = ({ result }: { result: AnalysisResponse }) => {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm font-medium text-center mb-2">Densidade</p>
-                <GaugeChart value={dados.exame_fisico.densidade} />
+                <GaugeChart value={data.exame_fisico.densidade} />
               </div>
               <div className="grid grid-cols-2 gap-3 pt-4 border-t">
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Cor</p>
-                  <p className="font-medium">{dados.exame_fisico.cor}</p>
+                  <p className="font-medium">{data.exame_fisico.cor}</p>
                 </div>
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Aspecto</p>
-                  <p className="font-medium">{dados.exame_fisico.aspecto}</p>
+                  <p className="font-medium">{data.exame_fisico.aspecto}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* 2. Exame Químico - Bar Chart */}
-        {dados.exame_quimico && chemicalData.length > 0 && (
+        {/* B - Exame Químico - Bar Chart */}
+        {data.exame_quimico && chemicalData.length > 0 && (
           <Card className="xl:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-amber-600">
@@ -310,7 +339,7 @@ const UrinaView = ({ result }: { result: AnalysisResponse }) => {
               <CardDescription>Análise bioquímica da urina</CardDescription>
               <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <p className="text-sm text-muted-foreground">pH</p>
-                <p className="text-2xl font-bold text-foreground">{dados.exame_quimico.ph.toFixed(1)}</p>
+                <p className="text-2xl font-bold text-foreground">{data.exame_quimico.ph.toFixed(1)}</p>
               </div>
             </CardHeader>
             <CardContent>
@@ -331,8 +360,8 @@ const UrinaView = ({ result }: { result: AnalysisResponse }) => {
           </Card>
         )}
 
-        {/* 3. Sedimentoscopia */}
-        {dados.sedimentoscopia && (
+        {/* C - Sedimentoscopia */}
+        {data.sedimentoscopia && (
           <Card className="lg:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-600">
@@ -345,41 +374,26 @@ const UrinaView = ({ result }: { result: AnalysisResponse }) => {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="p-4 bg-muted/50 rounded-lg border text-center">
                   <p className="text-sm text-muted-foreground mb-1">Leucócitos/Campo</p>
-                  <p className="text-3xl font-bold text-foreground">{dados.sedimentoscopia.leucocitos_campo}</p>
+                  <p className="text-3xl font-bold text-foreground">{data.sedimentoscopia.leucocitos_campo}</p>
                   <p className="text-xs text-muted-foreground mt-1">células/campo</p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg border text-center">
                   <p className="text-sm text-muted-foreground mb-1">Hemácias/Campo</p>
-                  <p className="text-3xl font-bold text-foreground">{dados.sedimentoscopia.hemacias_campo}</p>
+                  <p className="text-3xl font-bold text-foreground">{data.sedimentoscopia.hemacias_campo}</p>
                   <p className="text-xs text-muted-foreground mt-1">células/campo</p>
                 </div>
-                <StatusIndicator label="Bactérias" value={dados.sedimentoscopia.bacterias_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.bacterias_score > 0} />
-                {dados.sedimentoscopia.cilindros_score !== undefined && (
-                  <StatusIndicator label="Cilindros" value={dados.sedimentoscopia.cilindros_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.cilindros_score > 0} />
+                <StatusIndicator label="Bactérias" value={data.sedimentoscopia.bacterias_score > 0 ? "Presente" : "Ausente"} isAlert={data.sedimentoscopia.bacterias_score > 0} />
+                {data.sedimentoscopia.cilindros_score !== undefined && (
+                  <StatusIndicator label="Cilindros" value={data.sedimentoscopia.cilindros_score > 0 ? "Presente" : "Ausente"} isAlert={data.sedimentoscopia.cilindros_score > 0} />
                 )}
-                {dados.sedimentoscopia.cristais_score !== undefined && (
-                  <StatusIndicator label="Cristais" value={dados.sedimentoscopia.cristais_score > 0 ? "Presente" : "Ausente"} isAlert={dados.sedimentoscopia.cristais_score > 0} />
+                {data.sedimentoscopia.cristais_score !== undefined && (
+                  <StatusIndicator label="Cristais" value={data.sedimentoscopia.cristais_score > 0 ? "Presente" : "Ausente"} isAlert={data.sedimentoscopia.cristais_score > 0} />
                 )}
               </div>
             </CardContent>
           </Card>
         )}
       </div>
-
-      {analysisText && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              Laudo da IA
-            </CardTitle>
-            <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{analysisText}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
@@ -390,11 +404,49 @@ interface AnalysisResultsProps {
 }
 
 export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
-  // Determine exam type: explicit or inferred
-  const tipoExame = result.tipo_exame || (result.dados_grafico ? 'urina' : 'hemograma');
+  // Normalize data: support both new modular format and legacy format
+  const hemograma: HemogramaData | undefined = result.hemograma ?? (
+    (result.serie_vermelha || result.serie_branca) 
+      ? { existe: true, serie_vermelha: result.serie_vermelha, serie_branca: result.serie_branca }
+      : undefined
+  );
+  
+  const bioquimica: BioquimicaData | undefined = result.bioquimica;
+  
+  const urinalise: UrinaliseData | undefined = result.urinalise ?? (
+    result.dados_grafico 
+      ? { 
+          existe: true, 
+          exame_fisico: result.dados_grafico.exame_fisico,
+          exame_quimico: result.dados_grafico.exame_quimico,
+          sedimentoscopia: result.dados_grafico.sedimentoscopia
+        }
+      : (result.tipo_exame === 'urina' ? { existe: true } : undefined)
+  );
+
+  // Check if any section exists
+  const hasHemograma = hemograma?.existe === true;
+  const hasBioquimica = bioquimica?.existe === true;
+  const hasUrinalise = urinalise?.existe === true;
+  const hasAnyData = hasHemograma || hasBioquimica || hasUrinalise;
+
+  const analysisText = result.analise_clinica || result.analise_ia;
 
   return (
     <div className="space-y-6">
+      {/* Patient Info */}
+      {result.paciente && (
+        <Card className="bg-muted/30">
+          <CardContent className="pt-4">
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span><strong>Paciente:</strong> {result.paciente.nome}</span>
+              <span><strong>Espécie:</strong> {result.paciente.especie}</span>
+              <span><strong>Idade:</strong> {result.paciente.idade}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Alertas */}
       {result.alertas && result.alertas.length > 0 && (
         <Alert variant="destructive">
@@ -410,8 +462,37 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
         </Alert>
       )}
 
-      {/* Render based on exam type */}
-      {tipoExame === 'urina' ? <UrinaView result={result} /> : <HemogramaView result={result} />}
+      {/* No Data Message */}
+      {!hasAnyData && (
+        <Alert>
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle>Dados não encontrados</AlertTitle>
+          <AlertDescription>
+            Nenhum dado de exame foi encontrado na resposta da análise.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Conditional Sections */}
+      {hasHemograma && hemograma && <HemogramaSection data={hemograma} />}
+      {hasBioquimica && bioquimica && <BioquimicaSection data={bioquimica} />}
+      {hasUrinalise && urinalise && <UrinaliseSection data={urinalise} />}
+
+      {/* AI Analysis */}
+      {analysisText && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              Laudo da IA
+            </CardTitle>
+            <CardDescription>Análise clínica gerada por inteligência artificial</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{analysisText}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
