@@ -4,11 +4,22 @@ import { Loader2, FileSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FileDropzone from "@/components/analysis/FileDropzone";
 import AnalysisResults, { AnalysisResponse } from "@/components/analysis/AnalysisResults";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+type ExamType = "sangue" | "urina";
 
 const Exams = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
+  const [examType, setExamType] = useState<ExamType>("sangue");
 
   const handleFileSelect = async (file: File) => {
     setIsLoading(true);
@@ -17,6 +28,7 @@ const Exams = () => {
     try {
       const formData = new FormData();
       formData.append("data", file);
+      formData.append("examType", examType);
 
       const response = await fetch("https://vet-api.predictlab.com.br/webhook/analisar-arquivo", {
         method: "POST",
@@ -56,6 +68,22 @@ const Exams = () => {
       </div>
 
       <div className="space-y-6">
+        {/* Seletor de Tipo de Exame */}
+        <div className="space-y-2">
+          <Label htmlFor="exam-type" className="text-sm font-medium">
+            Tipo de Exame
+          </Label>
+          <Select value={examType} onValueChange={(value: ExamType) => setExamType(value)}>
+            <SelectTrigger id="exam-type" className="w-full md:w-72">
+              <SelectValue placeholder="Selecione o tipo de exame" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sangue">Hemograma Completo</SelectItem>
+              <SelectItem value="urina">Urinálise (EAS)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
 
         {isLoading && (
