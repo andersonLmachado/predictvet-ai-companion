@@ -404,9 +404,13 @@ interface AnalysisResultsProps {
 }
 
 export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
+  // Detect if this is a urine exam (legacy format check)
+  const isUrinaExam = result.tipo_exame === 'urina' || !!result.dados_grafico || result.urinalise?.existe === true;
+  
   // Normalize data: support both new modular format and legacy format
+  // IMPORTANT: Don't create hemograma from legacy data if this is a urine exam
   const hemograma: HemogramaData | undefined = result.hemograma ?? (
-    (result.serie_vermelha || result.serie_branca) 
+    (!isUrinaExam && (result.serie_vermelha || result.serie_branca))
       ? { existe: true, serie_vermelha: result.serie_vermelha, serie_branca: result.serie_branca }
       : undefined
   );
@@ -424,8 +428,8 @@ export const AnalysisResults = ({ result }: AnalysisResultsProps) => {
       : (result.tipo_exame === 'urina' ? { existe: true } : undefined)
   );
 
-  // Check if any section exists
-  const hasHemograma = hemograma?.existe === true;
+  // Check if any section exists based on the `existe` flag
+  const hasHemograma = hemograma?.existe === true && !isUrinaExam;
   const hasBioquimica = bioquimica?.existe === true;
   const hasUrinalise = urinalise?.existe === true;
   const hasAnyData = hasHemograma || hasBioquimica || hasUrinalise;
