@@ -1,29 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import { Activity, Droplets } from "lucide-react";
 import type { ResultadoItem } from "./AnalysisResults";
 
 // Parameters for Red Blood Cell Series
 const RED_SERIES_PARAMS = [
-  'eritrócitos', 'eritrocitos', 'hemácias', 'hemacias',
-  'hemoglobina', 'hb',
-  'hematócrito', 'hematocrito', 'ht', 'htc',
-  'vcm', 'vgm',
-  'hcm', 'chcm', 'chgm',
-  'rdw'
+  "eritrócitos", "eritrocitos", "hemácias", "hemacias",
+  "hemoglobina", "hb",
+  "hematócrito", "hematocrito", "ht", "htc",
+  "vcm", "vgm",
+  "hcm", "chcm", "chgm",
+  "rdw"
 ];
 
 // Parameters for White Blood Cell Series
 const WHITE_SERIES_PARAMS = [
-  'leucócitos', 'leucocitos', 'wbc',
-  'neutrófilos', 'neutrofilos', 'segmentados',
-  'bastonetes', 'bastões', 'bastoes',
-  'linfócitos', 'linfocitos',
-  'monócitos', 'monocitos',
-  'eosinófilos', 'eosinofilos',
-  'basófilos', 'basofilos',
-  'plaquetas', 'plt'
+  "leucócitos", "leucocitos", "wbc",
+  "neutrófilos", "neutrofilos", "segmentados",
+  "bastonetes", "bastões", "bastoes",
+  "linfócitos", "linfocitos",
+  "monócitos", "monocitos",
+  "eosinófilos", "eosinofilos",
+  "basófilos", "basofilos",
+  "plaquetas", "plt"
 ];
 
 const matchesParam = (parametro: string, patterns: string[]): boolean => {
@@ -54,19 +54,25 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
   };
 
   const formatChartData = (data: ResultadoItem[]) => {
-    return data.map(item => ({
-      name: item.parametro.length > 12 ? item.parametro.substring(0, 10) + '...' : item.parametro,
-      fullName: item.parametro,
-      value: item.valor_encontrado,
-      refMin: item.ref_min,
-      refMax: item.ref_max,
-      unit: item.unidade,
-      status: item.status,
-    }));
+    return data.map(item => {
+      const numericValue = typeof item.valor_encontrado === "number" 
+        ? item.valor_encontrado 
+        : parseFloat(String(item.valor_encontrado)) || 0;
+      
+      return {
+        name: item.parametro.length > 12 ? item.parametro.substring(0, 10) + "..." : item.parametro,
+        fullName: item.parametro,
+        value: numericValue,
+        refMin: item.ref_min,
+        refMax: item.ref_max,
+        unit: item.unidade,
+        status: item.status,
+      };
+    });
   };
 
   const getBarColor = (status: string) => {
-    return status === 'normal' ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))';
+    return status === "normal" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))";
   };
 
   return (
@@ -81,10 +87,10 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
         {hasRedSeries && (
           <Card>
             <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Droplets className="h-4 w-4 text-destructive" />
-              Série Vermelha
-            </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Droplets className="h-4 w-4 text-destructive" />
+                Série Vermelha
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -104,7 +110,7 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
                           <div className="flex flex-col gap-1">
                             <span className="font-medium">{item.payload.fullName}</span>
                             <span>{value} {item.payload.unit}</span>
-                            {item.payload.refMin !== undefined && item.payload.refMax !== undefined && (
+                            {item.payload.refMin !== null && item.payload.refMax !== null && (
                               <span className="text-xs text-muted-foreground">
                                 Ref: {item.payload.refMin} - {item.payload.refMax}
                               </span>
@@ -129,10 +135,10 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
         {hasWhiteSeries && (
           <Card>
             <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              Série Branca
-            </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                Série Branca
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -152,7 +158,7 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
                           <div className="flex flex-col gap-1">
                             <span className="font-medium">{item.payload.fullName}</span>
                             <span>{value} {item.payload.unit}</span>
-                            {item.payload.refMin !== undefined && item.payload.refMax !== undefined && (
+                            {item.payload.refMin !== null && item.payload.refMax !== null && (
                               <span className="text-xs text-muted-foreground">
                                 Ref: {item.payload.refMin} - {item.payload.refMax}
                               </span>
