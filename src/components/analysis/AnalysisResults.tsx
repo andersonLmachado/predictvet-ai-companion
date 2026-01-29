@@ -135,7 +135,7 @@ const AnalysisResults = ({ result }: AnalysisResultsProps) => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       
       {/* SEÇÃO 1: Resumo Clínico */}
       <Card className="bg-primary/5 border-primary/20">
