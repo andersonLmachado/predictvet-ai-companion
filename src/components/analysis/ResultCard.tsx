@@ -6,14 +6,16 @@ import type { ResultadoItem } from "./AnalysisResults";
 // ========== Circular Progress Component ==========
 interface CircularProgressProps {
   value: number;
-  maxValue?: number;
-  status: 'normal' | 'alto' | 'baixo';
+  maxValue: number | null;
+  status: "normal" | "alto" | "baixo";
+  displayValue: string;
   unit: string;
 }
 
-const CircularProgress = ({ value, maxValue, status, unit }: CircularProgressProps) => {
-  // Calculate percentage - if no maxValue, show 100%
-  const percentage = maxValue && maxValue > 0 ? Math.min((value / maxValue) * 100, 100) : 100;
+const CircularProgress = ({ value, maxValue, status, displayValue, unit }: CircularProgressProps) => {
+  // Calculate percentage - if no maxValue, use double the value as max
+  const effectiveMax = maxValue ?? value * 2;
+  const percentage = effectiveMax > 0 ? Math.min((value / effectiveMax) * 100, 100) : 100;
   
   // SVG circle parameters
   const size = 120;
@@ -24,13 +26,13 @@ const CircularProgress = ({ value, maxValue, status, unit }: CircularProgressPro
   
   // Color based on status
   const getColor = () => {
-    if (status === 'normal') return 'hsl(var(--chart-2))'; // Green
-    return 'hsl(var(--destructive))'; // Red for alto/baixo
+    if (status === "normal") return "hsl(var(--chart-2))"; // Green
+    return "hsl(var(--destructive))"; // Red for alto/baixo
   };
   
   const getBgColor = () => {
-    if (status === 'normal') return 'hsl(var(--chart-2) / 0.15)';
-    return 'hsl(var(--destructive) / 0.15)';
+    if (status === "normal") return "hsl(var(--chart-2) / 0.15)";
+    return "hsl(var(--destructive) / 0.15)";
   };
 
   return (
@@ -61,8 +63,8 @@ const CircularProgress = ({ value, maxValue, status, unit }: CircularProgressPro
       </svg>
       {/* Center value */}
       <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-        <span className={`text-xl font-bold ${status === 'normal' ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
-          {typeof value === 'number' ? value.toFixed(value % 1 === 0 ? 0 : 2) : value}
+        <span className={`text-xl font-bold ${status === "normal" ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
+          {displayValue}
         </span>
         <span className="text-xs text-muted-foreground">{unit}</span>
       </div>
@@ -78,21 +80,32 @@ interface ResultCardProps {
 export const ResultCard = ({ item }: ResultCardProps) => {
   const getStatusBadge = () => {
     switch (item.status) {
-      case 'normal':
+      case "normal":
         return <Badge className="bg-chart-2 hover:bg-chart-2/90 text-primary-foreground">Normal</Badge>;
-      case 'alto':
+      case "alto":
         return <Badge variant="destructive">Alto</Badge>;
-      case 'baixo':
+      case "baixo":
         return <Badge variant="destructive">Baixo</Badge>;
       default:
         return null;
     }
   };
 
-  const hasReference = item.ref_min !== undefined || item.ref_max !== undefined;
+  // Handle both number and string values
+  const numericValue = typeof item.valor_encontrado === "number" 
+    ? item.valor_encontrado 
+    : parseFloat(String(item.valor_encontrado)) || 0;
+  
+  const displayValue = typeof item.valor_encontrado === "number"
+    ? item.valor_encontrado % 1 === 0 
+      ? item.valor_encontrado.toString() 
+      : item.valor_encontrado.toFixed(2)
+    : String(item.valor_encontrado);
+
+  const hasReference = item.ref_min !== null || item.ref_max !== null;
   const referenceText = hasReference 
-    ? `${item.ref_min ?? '-'} a ${item.ref_max ?? '-'} ${item.unidade}`
-    : 'Sem referência';
+    ? `${item.ref_min ?? "-"} a ${item.ref_max ?? "-"} ${item.unidade}`
+    : "Sem referência";
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -105,9 +118,10 @@ export const ResultCard = ({ item }: ResultCardProps) => {
       {/* Center - Circular Progress */}
       <CardContent className="flex justify-center py-6 relative">
         <CircularProgress
-          value={item.valor_encontrado}
+          value={numericValue}
           maxValue={item.ref_max}
           status={item.status}
+          displayValue={displayValue}
           unit={item.unidade}
         />
       </CardContent>
