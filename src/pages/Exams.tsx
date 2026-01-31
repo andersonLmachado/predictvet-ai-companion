@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, FileSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FileDropzone from "@/components/analysis/FileDropzone";
-import AnalysisResults, { AnalysisResponse } from "@/components/analysis/AnalysisResults";
+import AnalysisResults, { AnalysisResponse, CabecalhoExame } from "@/components/analysis/AnalysisResults";
 import {
   Select,
   SelectContent,
@@ -15,11 +15,28 @@ import { Label } from "@/components/ui/label";
 
 type ExamType = "sangue" | "urina";
 
+const MOCK_PATIENTS = [
+  { id: 1, nome: 'Thorvy', raca: 'Pug', tutor: 'João', idade: '12 anos', sexo: 'Macho' },
+  { id: 2, nome: 'Cookie', raca: 'Golden Retriever', tutor: 'Maria', idade: '5 anos', sexo: 'Fêmea' },
+  { id: 3, nome: 'Luna', raca: 'SRD', tutor: 'Carlos', idade: '3 anos', sexo: 'Fêmea' },
+];
+
 const Exams = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [examType, setExamType] = useState<ExamType>("sangue");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+
+  const selectedPatient = MOCK_PATIENTS.find(p => p.id.toString() === selectedPatientId);
+
+  const patientData: CabecalhoExame | undefined = selectedPatient ? {
+    nome_animal: selectedPatient.nome,
+    especie_raca: selectedPatient.raca,
+    idade: selectedPatient.idade,
+    tutor: selectedPatient.tutor,
+    sexo: selectedPatient.sexo,
+  } : undefined;
 
   const handleFileSelect = async (file: File) => {
     setIsLoading(true);
@@ -84,6 +101,26 @@ const Exams = () => {
           </Select>
         </div>
 
+        {/* Seletor de Paciente (Opcional) */}
+        <div className="space-y-2">
+           <Label htmlFor="patient-select" className="text-sm font-medium">
+             Selecione o Paciente (Opcional)
+           </Label>
+           <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+             <SelectTrigger id="patient-select" className="w-full md:w-72">
+               <SelectValue placeholder="Selecione um paciente..." />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="none">Nenhum (Usar dados da IA)</SelectItem>
+               {MOCK_PATIENTS.map((patient) => (
+                 <SelectItem key={patient.id} value={patient.id.toString()}>
+                   {patient.nome} ({patient.tutor})
+                 </SelectItem>
+               ))}
+             </SelectContent>
+           </Select>
+        </div>
+
         <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
 
         {isLoading && (
@@ -109,7 +146,7 @@ const Exams = () => {
           </Card>
         )}
 
-        {result && <AnalysisResults result={result} />}
+        {result && <AnalysisResults result={result} patientData={patientData} />}
       </div>
     </div>
   );
