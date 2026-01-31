@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PetData {
   name: string;
@@ -28,6 +29,7 @@ interface TutorData {
 }
 
 const PetRegistrationForm = () => {
+  const navigate = useNavigate();
   const [petData, setPetData] = useState<PetData>({
     name: '',
     species: '',
@@ -105,12 +107,46 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Aqui será integrado com Supabase para salvar no banco de dados
-      console.log('Pet Data:', petData);
-      console.log('Tutor Data:', tutorData);
+      // Verificar se o usuário está autenticado
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      // Simular salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (authError || !user) {
+        toast({
+          title: "Não autenticado",
+          description: "Você precisa estar logado para cadastrar pacientes.",
+          variant: "destructive",
+        });
+        navigate('/login');
+        return;
+      }
+
+      // Calcular idade a partir da data de nascimento
+      const birthDate = new Date(petData.birthDate);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      // Inserir no Supabase
+      const { error } = await supabase.from('patients').insert({
+        name: petData.name,
+        species: petData.species,
+        breed: petData.breed,
+        age: age,
+        sex: petData.gender,
+        weight: parseFloat(petData.weight),
+        owner_name: tutorData.name,
+        owner_phone: tutorData.phone,
+        owner_email: tutorData.email,
+        veterinarian_id: user.id,
+      });
+
+      if (error) {
+        console.error('Erro ao salvar paciente:', error);
+        throw error;
+      }
       
       toast({
         title: "Pet cadastrado com sucesso!",
@@ -134,11 +170,15 @@ const PetRegistrationForm = () => {
         email: '',
         address: '',
       });
+
+      // Redirecionar para lista de pacientes
+      navigate('/patients');
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro completo:', error);
       toast({
         title: "Erro ao cadastrar pet",
-        description: "Ocorreu um erro ao salvar os dados. Tente novamente.",
+        description: error.message || "Ocorreu um erro ao salvar os dados. Tente novamente.",
         variant: "destructive",
       });
     } finally {
