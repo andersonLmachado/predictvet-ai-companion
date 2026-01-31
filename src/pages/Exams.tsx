@@ -14,18 +14,9 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
-
-interface Patient {
-  id: string;
-  name: string;
-  species: string;
-  breed: string | null;
-  owner_name: string;
-  age: number | null;
-  sex: string | null;
-}
 
 const Exams = () => {
   const { toast } = useToast();
@@ -175,6 +166,7 @@ const Exams = () => {
                <RefreshCw className={`h-4 w-4 ${isLoadingPatients ? 'animate-spin' : ''}`} />
              </Button>
            </div>
+           <PatientHeader patient={selectedPatient} />
         </div>
 
         {selectedPatient ? (
