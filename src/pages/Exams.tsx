@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
 import AnalysisResults, { AnalysisResponse, CabecalhoExame } from "@/components/analysis/AnalysisResults";
 import {
@@ -34,30 +35,35 @@ const Exams = () => {
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [patients, setPatients] = useState<Patient[]>([]);
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("patients")
-          .select("id, name, species, breed, owner_name, age, sex");
+  const [isLoadingPatients, setIsLoadingPatients] = useState(false);
 
-        if (error) throw error;
-        if (data) {
-          console.log("Patients loaded:", data);
-          setPatients(data);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar pacientes:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar a lista de pacientes.",
-          variant: "destructive",
-        });
+  const fetchPatients = useCallback(async () => {
+    setIsLoadingPatients(true);
+    try {
+      const { data, error } = await supabase
+        .from("patients")
+        .select("id, name, species, breed, owner_name, age, sex");
+
+      if (error) throw error;
+      if (data) {
+        console.log("Patients loaded:", data);
+        setPatients(data);
       }
-    };
-
-    fetchPatients();
+    } catch (error) {
+      console.error("Erro ao buscar pacientes:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar a lista de pacientes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingPatients(false);
+    }
   }, [toast]);
+
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
@@ -145,18 +151,30 @@ const Exams = () => {
            <Label htmlFor="patient-select" className="text-sm font-medium">
              Selecione o Paciente
            </Label>
-           <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
-             <SelectTrigger id="patient-select" className="w-full md:w-72">
-               <SelectValue placeholder="Selecione um paciente..." />
-             </SelectTrigger>
-             <SelectContent>
-               {patients.map((patient) => (
-                 <SelectItem key={patient.id} value={patient.id}>
-                   {patient.name} ({patient.owner_name})
-                 </SelectItem>
-               ))}
-             </SelectContent>
-           </Select>
+           <div className="flex items-center gap-2">
+             <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+               <SelectTrigger id="patient-select" className="w-full md:w-72">
+                 <SelectValue placeholder="Selecione um paciente..." />
+               </SelectTrigger>
+               <SelectContent>
+                 {patients.map((patient) => (
+                   <SelectItem key={patient.id} value={patient.id}>
+                     {patient.name} ({patient.owner_name})
+                   </SelectItem>
+                 ))}
+               </SelectContent>
+             </Select>
+             <Button
+               type="button"
+               variant="outline"
+               size="icon"
+               onClick={fetchPatients}
+               disabled={isLoadingPatients}
+               title="Atualizar lista de pacientes"
+             >
+               <RefreshCw className={`h-4 w-4 ${isLoadingPatients ? 'animate-spin' : ''}`} />
+             </Button>
+           </div>
         </div>
 
         {selectedPatient ? (
