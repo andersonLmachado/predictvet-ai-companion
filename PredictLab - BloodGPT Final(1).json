@@ -1,0 +1,208 @@
+{
+  "name": "PredictLab - BloodGPT Final",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analisar-arquivo",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        -320
+      ],
+      "id": "372c5302-1971-4819-a8a3-ff2c3538dfa4",
+      "name": "Webhook (Binary)",
+      "webhookId": "a53cb420-cbfc-4c7f-91fb-ab4d247c20f9"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CÓDIGO DO ADAPTADOR (PREPARA O ARQUIVO)\nconst item = $input.first();\n\n// Verifica se tem algum arquivo binário vindo do Webhook\nif (item.binary && Object.keys(item.binary).length > 0) {\n  const keys = Object.keys(item.binary);\n  const nomeQueVeio = keys[0];\n\n  return {\n    json: item.json,\n    binary: {\n      data: item.binary[nomeQueVeio] // Padroniza o nome para 'data'\n    }\n  };\n}\n\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -320
+      ],
+      "id": "f92fad63-91b2-493f-836e-9c99d970d2d2",
+      "name": "Adaptador de Arquivo"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CÓDIGO DE LIMPEZA E VALIDAÇÃO (SUPORTE A CABEÇALHO)\nconst item = $input.first();\nconst json = item.json;\nlet textoIa = \"\";\n\n// 1. Extração do texto bruto\nif (json.content && typeof json.content === 'object' && json.content.parts && json.content.parts[0]) {\n    textoIa = json.content.parts[0].text;\n} else if (typeof json.content === 'string') {\n    textoIa = json.content;\n} else if (json.output) {\n    textoIa = json.output;\n} else if (json.text) {\n    textoIa = json.text;\n} else {\n    textoIa = JSON.stringify(json);\n}\n\n// 2. Extrair JSON via Regex\nconst jsonMatch = textoIa.toString().match(/\\{[\\s\\S]*\\}/);\nlet textoParaParsear = jsonMatch ? jsonMatch[0] : textoIa.toString().replace(/```json/gi, '').replace(/```/g, '').trim();\n\ntry {\n    const parsed = JSON.parse(textoParaParsear);\n    \n    // 3. Validação dos novos campos\n    if (!parsed.resultados) parsed.resultados = [];\n    if (!parsed.cabecalho) {\n        parsed.cabecalho = {\n            nome_animal: \"Não identificado\",\n            especie_raca: \"-\",\n            idade: \"-\",\n            tutor: \"-\"\n        };\n    }\n\n    // Normalização numérica\n    parsed.resultados = parsed.resultados.map(r => ({\n        ...r,\n        valor_encontrado: isNaN(Number(r.valor_encontrado)) ? r.valor_encontrado : Number(r.valor_encontrado)\n    }));\n\n    return parsed;\n} catch (erro) {\n    return {\n        cabecalho: { nome_animal: \"Erro de Leitura\" },\n        resumo_clinico: \"Erro ao processar o retorno da IA.\",\n        resultados: [],\n        error_details: textoIa.substring(0, 200)\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -320
+      ],
+      "id": "0d97e5a4-9be9-4e60-9a88-efaad33cb947",
+      "name": "Limpar JSON"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        848,
+        -320
+      ],
+      "id": "53b11af1-63eb-4116-97c4-48be20be52f0",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-robotics-er-1.5-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-robotics-er-1.5-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é o \"PredictLab AI\", um patologista veterinário sênior.\n\nTAREFA:\n1. Analise o CABEÇALHO do documento para identificar os dados do paciente e tutor.\n2. Analise o CORPO do exame para extrair os resultados técnicos.\n3. Gere explicações curtas e educativas.\n\n### ESTRUTURA DE RESPOSTA (JSON Obrigatório):\n{\n  \"cabecalho\": {\n    \"nome_animal\": \"Nome do pet (ou 'Não identificado')\",\n    \"especie_raca\": \"Ex: Canina / Beagle (ou null)\",\n    \"idade\": \"Ex: 10 anos (ou null)\",\n    \"sexo\": \"Ex: Fêmea/Macho (ou null)\",\n    \"tutor\": \"Nome do proprietário (ou null)\"\n  },\n  \"resumo_clinico\": \"Resumo do caso clínico focado nos achados.\",\n  \"resultados\": [\n    {\n      \"parametro\": \"Nome do Exame\",\n      \"valor_encontrado\": (número ou string),\n      \"unidade\": \"unidade\",\n      \"ref_min\": (número ou null),\n      \"ref_max\": (número ou null),\n      \"status\": \"normal, alto ou baixo\",\n      \"explicacao_curta\": \"Explicação educativa\"\n    }\n  ]\n}\n\n### REGRAS:\n1. Seja preciso na extração do nome do animal e do tutor. Geralmente estão no topo.\n2. Mantenha a extração rigorosa dos valores numéricos dos exames.\n3. Retorne APENAS o JSON."
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -320
+      ],
+      "id": "afc20d92-13cf-4988-b085-a738f311af6d",
+      "name": "Gemini (Vision/File Mode)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "yVQA9z7VMV29IeAA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook (Binary)": [
+      {
+        "json": {
+          "headers": {
+            "host": "vet-api.predictlab.com.br",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0",
+            "content-length": "209250",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2804:d51:5cff:af00:6b7e:abd9:8d85:a90",
+            "cf-ipcountry": "BR",
+            "cf-ray": "9c5b3c4dfa75b289-GRU",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "9a408b6f-4e03-476b-802e-ca908d84e2d7",
+            "connection": "keep-alive",
+            "content-type": "multipart/form-data; boundary=----geckoformboundary781750524404de46b097c6257af51d82",
+            "origin": "https://www.predictlab.com.br",
+            "priority": "u=4",
+            "referer": "https://www.predictlab.com.br/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "x-forwarded-for": "2804:d51:5cff:af00:6b7e:abd9:8d85:a90",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "examType": "sangue"
+          },
+          "webhookUrl": "https://vet-api.predictlab.com.br/webhook/analisar-arquivo",
+          "executionMode": "production"
+        },
+        "binary": {
+          "data0": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "Resultado0072909-THORVY.pdf",
+            "id": "filesystem-v2:workflows/tnZ4xx6NblOFZYCl/executions/temp/binary_data/8202965b-d5e3-4ed8-9272-9c011984faab",
+            "fileSize": "209 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook (Binary)": {
+      "main": [
+        [
+          {
+            "node": "Adaptador de Arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adaptador de Arquivo": {
+      "main": [
+        [
+          {
+            "node": "Gemini (Vision/File Mode)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar JSON": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini (Vision/File Mode)": {
+      "main": [
+        [
+          {
+            "node": "Limpar JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "948aef98-e9e2-4f84-bec2-315ed5316377",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98251b54a2b1f83c49b1d64947f0233c1f27e9c77fff880a269f00150af9b6d6"
+  },
+  "id": "tnZ4xx6NblOFZYCl",
+  "tags": []
+}
