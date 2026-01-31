@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Info, Activity } from "lucide-react";
+import { Brain, Info, Activity, PawPrint, User } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -24,7 +24,16 @@ export interface ExamResultItem {
   explicacao_curta: string;
 }
 
+export interface CabecalhoExame {
+  nome_animal: string;
+  especie_raca: string | null;
+  idade: string | null;
+  sexo: string | null;
+  tutor: string | null;
+}
+
 export interface AnalysisResponse {
+  cabecalho: CabecalhoExame;
   resumo_clinico: string;
   resultados: ExamResultItem[];
 }
@@ -137,6 +146,43 @@ const AnalysisResults = ({ result }: AnalysisResultsProps) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       
+      {/* SEÇÃO 0: Dados do Paciente */}
+      <Card className="border-primary/20 shadow-sm">
+        <CardContent className="pt-6">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-3">
+                 <div className="p-3 bg-primary/10 rounded-full">
+                    <PawPrint className="w-8 h-8 text-primary" />
+                 </div>
+                 <div>
+                    <h2 className="text-2xl font-bold text-foreground">
+                       {result.cabecalho.nome_animal}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                       {result.cabecalho.especie_raca || "Espécie/Raça não informada"}
+                    </p>
+                 </div>
+              </div>
+
+              <div className="flex flex-wrap gap-4 md:gap-8 text-sm">
+                 <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-muted-foreground">Tutor:</span>
+                    <span>{result.cabecalho.tutor || "Não informado"}</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                     <span className="font-medium text-muted-foreground">Idade:</span>
+                     <span>{result.cabecalho.idade || "Não informado"}</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                     <span className="font-medium text-muted-foreground">Sexo:</span>
+                     <span>{result.cabecalho.sexo || "Não informado"}</span>
+                 </div>
+              </div>
+           </div>
+        </CardContent>
+      </Card>
+
       {/* SEÇÃO 1: Resumo Clínico */}
       <Card className="bg-primary/5 border-primary/20">
         <CardHeader>
