@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Cell, RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { Droplet, FlaskConical } from "lucide-react";
-import type { ResultadoItem } from "./AnalysisResults";
+import type { ExamResultItem } from "./AnalysisResults";
 
 // Parameters for Urinalysis
 const URINE_PARAMS = [
@@ -24,7 +24,7 @@ const matchesParam = (parametro: string, patterns: string[]): boolean => {
 };
 
 interface UrinalysisChartsProps {
-  resultados: ResultadoItem[];
+  resultados: ExamResultItem[];
 }
 
 export const UrinalysisCharts = ({ resultados }: UrinalysisChartsProps) => {
@@ -63,7 +63,7 @@ export const UrinalysisCharts = ({ resultados }: UrinalysisChartsProps) => {
 
   // Gauge chart component for density and pH
   const GaugeChart = ({ item, minVal, maxVal, label }: { 
-    item: ResultadoItem; 
+    item: ExamResultItem; 
     minVal: number; 
     maxVal: number;
     label: string;
@@ -114,7 +114,7 @@ export const UrinalysisCharts = ({ resultados }: UrinalysisChartsProps) => {
     );
   };
 
-  const formatChartData = (data: ResultadoItem[]) => {
+  const formatChartData = (data: ExamResultItem[]) => {
     return data.map(item => {
       const numericValue = typeof item.valor_encontrado === "number" 
         ? item.valor_encontrado 
