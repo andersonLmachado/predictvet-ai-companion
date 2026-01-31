@@ -40,6 +40,7 @@ export interface AnalysisResponse {
 
 interface AnalysisResultsProps {
   result: AnalysisResponse;
+  patientData?: CabecalhoExame;
 }
 
 // --- 2. Componente de Card Circular (Estilo BloodGPT) ---
@@ -119,8 +120,11 @@ const ResultCard = ({ item }: { item: ExamResultItem }) => {
 };
 
 // --- 3. Componente Principal ---
-const AnalysisResults = ({ result }: AnalysisResultsProps) => {
+const AnalysisResults = ({ result, patientData }: AnalysisResultsProps) => {
   
+  // Determina quais dados mostrar: o selecionado manualmente (se houver) ou o da IA
+  const displayData = patientData || result.cabecalho;
+
   // Função auxiliar para buscar dados para os gráficos antigos
   const findValue = (terms: string[]) => {
     const found = result.resultados.find((r) => 
@@ -156,10 +160,10 @@ const AnalysisResults = ({ result }: AnalysisResultsProps) => {
                  </div>
                  <div>
                     <h2 className="text-2xl font-bold text-foreground">
-                       {result.cabecalho.nome_animal}
+                       {displayData.nome_animal}
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                       {result.cabecalho.especie_raca || "Espécie/Raça não informada"}
+                       {displayData.especie_raca || "Espécie/Raça não informada"}
                     </p>
                  </div>
               </div>
@@ -168,15 +172,15 @@ const AnalysisResults = ({ result }: AnalysisResultsProps) => {
                  <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-primary" />
                     <span className="font-medium text-muted-foreground">Tutor:</span>
-                    <span>{result.cabecalho.tutor || "Não informado"}</span>
+                    <span>{displayData.tutor || "Não informado"}</span>
                  </div>
                  <div className="flex items-center gap-2">
                      <span className="font-medium text-muted-foreground">Idade:</span>
-                     <span>{result.cabecalho.idade || "Não informado"}</span>
+                     <span>{displayData.idade || "Não informado"}</span>
                  </div>
                  <div className="flex items-center gap-2">
                      <span className="font-medium text-muted-foreground">Sexo:</span>
-                     <span>{result.cabecalho.sexo || "Não informado"}</span>
+                     <span>{displayData.sexo || "Não informado"}</span>
                  </div>
               </div>
            </div>
