@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
-import type { ResultadoItem } from "./AnalysisResults";
+import { Brain } from "lucide-react";
+import type { ExamResultItem } from "./AnalysisResults";
 
 // ========== Circular Progress Component ==========
 interface CircularProgressProps {
@@ -74,7 +74,7 @@ const CircularProgress = ({ value, maxValue, status, displayValue, unit }: Circu
 
 // ========== Result Card Component ==========
 interface ResultCardProps {
-  item: ResultadoItem;
+  item: ExamResultItem;
 }
 
 export const ResultCard = ({ item }: ResultCardProps) => {
@@ -138,7 +138,7 @@ export const ResultCard = ({ item }: ResultCardProps) => {
         {/* AI Explanation */}
         {item.explicacao_curta && (
           <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-            <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+            <Brain className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               {item.explicacao_curta}
             </p>

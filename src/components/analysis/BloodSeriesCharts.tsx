@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import { Activity, Droplets } from "lucide-react";
-import type { ResultadoItem } from "./AnalysisResults";
+import type { ExamResultItem } from "./AnalysisResults";
 
 // Parameters for Red Blood Cell Series
 const RED_SERIES_PARAMS = [
@@ -32,7 +32,7 @@ const matchesParam = (parametro: string, patterns: string[]): boolean => {
 };
 
 interface BloodSeriesChartsProps {
-  resultados: ResultadoItem[];
+  resultados: ExamResultItem[];
 }
 
 export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
@@ -53,7 +53,7 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
     altered: { label: "Alterado", color: "hsl(var(--destructive))" },
   };
 
-  const formatChartData = (data: ResultadoItem[]) => {
+  const formatChartData = (data: ExamResultItem[]) => {
     return data.map(item => {
       const numericValue = typeof item.valor_encontrado === "number" 
         ? item.valor_encontrado 
