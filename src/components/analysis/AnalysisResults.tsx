@@ -122,7 +122,7 @@ const ResultCard = ({ item }: { item: ExamResultItem }) => {
 // --- 3. Componente Principal ---
 const AnalysisResults = ({ result, patientData }: AnalysisResultsProps) => {
   
-  // Determina quais dados mostrar: o selecionado manualmente (se houver) ou o da IA
+  // Determina quais dados mostrar: Prioriza estritamente os dados do paciente selecionado (se fornecido)
   const displayData = patientData || result.cabecalho;
 
   // Função auxiliar para buscar dados para os gráficos antigos

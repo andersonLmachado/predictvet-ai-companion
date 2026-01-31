@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, FileSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -12,14 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 type ExamType = "sangue" | "urina";
 
-const MOCK_PATIENTS = [
-  { id: 1, nome: 'Thorvy', raca: 'Pug', tutor: 'João', idade: '12 anos', sexo: 'Macho' },
-  { id: 2, nome: 'Cookie', raca: 'Golden Retriever', tutor: 'Maria', idade: '5 anos', sexo: 'Fêmea' },
-  { id: 3, nome: 'Luna', raca: 'SRD', tutor: 'Carlos', idade: '3 anos', sexo: 'Fêmea' },
-];
+interface Patient {
+  id: string;
+  name: string;
+  species: string;
+  breed: string | null;
+  owner_name: string;
+  age: number | null;
+  sex: string | null;
+}
 
 const Exams = () => {
   const { toast } = useToast();
@@ -27,18 +32,52 @@ const Exams = () => {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [examType, setExamType] = useState<ExamType>("sangue");
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [patients, setPatients] = useState<Patient[]>([]);
 
-  const selectedPatient = MOCK_PATIENTS.find(p => p.id.toString() === selectedPatientId);
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("patients")
+          .select("id, name, species, breed, owner_name, age, sex");
+
+        if (error) throw error;
+        if (data) {
+          console.log("Patients loaded:", data);
+          setPatients(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar pacientes:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar a lista de pacientes.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchPatients();
+  }, [toast]);
+
+  const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
   const patientData: CabecalhoExame | undefined = selectedPatient ? {
-    nome_animal: selectedPatient.nome,
-    especie_raca: selectedPatient.raca,
-    idade: selectedPatient.idade,
-    tutor: selectedPatient.tutor,
-    sexo: selectedPatient.sexo,
+    nome_animal: selectedPatient.name,
+    especie_raca: `${selectedPatient.species} ${selectedPatient.breed ? `/ ${selectedPatient.breed}` : ''}`,
+    idade: selectedPatient.age ? `${selectedPatient.age} anos` : null,
+    tutor: selectedPatient.owner_name,
+    sexo: selectedPatient.sex,
   } : undefined;
 
   const handleFileSelect = async (file: File) => {
+    if (!selectedPatient) {
+        toast({
+            title: "Seleção obrigatória",
+            description: "Por favor, selecione um paciente antes de enviar o exame.",
+            variant: "destructive",
+        });
+        return;
+    }
     setIsLoading(true);
     setResult(null);
 
@@ -101,27 +140,35 @@ const Exams = () => {
           </Select>
         </div>
 
-        {/* Seletor de Paciente (Opcional) */}
+        {/* Seletor de Paciente (Obrigatório) */}
         <div className="space-y-2">
            <Label htmlFor="patient-select" className="text-sm font-medium">
-             Selecione o Paciente (Opcional)
+             Selecione o Paciente
            </Label>
            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
              <SelectTrigger id="patient-select" className="w-full md:w-72">
                <SelectValue placeholder="Selecione um paciente..." />
              </SelectTrigger>
              <SelectContent>
-               <SelectItem value="none">Nenhum (Usar dados da IA)</SelectItem>
-               {MOCK_PATIENTS.map((patient) => (
-                 <SelectItem key={patient.id} value={patient.id.toString()}>
-                   {patient.nome} ({patient.tutor})
+               {patients.map((patient) => (
+                 <SelectItem key={patient.id} value={patient.id}>
+                   {patient.name} ({patient.owner_name})
                  </SelectItem>
                ))}
              </SelectContent>
            </Select>
         </div>
 
-        <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
+        {selectedPatient ? (
+           <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
+        ) : (
+           <Card className="border-dashed bg-muted/50">
+             <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+               <FileSearch className="h-12 w-12 mb-4 opacity-50" />
+               <p>Selecione um paciente acima para enviar exames.</p>
+             </CardContent>
+           </Card>
+        )}
 
         {isLoading && (
           <Card>
