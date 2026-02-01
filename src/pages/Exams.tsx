@@ -36,10 +36,16 @@ const Exams = () => {
       }
       const data = await response.json();
 
+      // Mapear resposta da API n8n para interface Patient (name, owner_name, id, etc.)
       const formattedPatients: Patient[] = Array.isArray(data)
         ? data.map((p: any) => ({
-            ...p,
-            id: String(p.id)
+            id: String(p.id),
+            name: p.name ?? "",
+            owner_name: p.owner_name ?? "",
+            breed: p.breed ?? "",
+            age: p.age ?? "",
+            species: p.species,
+            sex: p.sex,
           }))
         : [];
 
@@ -150,12 +156,12 @@ const Exams = () => {
            <div className="flex items-center gap-2">
              <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
                <SelectTrigger id="patient-select" className="w-full md:w-72">
-                 <SelectValue placeholder="Selecione um paciente..." />
+                 <SelectValue placeholder="Selecione um paciente cadastrado" />
                </SelectTrigger>
                <SelectContent>
                  {patients.map((patient) => (
                    <SelectItem key={patient.id} value={patient.id}>
-                     {patient.name} ({patient.owner_name})
+                     {patient.name} - {patient.owner_name}
                    </SelectItem>
                  ))}
                </SelectContent>
