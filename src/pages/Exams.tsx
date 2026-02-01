@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
@@ -31,15 +30,21 @@ const Exams = () => {
   const fetchPatients = useCallback(async () => {
     setIsLoadingPatients(true);
     try {
-      const { data, error } = await supabase
-        .from("patients")
-        .select("id, name, species, breed, owner_name, age, sex");
-
-      if (error) throw error;
-      if (data) {
-        console.log("Patients loaded:", data);
-        setPatients(data);
+      const response = await fetch("https://vet-api.predictlab.com.br/webhook/buscar-pacientes");
+      if (!response.ok) {
+        throw new Error("Falha ao buscar pacientes");
       }
+      const data = await response.json();
+
+      const formattedPatients: Patient[] = Array.isArray(data)
+        ? data.map((p: any) => ({
+            ...p,
+            id: String(p.id)
+          }))
+        : [];
+
+      console.log("Patients loaded:", formattedPatients);
+      setPatients(formattedPatients);
     } catch (error) {
       console.error("Erro ao buscar pacientes:", error);
       toast({
