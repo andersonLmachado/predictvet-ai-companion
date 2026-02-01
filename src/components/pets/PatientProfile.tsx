@@ -19,7 +19,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 // Interface para os dados completos do pet e tutor
-/* interface Patient {
+ interface Patient {
   id: string;
   name: string;
   species: string;
@@ -35,17 +35,8 @@ import { toast } from '@/hooks/use-toast';
     phone: string;
     email: string;
     address: string;
-  }; */
+  }; 
 
-export interface Patient {
-  id?: string;
-  name: string;          // nome do pet
-  owner_name: string;    // nome do tutor
-  species: string;       // espécie
-  breed?: string;        // raça
-  age?: number;
-  weight?: number;
-}
 
 }
 
