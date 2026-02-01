@@ -115,7 +115,7 @@ const PetRegistrationForm = () => {
         age--;
       }
 
-      // Payload único: name, species, breed, age, sex, weight, owner_name, owner_phone, owner_email (gender -> sex)
+      // Payload único: name, species, breed, age, sex, weight, owner_name, owner_phone, owner_email, veterinarian_id (gender -> sex)
       const payload = {
         name: petData.name,
         species: petData.species,
@@ -126,6 +126,7 @@ const PetRegistrationForm = () => {
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
         owner_email: tutorData.email,
+        veterinarian_id: 'cb0d8c84-2a9b-4d36-b1e0-21cce47baf06',
       };
 
       console.log(JSON.stringify(payload));
