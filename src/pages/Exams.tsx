@@ -65,10 +65,10 @@ const Exams = () => {
 
   const patientData: CabecalhoExame | undefined = selectedPatient ? {
     nome_animal: selectedPatient.name,
-    especie_raca: `${selectedPatient.species} ${selectedPatient.breed ? `/ ${selectedPatient.breed}` : ''}`,
-    idade: selectedPatient.age ? `${selectedPatient.age} anos` : null,
+    especie_raca: selectedPatient.breed,
+    idade: String(selectedPatient.age),
     tutor: selectedPatient.owner_name,
-    sexo: selectedPatient.sex,
+    sexo: selectedPatient.sex || null,
   } : undefined;
 
   const handleFileSelect = async (file: File) => {
