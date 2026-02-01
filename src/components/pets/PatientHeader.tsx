@@ -4,11 +4,11 @@ import { User, PawPrint } from "lucide-react";
 export interface Patient {
   id: string;
   name: string;
-  species: string;
-  breed: string | null;
   owner_name: string;
-  age: number | null;
-  sex: string | null;
+  breed: string;
+  age: string | number;
+  species?: string;
+  sex?: string;
 }
 
 interface PatientHeaderProps {
@@ -34,7 +34,7 @@ export const PatientHeader = ({ patient }: PatientHeaderProps) => {
         <div className="flex flex-col space-y-1">
           <span className="text-sm text-muted-foreground">Raça</span>
           <span className="font-medium">
-            {patient.species} {patient.breed ? `- ${patient.breed}` : ""}
+            {patient.breed}
           </span>
         </div>
         <div className="flex flex-col space-y-1">
