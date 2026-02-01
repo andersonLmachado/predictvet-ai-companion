@@ -36,20 +36,18 @@ const Exams = () => {
       }
       const data = await response.json();
 
-      // Mapear resposta da API n8n para interface Patient (name, owner_name, id, etc.)
-      const formattedPatients: Patient[] = Array.isArray(data)
-        ? data.map((p: any) => ({
-            id: String(p.id),
-            name: p.name ?? "",
-            owner_name: p.owner_name ?? "",
-            breed: p.breed ?? "",
-            age: p.age ?? "",
-            species: p.species,
-            sex: p.sex,
-          }))
-        : [];
+      // Webhook n8n pode retornar array ou objeto único; normalizar para array
+      const rawList = Array.isArray(data) ? data : data?.id != null ? [data] : [];
+      const formattedPatients: Patient[] = rawList.map((p: any) => ({
+        id: String(p.id),
+        name: p.name ?? "",
+        owner_name: p.owner_name ?? "",
+        breed: p.breed ?? "",
+        age: p.age ?? "",
+        species: p.species,
+        sex: p.sex,
+      }));
 
-      console.log("Patients loaded:", formattedPatients);
       setPatients(formattedPatients);
     } catch (error) {
       console.error("Erro ao buscar pacientes:", error);
@@ -63,9 +61,12 @@ const Exams = () => {
     }
   }, [toast]);
 
+  // Busca a lista de pacientes do webhook n8n ao carregar a página
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
+
+  const handlePatientChange = (value: string) => setSelectedPatientId(value);
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
@@ -154,16 +155,20 @@ const Exams = () => {
              Selecione o Paciente
            </Label>
            <div className="flex items-center gap-2">
-             <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
-               <SelectTrigger id="patient-select" className="w-full md:w-72">
-                 <SelectValue placeholder="Selecione um paciente cadastrado" />
+             <Select value={selectedPatientId} onValueChange={handlePatientChange}>
+               <SelectTrigger id="patient-select" className="w-full">
+                 <SelectValue placeholder={isLoadingPatients ? "Carregando..." : "Selecione um paciente cadastrado"} />
                </SelectTrigger>
                <SelectContent>
-                 {patients.map((patient) => (
-                   <SelectItem key={patient.id} value={patient.id}>
-                     {patient.name} - {patient.owner_name}
-                   </SelectItem>
-                 ))}
+                 {patients.length > 0 ? (
+                   patients.map((patient) => (
+                     <SelectItem key={patient.id} value={patient.id}>
+                       {patient.name} ({patient.owner_name})
+                     </SelectItem>
+                   ))
+                 ) : (
+                   <SelectItem value="none" disabled>Nenhum paciente encontrado</SelectItem>
+                 )}
                </SelectContent>
              </Select>
              <Button
