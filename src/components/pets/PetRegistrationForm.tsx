@@ -106,23 +106,26 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Calcular idade a partir da data de nascimento
+      // Idade em anos a partir da data de nascimento (birthDate -> age)
       const birthDate = new Date(petData.birthDate);
       const today = new Date();
-      let ageYears = today.getFullYear() - birthDate.getFullYear();
+      let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        ageYears--;
+        age--;
       }
 
-      // Corpo JSON plano para o n8n: apenas { name, owner_name, species, breed, age, weight }
+      // Objeto plano: petData + tutorData mapeados para os nomes do banco
       const payload = {
         name: petData.name,
-        owner_name: tutorData.name,
         species: petData.species,
         breed: petData.breed,
-        age: ageYears,
+        age,
+        sex: petData.gender,
         weight: parseFloat(petData.weight),
+        owner_name: tutorData.name,
+        owner_phone: tutorData.phone,
+        owner_email: tutorData.email,
       };
 
       console.log(JSON.stringify(payload));
