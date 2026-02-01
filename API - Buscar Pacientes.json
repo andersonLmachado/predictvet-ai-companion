@@ -1,0 +1,93 @@
+{
+  "name": "API - Buscar Pacientes",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "buscar-pacientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "a30fb5f8-77ac-40d1-a129-13e595e5e185",
+      "name": "Webhook GET",
+      "webhookId": "314cf722-81cc-4376-84d4-2559c3761bb4"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "patients",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "e5a6d036-6e2d-49de-84f0-c3728349def0",
+      "name": "Supabase Get All",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uqgsXRYm4lDcTGvG",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -64
+      ],
+      "id": "86d59387-0b90-4853-bb53-e84b15161708",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Supabase Get All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Get All": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a1aca53e-0f7d-4b40-a60c-c9b386f0c915",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98251b54a2b1f83c49b1d64947f0233c1f27e9c77fff880a269f00150af9b6d6"
+  },
+  "id": "K6gMuU8j7GPN7zAZ",
+  "tags": []
+}

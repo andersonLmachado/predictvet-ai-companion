@@ -1,0 +1,207 @@
+{
+  "name": "API - Cadastrar Paciente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cadastrar-paciente",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -224
+      ],
+      "id": "805fa67f-4f41-4298-a9bd-8c4ab8d07c61",
+      "name": "Webhook POST",
+      "webhookId": "743b7cc6-430e-427b-9187-55505f4deea8"
+    },
+    {
+      "parameters": {
+        "tableId": "patients"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        736,
+        -224
+      ],
+      "id": "9c2a0b17-72a4-4c68-9671-8b0a59a3ca24",
+      "name": "Supabase Insert",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uqgsXRYm4lDcTGvG",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        960,
+        -224
+      ],
+      "id": "b1b39c6d-0c66-4f95-980e-ebf676b07fb7",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6a9eeb59-0a7e-40bc-a24e-ed93ce61fc0b",
+              "leftValue": "={{ $json.body.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        -224
+      ],
+      "id": "b55021ec-8d4e-46d5-a35d-6a45f3ee4985",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        736,
+        -432
+      ],
+      "id": "3e861034-a47a-4164-867b-2f4309961531",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {
+    "Webhook POST": [
+      {
+        "json": {
+          "headers": {
+            "host": "vet-api.predictlab.com.br",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0",
+            "content-length": "185",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2804:d51:5cff:af00:c77a:5df5:67a2:a1ff",
+            "cf-ipcountry": "BR",
+            "cf-ray": "9c727f6fff498ea4-CWB",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "e3cd9da4-90b6-4136-9ece-3aad4e4f6fb2",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "origin": "https://www.predictlab.com.br",
+            "priority": "u=0",
+            "referer": "https://www.predictlab.com.br/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "x-forwarded-for": "2804:d51:5cff:af00:c77a:5df5:67a2:a1ff",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "name": "Jimmy Choo",
+            "species": "canina",
+            "breed": "SRD",
+            "age": 4,
+            "sex": "macho",
+            "weight": 5,
+            "owner_name": "Anderson Teste",
+            "owner_phone": "51991671671",
+            "owner_email": "machado.teste@email.com"
+          },
+          "webhookUrl": "https://vet-api.predictlab.com.br/webhook/cadastrar-paciente",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook POST": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Insert": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a894622-3b70-4d8c-8130-2216e8c09e51",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98251b54a2b1f83c49b1d64947f0233c1f27e9c77fff880a269f00150af9b6d6"
+  },
+  "id": "ImkZz5I1DmyHbkqx",
+  "tags": []
+}

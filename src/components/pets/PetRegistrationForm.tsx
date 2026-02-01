@@ -107,17 +107,8 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Verificar se usuário está autenticado
+      // Usuário opcional: envia veterinarian_id apenas quando logado (página funciona sem login)
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Erro de autenticação",
-          description: "Você precisa estar logado para cadastrar um paciente.",
-          variant: "destructive",
-        });
-        return;
-      }
 
       // Calcular idade a partir da data de nascimento
       const birthDate = new Date(petData.birthDate);
@@ -128,24 +119,26 @@ const PetRegistrationForm = () => {
         ageYears--;
       }
 
-      // Enviar dados para o Webhook com os nomes corretos das colunas
+      // Payload com chaves em inglês para o n8n (mapeamento: nome→name, tutor→owner_name, especie→species, raca→breed, idade→age, peso→weight)
+      const payload = {
+        name: petData.name,
+        owner_name: tutorData.name,
+        species: petData.species,
+        breed: petData.breed,
+        age: ageYears,
+        weight: parseFloat(petData.weight),
+        sex: petData.gender,
+        owner_phone: tutorData.phone,
+        owner_email: tutorData.email,
+        veterinarian_id: user?.id,
+      };
+
       const response = await fetch('https://vet-api.predictlab.com.br/webhook/cadastrar-paciente', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: petData.name,
-          species: petData.species,
-          breed: petData.breed,
-          age: String(ageYears),
-          sex: petData.gender,
-          weight: parseFloat(petData.weight),
-          owner_name: tutorData.name,
-          owner_phone: tutorData.phone,
-          owner_email: tutorData.email,
-          veterinarian_id: user.id
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
