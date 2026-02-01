@@ -128,22 +128,29 @@ const PetRegistrationForm = () => {
         ageYears--;
       }
 
-      // Inserir diretamente no Supabase com os nomes corretos das colunas
-      const { error } = await supabase.from('patients').insert({
-        name: petData.name,
-        species: petData.species,
-        breed: petData.breed,
-        age: String(ageYears),
-        sex: petData.gender,
-        weight: parseFloat(petData.weight),
-        owner_name: tutorData.name,
-        owner_phone: tutorData.phone,
-        owner_email: tutorData.email,
-        veterinarian_id: user.id
+      // Enviar dados para o Webhook com os nomes corretos das colunas
+      const response = await fetch('https://vet-api.predictlab.com.br/webhook/cadastrar-paciente', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: petData.name,
+          species: petData.species,
+          breed: petData.breed,
+          age: String(ageYears),
+          sex: petData.gender,
+          weight: parseFloat(petData.weight),
+          owner_name: tutorData.name,
+          owner_phone: tutorData.phone,
+          owner_email: tutorData.email,
+          veterinarian_id: user.id
+        }),
       });
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Erro ${response.status}: Falha ao cadastrar paciente`);
       }
       
       toast({

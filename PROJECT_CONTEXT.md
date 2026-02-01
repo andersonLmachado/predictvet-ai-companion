@@ -43,13 +43,13 @@ A arquitetura de backend é **híbrida**:
 ## 4. Fluxos de Dados Principais
 
 ### A. Cadastro de Pacientes (`RegisterPet.tsx`)
--   **Método:** Inserção direta no Supabase.
+-   **Método:** Webhook via API.
 -   **Componente:** `PetRegistrationForm`.
 -   **Fluxo:**
     1.  Validação local do formulário.
     2.  Verificação de autenticação (`supabase.auth.getUser()`).
-    3.  Insert na tabela `patients` via cliente Supabase JS.
-    4.  Campos: `name`, `species`, `breed`, `age`, `sex`, `weight`, `owner_name`, `owner_phone`, `owner_email`, `veterinarian_id`.
+    3.  POST para `/webhook/cadastrar-paciente`.
+    4.  Campos enviados (JSON): `name`, `species`, `breed`, `age` (calculada), `sex`, `weight`, `owner_name`, `owner_phone`, `owner_email`, `veterinarian_id`.
 
 ### B. Análise de Exames - Fluxo "Patient-Centric" (`Exams.tsx`)
 Este fluxo prioriza a seleção do paciente antes do upload do exame.
