@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface PetData {
   name: string;
@@ -107,9 +106,6 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Usuário opcional: envia veterinarian_id apenas quando logado (página funciona sem login)
-      const { data: { user } } = await supabase.auth.getUser();
-
       // Calcular idade a partir da data de nascimento
       const birthDate = new Date(petData.birthDate);
       const today = new Date();
@@ -119,7 +115,7 @@ const PetRegistrationForm = () => {
         ageYears--;
       }
 
-      // Payload com chaves em inglês para o n8n (mapeamento: nome→name, tutor→owner_name, especie→species, raca→breed, idade→age, peso→weight)
+      // Corpo JSON plano para o n8n: apenas { name, owner_name, species, breed, age, weight }
       const payload = {
         name: petData.name,
         owner_name: tutorData.name,
@@ -127,11 +123,9 @@ const PetRegistrationForm = () => {
         breed: petData.breed,
         age: ageYears,
         weight: parseFloat(petData.weight),
-        sex: petData.gender,
-        owner_phone: tutorData.phone,
-        owner_email: tutorData.email,
-        veterinarian_id: user?.id,
       };
+
+      console.log(JSON.stringify(payload));
 
       const response = await fetch('https://vet-api.predictlab.com.br/webhook/cadastrar-paciente', {
         method: 'POST',
