@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface PetData {
   name: string;
@@ -107,19 +106,6 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Verificar se o usuário está autenticado
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        toast({
-          title: "Não autenticado",
-          description: "Você precisa estar logado para cadastrar pacientes.",
-          variant: "destructive",
-        });
-        navigate('/login');
-        return;
-      }
-
       // Calcular idade a partir da data de nascimento
       const birthDate = new Date(petData.birthDate);
       const today = new Date();
@@ -129,8 +115,7 @@ const PetRegistrationForm = () => {
         age--;
       }
 
-      // Inserir no Supabase
-      const { error } = await supabase.from('patients').insert({
+      const payload = {
         name: petData.name,
         species: petData.species,
         breed: petData.breed,
@@ -140,12 +125,21 @@ const PetRegistrationForm = () => {
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
         owner_email: tutorData.email,
-        veterinarian_id: user.id,
+        owner_address: tutorData.address,
+        observations: petData.observations,
+        birth_date: petData.birthDate
+      };
+
+      const response = await fetch("https://vet-api.predictlab.com.br/webhook/cadastrar-paciente", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
-      if (error) {
-        console.error('Erro ao salvar paciente:', error);
-        throw error;
+      if (!response.ok) {
+        throw new Error("Erro ao cadastrar paciente via API");
       }
       
       toast({
