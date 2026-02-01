@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PetData {
   name: string;
@@ -106,37 +107,43 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
+      // Verificar se usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para cadastrar um paciente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Calcular idade a partir da data de nascimento
       const birthDate = new Date(petData.birthDate);
       const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
+      let ageYears = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+        ageYears--;
       }
 
-      const payload = {
+      // Inserir diretamente no Supabase com os nomes corretos das colunas
+      const { error } = await supabase.from('patients').insert({
         name: petData.name,
         species: petData.species,
         breed: petData.breed,
-        age: age,
+        age: String(ageYears),
         sex: petData.gender,
         weight: parseFloat(petData.weight),
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
-        owner_email: tutorData.email
-      };
-
-      const response = await fetch("https://vet-api.predictlab.com.br/webhook/cadastrar-paciente", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        owner_email: tutorData.email,
+        veterinarian_id: user.id
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao cadastrar paciente via API");
+      if (error) {
+        throw error;
       }
       
       toast({

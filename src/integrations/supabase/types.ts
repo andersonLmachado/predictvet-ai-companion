@@ -58,7 +58,7 @@ export type Database = {
       }
       patients: {
         Row: {
-          age: number | null
+          age: string | null
           breed: string | null
           created_at: string
           id: string
@@ -73,7 +73,7 @@ export type Database = {
           weight: number | null
         }
         Insert: {
-          age?: number | null
+          age?: string | null
           breed?: string | null
           created_at?: string
           id?: string
@@ -88,7 +88,7 @@ export type Database = {
           weight?: number | null
         }
         Update: {
-          age?: number | null
+          age?: string | null
           breed?: string | null
           created_at?: string
           id?: string
