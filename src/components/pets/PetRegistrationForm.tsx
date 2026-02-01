@@ -124,10 +124,7 @@ const PetRegistrationForm = () => {
         weight: parseFloat(petData.weight),
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
-        owner_email: tutorData.email,
-        owner_address: tutorData.address,
-        observations: petData.observations,
-        birth_date: petData.birthDate
+        owner_email: tutorData.email
       };
 
       const response = await fetch("https://vet-api.predictlab.com.br/webhook/cadastrar-paciente", {
