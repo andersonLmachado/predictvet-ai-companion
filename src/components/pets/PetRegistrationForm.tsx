@@ -106,7 +106,7 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // Idade em anos a partir da data de nascimento (birthDate -> age)
+      // birthDate -> age (idade em anos)
       const birthDate = new Date(petData.birthDate);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
@@ -115,7 +115,7 @@ const PetRegistrationForm = () => {
         age--;
       }
 
-      // Objeto plano: petData + tutorData mapeados para os nomes do banco
+      // Payload único: name, species, breed, age, sex, weight, owner_name, owner_phone, owner_email (gender -> sex)
       const payload = {
         name: petData.name,
         species: petData.species,
