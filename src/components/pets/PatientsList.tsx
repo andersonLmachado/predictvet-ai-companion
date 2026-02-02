@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,78 +17,59 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
-// Dados simulados para exibição inicial
-const samplePatients = [
-  {
-    id: '1',
-    name: 'Max',
-    species: 'Canina',
-    breed: 'Labrador',
-    age: '3 anos',
-    gender: 'Macho',
-    tutor: 'Carlos Silva',
-    lastConsult: '2025-05-20',
-  },
-  {
-    id: '2',
-    name: 'Luna',
-    species: 'Felina',
-    breed: 'SRD',
-    age: '2 anos',
-    gender: 'Fêmea',
-    tutor: 'Ana Sousa',
-    lastConsult: '2025-05-25',
-  },
-  {
-    id: '3',
-    name: 'Thor',
-    species: 'Canina',
-    breed: 'Golden Retriever',
-    age: '5 anos',
-    gender: 'Macho',
-    tutor: 'Marcos Oliveira',
-    lastConsult: '2025-05-18',
-  },
-  {
-    id: '4',
-    name: 'Meg',
-    species: 'Canina',
-    breed: 'Beagle',
-    age: '4 anos',
-    gender: 'Fêmea',
-    tutor: 'Julia Santos',
-    lastConsult: '2025-05-23',
-  },
-  {
-    id: '5',
-    name: 'Felix',
-    species: 'Felina',
-    breed: 'Persa',
-    age: '6 anos',
-    gender: 'Macho',
-    tutor: 'Carla Mendes',
-    lastConsult: '2025-05-15',
-  }
-];
+const API_PATIENTS_URL = 'https://vet-api.predictlab.com.br/webhook/buscar-pacientes';
+
+type PatientRow = {
+  id: string;
+  name: string;
+  species: string;
+  breed: string;
+  age: string | number | null;
+  owner_name: string;
+  updated_at?: string;
+};
 
 const PatientsList = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [patients, setPatients] = React.useState(samplePatients);
-  
-  const filteredPatients = patients.filter(patient => 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [patients, setPatients] = useState<PatientRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(API_PATIENTS_URL);
+        if (!response.ok) throw new Error('Falha ao buscar pacientes');
+        const data = await response.json();
+        const rawList = Array.isArray(data) ? data : data?.id != null ? [data] : [];
+        const list: PatientRow[] = rawList.map((p: any) => ({
+          id: String(p.id),
+          name: p.name ?? '',
+          species: p.species ?? '',
+          breed: p.breed ?? '',
+          age: p.age ?? null,
+          owner_name: p.owner_name ?? '',
+          updated_at: p.updated_at,
+        }));
+        setPatients(list);
+      } catch (error) {
+        console.error('Erro ao buscar pacientes:', error);
+        setPatients([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.tutor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.breed.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.species.toLowerCase().includes(searchTerm.toLowerCase())
+    (patient.owner_name && patient.owner_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (patient.breed && patient.breed.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (patient.species && patient.species.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const navigateToPatientProfile = (id: string) => {
@@ -126,23 +107,36 @@ const PatientsList = () => {
                   <TableHead className="hidden md:table-cell">Raça</TableHead>
                   <TableHead className="hidden md:table-cell">Idade</TableHead>
                   <TableHead>Tutor</TableHead>
-                  <TableHead>Última Consulta</TableHead>
+                  <TableHead className="hidden md:table-cell">Atualizado</TableHead>
                   <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPatients.length > 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12">
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Carregando pacientes...
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredPatients.length > 0 ? (
                   filteredPatients.map((patient) => (
                     <TableRow key={patient.id}>
                       <TableCell className="font-medium">{patient.name}</TableCell>
                       <TableCell className="hidden md:table-cell">{patient.species}</TableCell>
                       <TableCell className="hidden md:table-cell">{patient.breed}</TableCell>
-                      <TableCell className="hidden md:table-cell">{patient.age}</TableCell>
-                      <TableCell>{patient.tutor}</TableCell>
-                      <TableCell>{new Date(patient.lastConsult).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="hidden md:table-cell">{patient.age ?? '—'}</TableCell>
+                      <TableCell>{patient.owner_name}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {patient.updated_at
+                          ? new Date(patient.updated_at).toLocaleDateString('pt-BR')
+                          : '—'}
+                      </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => navigateToPatientProfile(patient.id)}
                         >
@@ -164,7 +158,7 @@ const PatientsList = () => {
         </CardContent>
         <CardFooter className="flex justify-between border-t px-6 py-4">
           <div className="text-sm text-muted-foreground">
-            {filteredPatients.length} pacientes no total
+            {loading ? 'Carregando...' : `${filteredPatients.length} pacientes no total`}
           </div>
         </CardFooter>
       </Card>
