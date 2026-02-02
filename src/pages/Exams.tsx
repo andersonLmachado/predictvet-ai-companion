@@ -94,6 +94,7 @@ const Exams = () => {
       const formData = new FormData();
       formData.append("data", file);
       formData.append("examType", examType);
+      formData.append("patientName", selectedPatient.name);
 
       const response = await fetch("https://vet-api.predictlab.com.br/webhook/analisar-arquivo", {
         method: "POST",
