@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import PatientExamsModal from '@/components/pets/PatientExamsModal';
 import { 
   Card, 
   CardContent, 
@@ -36,6 +37,8 @@ const PatientsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [examsModalOpen, setExamsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<PatientRow | null>(null);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -72,8 +75,9 @@ const PatientsList = () => {
     (patient.species && patient.species.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const navigateToPatientProfile = (id: string) => {
-    navigate(`/patient/${id}`);
+  const openExamsModal = (patient: PatientRow) => {
+    setSelectedPatient(patient);
+    setExamsModalOpen(true);
   };
 
   return (
@@ -138,7 +142,7 @@ const PatientsList = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigateToPatientProfile(patient.id)}
+                          onClick={() => openExamsModal(patient)}
                         >
                           Ver
                         </Button>
@@ -162,6 +166,15 @@ const PatientsList = () => {
           </div>
         </CardFooter>
       </Card>
+
+      {selectedPatient && (
+        <PatientExamsModal
+          open={examsModalOpen}
+          onOpenChange={setExamsModalOpen}
+          patientId={selectedPatient.id}
+          patientName={selectedPatient.name}
+        />
+      )}
     </div>
   );
 };
