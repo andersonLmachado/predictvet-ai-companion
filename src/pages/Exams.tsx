@@ -134,21 +134,7 @@ const Exams = () => {
       </div>
 
       <div className="space-y-6">
-        {/* Seletor de Tipo de Exame */}
-        <div className="space-y-2">
-          <Label htmlFor="exam-type" className="text-sm font-medium">
-            Tipo de Exame
-          </Label>
-          <Select value={examType} onValueChange={(value: ExamType) => setExamType(value)}>
-            <SelectTrigger id="exam-type" className="w-full md:w-72">
-              <SelectValue placeholder="Selecione o tipo de exame" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sangue">Hemograma Completo</SelectItem>
-              <SelectItem value="urina">Urinálise (EAS)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
 
         {/* Seletor de Paciente (Obrigatório) */}
         <div className="space-y-2">
@@ -201,7 +187,7 @@ const Exams = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium text-foreground">Analisando exame com IA...</p>
+              <p className="text-lg font-medium text-foreground">Analisando exame...</p>
               <p className="text-sm text-muted-foreground mt-2">
                 Isso pode levar alguns segundos
               </p>
