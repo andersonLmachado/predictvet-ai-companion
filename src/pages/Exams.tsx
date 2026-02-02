@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch, RefreshCw } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
@@ -26,6 +26,7 @@ const Exams = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
 
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+  const [isSavingExam, setIsSavingExam] = useState(false);
 
   const fetchPatients = useCallback(async () => {
     setIsLoadingPatients(true);
@@ -124,6 +125,37 @@ const Exams = () => {
     }
   };
 
+  const handleSaveExam = async () => {
+    if (!result || !selectedPatientId) return;
+    setIsSavingExam(true);
+    try {
+      const response = await fetch("https://vet-api.predictlab.com.br/webhook/salvar-exame", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: selectedPatientId,
+          examType,
+          resultados: result.resultados,
+          resumo_clinico: result.resumo_clinico,
+        }),
+      });
+      if (!response.ok) throw new Error("Falha ao salvar exame");
+      toast({
+        title: "Exame salvo",
+        description: "O exame foi salvo com sucesso.",
+      });
+    } catch (error) {
+      console.error("Erro ao salvar exame:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o exame. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingExam(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-8">
@@ -206,7 +238,20 @@ const Exams = () => {
           </Card>
         )}
 
-        {result && <AnalysisResults result={result} patientData={patientData} />}
+        {result && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSaveExam}
+                disabled={isSavingExam}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSavingExam ? "Salvando..." : "Salvar Exame"}
+              </Button>
+            </div>
+            <AnalysisResults result={result} patientData={patientData} />
+          </div>
+        )}
       </div>
     </div>
   );
