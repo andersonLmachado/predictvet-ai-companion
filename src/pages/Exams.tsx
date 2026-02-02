@@ -126,18 +126,45 @@ const Exams = () => {
   };
 
   const handleSaveExam = async () => {
-    if (!result || !selectedPatientId) return;
+    const patient = selectedPatient;
+    if (!result || !patient) {
+      toast({
+        title: "Dados incompletos",
+        description: "Selecione um paciente e aguarde o resultado da análise.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const patientId = patient.id;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!patientId || !uuidRegex.test(patientId)) {
+      toast({
+        title: "ID do paciente inválido",
+        description: "O paciente selecionado não possui um UUID válido do banco de dados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const examTypeLabel =
+      examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)";
+
+    const payload = {
+      patient_id: patientId,
+      exam_type: examTypeLabel,
+      clinical_summary: result.resumo_clinico,
+      analysis_data: result.resultados,
+    };
+
+    console.log("ID do Paciente:", patientId);
+
     setIsSavingExam(true);
     try {
       const response = await fetch("https://vet-api.predictlab.com.br/webhook/salvar-exame", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: selectedPatientId,
-          examType,
-          resultados: result.resultados,
-          resumo_clinico: result.resumo_clinico,
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error("Falha ao salvar exame");
       toast({
