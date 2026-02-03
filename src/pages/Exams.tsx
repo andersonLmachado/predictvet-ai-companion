@@ -277,6 +277,14 @@ const Exams = () => {
               </Button>
             </div>
             <AnalysisResults result={result} patientData={patientData} />
+              {result && (
+                <div className="mt-4 flex justify-end">
+                  <ExamReport
+                    clinical_summary={result.resumo_clinico}
+                    analysis_data={result.resultados}
+                  />
+                </div>
+              )}
           </div>
         )}
       </div>
