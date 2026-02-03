@@ -56,6 +56,41 @@ export type Database = {
         }
         Relationships: []
       }
+      exams_history: {
+        Row: {
+          analysis_data: Json
+          clinical_summary: string | null
+          created_at: string | null
+          exam_type: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          analysis_data: Json
+          clinical_summary?: string | null
+          created_at?: string | null
+          exam_type: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          analysis_data?: Json
+          clinical_summary?: string | null
+          created_at?: string | null
+          exam_type?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_patient"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           age: string | null
