@@ -14,6 +14,7 @@ import AnalysisResults, {
   CabecalhoExame,
   ExamResultItem,
 } from "@/components/analysis/AnalysisResults";
+import ExamReport from "@/components/analysis/ExamReport";
 
 const API_EXAMS_URL = "https://vet-api.predictlab.com.br/webhook/buscar-exames";
 
@@ -139,6 +140,16 @@ const PatientExamsModal = ({
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 Voltar à lista
               </Button>
+              {selectedExam && (
+                <div className="flex justify-end">
+                  <ExamReport
+                    clinical_summary={selectedExam.clinical_summary}
+                    analysis_data={selectedExam.analysis_data}
+                    patientData={patientData}
+                    examType={examTypeLabel[selectedExam.exam_type] ?? selectedExam.exam_type}
+                  />
+                </div>
+              )}
               {syntheticResult && (
                 <AnalysisResults result={syntheticResult} patientData={patientData} />
               )}
