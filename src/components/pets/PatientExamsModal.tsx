@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ChevronLeft, FileText } from "lucide-react";
 import AnalysisResults, {
-import ExamReport from "@/components/analysis/ExamReport";
   AnalysisResponse,
   CabecalhoExame,
   ExamResultItem,
@@ -142,12 +141,6 @@ const PatientExamsModal = ({
               </Button>
               {syntheticResult && (
                 <AnalysisResults result={syntheticResult} patientData={patientData} />
-                  <div className="mt-2 flex justify-end">
-                    <ExamReport
-                      clinical_summary={syntheticResult.resumo_clinico}
-                      analysis_data={syntheticResult.resultados}
-                    />
-                  </div>
               )}
             </div>
           ) : exams.length === 0 ? (
