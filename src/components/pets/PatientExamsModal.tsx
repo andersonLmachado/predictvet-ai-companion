@@ -21,8 +21,8 @@ export type ExamHistoryRecord = {
   id: string;
   patient_id: string;
   exam_type: string;
-  resultados: ExamResultItem[];
-  resumo_clinico: string;
+  clinical_summary: string;
+  analysis_data: ExamResultItem[];
   created_at: string;
 };
 
@@ -31,6 +31,8 @@ type PatientExamsModalProps = {
   onOpenChange: (open: boolean) => void;
   patientId: string;
   patientName: string;
+  owner_name?: string;
+  age?: string | number | null;
 };
 
 const examTypeLabel: Record<string, string> = {
@@ -43,6 +45,8 @@ const PatientExamsModal = ({
   onOpenChange,
   patientId,
   patientName,
+  owner_name,
+  age,
 }: PatientExamsModalProps) => {
   const [exams, setExams] = useState<ExamHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,13 +63,13 @@ const PatientExamsModal = ({
         if (!response.ok) throw new Error("Falha ao buscar exames");
         const data = await response.json();
         const list = Array.isArray(data) ? data : data?.id != null ? [data] : [];
-        const sorted = (list as ExamHistoryRecord[])
-          .map((e: any) => ({
-            id: String(e.id),
+        const sorted = list
+          .map((e: any, index: number) => ({
+            id: String(e.id ?? index),
             patient_id: String(e.patient_id),
             exam_type: e.exam_type ?? "",
-            resultados: Array.isArray(e.resultados) ? e.resultados : [],
-            resumo_clinico: e.resumo_clinico ?? "",
+            clinical_summary: e.clinical_summary ?? e.resumo_clinico ?? "",
+            analysis_data: Array.isArray(e.analysis_data) ? e.analysis_data : (Array.isArray(e.resultados) ? e.resultados : []),
             created_at: e.created_at ?? "",
           }))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -88,24 +92,33 @@ const PatientExamsModal = ({
   const patientData: CabecalhoExame = {
     nome_animal: patientName,
     especie_raca: null,
-    idade: null,
+    idade: age != null ? String(age) : null,
     sexo: null,
-    tutor: null,
+    tutor: owner_name ?? null,
   };
 
-  const syntheticResult = selectedExam
-    ? ({
-        cabecalho: patientData,
-        resumo_clinico: selectedExam.resumo_clinico,
-        resultados: selectedExam.resultados,
-      } satisfies AnalysisResponse)
-    : null;
+  const syntheticResult =
+    selectedExam != null
+      ? ({
+          cabecalho: patientData,
+          resumo_clinico: selectedExam.clinical_summary,
+          resultados: selectedExam.analysis_data,
+        } satisfies AnalysisResponse)
+      : null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Histórico de exames — {patientName}</DialogTitle>
+          <div className="text-sm text-muted-foreground space-y-0.5 pt-1">
+            {owner_name != null && owner_name !== "" && (
+              <p><span className="font-medium text-foreground">Tutor:</span> {owner_name}</p>
+            )}
+            {age != null && age !== "" && (
+              <p><span className="font-medium text-foreground">Idade:</span> {String(age)}</p>
+            )}
+          </div>
         </DialogHeader>
 
         {loading ? (
@@ -163,9 +176,9 @@ const PatientExamsModal = ({
                             : "—"}
                         </span>
                       </div>
-                      {exam.resumo_clinico && (
+                      {exam.clinical_summary && (
                         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {exam.resumo_clinico}
+                          {exam.clinical_summary}
                         </p>
                       )}
                     </CardHeader>
