@@ -27,11 +27,13 @@ const CircularProgress = ({ value, maxValue, status, displayValue, unit }: Circu
   // Color based on status
   const getColor = () => {
     if (status === "normal") return "hsl(var(--chart-2))"; // Green
-    return "hsl(var(--destructive))"; // Red for alto/baixo
+    if (status === "baixo") return "#20b2aa"; // Teal for baixo
+    return "hsl(var(--destructive))"; // Red for alto
   };
   
   const getBgColor = () => {
     if (status === "normal") return "hsl(var(--chart-2) / 0.15)";
+    if (status === "baixo") return "rgba(32, 178, 170, 0.15)"; // Teal background for baixo
     return "hsl(var(--destructive) / 0.15)";
   };
 
@@ -63,7 +65,7 @@ const CircularProgress = ({ value, maxValue, status, displayValue, unit }: Circu
       </svg>
       {/* Center value */}
       <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-        <span className={`text-xl font-bold ${status === "normal" ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
+        <span className={`text-xl font-bold ${status === "normal" ? "text-green-600 dark:text-green-400" : status === "baixo" ? "text-[#20b2aa]" : "text-destructive"}`}>
           {displayValue}
         </span>
         <span className="text-xs text-muted-foreground">{unit}</span>
@@ -85,7 +87,7 @@ export const ResultCard = ({ item }: ResultCardProps) => {
       case "alto":
         return <Badge variant="destructive">Alto</Badge>;
       case "baixo":
-        return <Badge variant="destructive">Baixo</Badge>;
+        return <Badge className="bg-[#20b2aa] hover:bg-[#20b2aa]/90 text-white">Baixo</Badge>;
       default:
         return null;
     }

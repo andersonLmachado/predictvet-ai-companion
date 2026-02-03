@@ -58,7 +58,9 @@ export const UrinalysisCharts = ({ resultados }: UrinalysisChartsProps) => {
   };
 
   const getBarColor = (status: string) => {
-    return status === "normal" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))";
+    if (status === "normal") return "hsl(var(--chart-2))";
+    if (status === "baixo") return "#20b2aa";
+    return "hsl(var(--destructive))";
   };
 
   // Gauge chart component for density and pH
@@ -101,7 +103,7 @@ export const UrinalysisCharts = ({ resultados }: UrinalysisChartsProps) => {
             </RadialBarChart>
           </ChartContainer>
           <div className="text-center -mt-8">
-            <span className={`text-2xl font-bold ${item.status === "normal" ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
+            <span className={`text-2xl font-bold ${item.status === "normal" ? "text-green-600 dark:text-green-400" : item.status === "baixo" ? "text-[#20b2aa]" : "text-destructive"}`}>
               {typeof item.valor_encontrado === "number" ? item.valor_encontrado.toFixed(3) : item.valor_encontrado}
             </span>
             <span className="text-sm text-muted-foreground ml-1">{item.unidade}</span>
