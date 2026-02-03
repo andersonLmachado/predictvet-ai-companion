@@ -173,6 +173,8 @@ const PatientsList = () => {
           onOpenChange={setExamsModalOpen}
           patientId={selectedPatient.id}
           patientName={selectedPatient.name}
+          owner_name={selectedPatient.owner_name}
+          age={selectedPatient.age}
         />
       )}
     </div>
