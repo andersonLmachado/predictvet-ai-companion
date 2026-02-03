@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
 import AnalysisResults, { AnalysisResponse, CabecalhoExame } from "@/components/analysis/AnalysisResults";
+import ExamReport from "@/components/analysis/ExamReport";
 import {
   Select,
   SelectContent,
@@ -267,7 +268,13 @@ const Exams = () => {
 
         {result && (
           <div className="space-y-4">
-            <div className="flex justify-end">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <ExamReport
+                clinical_summary={result.resumo_clinico}
+                analysis_data={result.resultados}
+                patientData={patientData}
+                examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
+              />
               <Button
                 onClick={handleSaveExam}
                 disabled={isSavingExam}
