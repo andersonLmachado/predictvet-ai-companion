@@ -72,7 +72,9 @@ export const BloodSeriesCharts = ({ resultados }: BloodSeriesChartsProps) => {
   };
 
   const getBarColor = (status: string) => {
-    return status === "normal" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))";
+    if (status === "normal") return "hsl(var(--chart-2))";
+    if (status === "baixo") return "#20b2aa";
+    return "hsl(var(--destructive))";
   };
 
   return (
