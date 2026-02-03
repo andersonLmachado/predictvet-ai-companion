@@ -55,7 +55,7 @@ const PatientExamsModal = ({
       setLoading(true);
       try {
         const url = `${API_EXAMS_URL}?patient_id=${encodeURIComponent(patientId)}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { mode: "cors" });
         if (!response.ok) throw new Error("Falha ao buscar exames");
         const data = await response.json();
         const list = Array.isArray(data) ? data : data?.id != null ? [data] : [];
