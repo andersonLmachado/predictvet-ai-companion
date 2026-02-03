@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ const PatientExamsModal = ({
   owner_name,
   age,
 }: PatientExamsModalProps) => {
+  const navigate = useNavigate();
   const [exams, setExams] = useState<ExamHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedExam, setSelectedExam] = useState<ExamHistoryRecord | null>(null);
@@ -142,8 +144,18 @@ const PatientExamsModal = ({
               )}
             </div>
           ) : exams.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Nenhum exame encontrado para este paciente.
+            <div className="py-8 text-center space-y-4">
+              <p className="text-muted-foreground">
+                Nenhum exame encontrado para este paciente.
+              </p>
+              <Button
+                onClick={() => {
+                  onOpenChange(false);
+                  navigate("/exams");
+                }}
+              >
+                Realizar Análise
+              </Button>
             </div>
           ) : (
             <ul className="space-y-2">
