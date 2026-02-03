@@ -6,8 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ChevronLeft, FileText } from "lucide-react";
 import AnalysisResults, {
   AnalysisResponse,
@@ -108,8 +107,8 @@ const PatientExamsModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b">
           <DialogTitle>Histórico de exames — {patientName}</DialogTitle>
           <div className="text-sm text-muted-foreground space-y-0.5 pt-1">
             {owner_name != null && owner_name !== "" && (
@@ -121,34 +120,32 @@ const PatientExamsModal = ({
           </div>
         </DialogHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Carregando exames...
-          </div>
-        ) : selectedExam ? (
-          <div className="flex flex-col gap-4 flex-1 min-h-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-fit"
-              onClick={() => setSelectedExam(null)}
-            >
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Voltar à lista
-            </Button>
-            <ScrollArea className="flex-1 pr-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          {loading ? (
+            <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Carregando exames...
+            </div>
+          ) : selectedExam ? (
+            <div className="flex flex-col gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-fit"
+                onClick={() => setSelectedExam(null)}
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" />
+                Voltar à lista
+              </Button>
               {syntheticResult && (
                 <AnalysisResults result={syntheticResult} patientData={patientData} />
               )}
-            </ScrollArea>
-          </div>
-        ) : exams.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            Nenhum exame encontrado para este paciente.
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[60vh] pr-4">
+            </div>
+          ) : exams.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">
+              Nenhum exame encontrado para este paciente.
+            </div>
+          ) : (
             <ul className="space-y-2">
               {exams.map((exam) => (
                 <li key={exam.id}>
@@ -186,8 +183,8 @@ const PatientExamsModal = ({
                 </li>
               ))}
             </ul>
-          </ScrollArea>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
