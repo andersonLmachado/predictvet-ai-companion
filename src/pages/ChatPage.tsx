@@ -20,5 +20,6 @@ const ChatPage = () => {
       <ChatInterface selectedPatientId={selectedPatientId} />
     </div>
   );
+}
 
 export default ChatPage;
