@@ -17,7 +17,7 @@ interface Message {
   timestamp: Date;
 }
 
-const ChatInterface = () => {
+const ChatInterface: React.FC<{ selectedPatientId?: string }> = ({ selectedPatientId }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -47,11 +47,19 @@ const ChatInterface = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: userMessage,
-          timestamp: new Date().toISOString(),
-          source: 'PredictLab Chat'
-        }),
+        body: JSON.stringify(() => {
+          const payload: any = {
+            message: userMessage,
+            timestamp: new Date().toISOString(),
+            source: 'PredictLab Chat',
+          };
+
+          if (selectedPatientId) {
+            payload.patient_id = selectedPatientId;
+          }
+
+          return payload;
+        }()),
       });
 
       console.log('Status da resposta:', response.status);
