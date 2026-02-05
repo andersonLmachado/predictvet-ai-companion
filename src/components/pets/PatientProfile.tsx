@@ -268,7 +268,10 @@ const PatientProfile = () => {
                 <p className="text-gray-500 mb-4">
                   Funcionalidade será implementada em atualizações futuras.
                 </p>
-                <Button variant="outline" onClick={() => navigate('/chat')}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/chat?patient_id=${encodeURIComponent(patient.id)}`)}
+                >
                   Iniciar Nova Consulta
                 </Button>
               </div>

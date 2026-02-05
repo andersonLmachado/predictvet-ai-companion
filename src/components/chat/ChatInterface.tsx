@@ -1,10 +1,14 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Send, Bot, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+const CHAT_WEBHOOK_URL =
+  import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL ?? 'https://vet-api.predictlab.com.br/webhook/chat';
 
 interface Message {
   id: string;

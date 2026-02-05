@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react-markdown": path.resolve(__dirname, "./src/shims/react-markdown.tsx"),
+      "remark-gfm": path.resolve(__dirname, "./src/shims/remark-gfm.ts"),
     },
   },
 }));
