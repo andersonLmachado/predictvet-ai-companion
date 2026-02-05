@@ -42,7 +42,7 @@ const ChatInterface = () => {
     try {
       console.log('Enviando mensagem para n8n:', userMessage);
       
-      const response = await fetch('https://a502d49b88db.ngrok-free.app/webhook/7542c3b7-eed8-43fd-b97f-fa5309620430', {
+      const response = await fetch(CHAT_WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
