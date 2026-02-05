@@ -42,24 +42,22 @@ const ChatInterface: React.FC<{ selectedPatientId?: string }> = ({ selectedPatie
     try {
       console.log('Enviando mensagem para n8n:', userMessage);
       
+      const payload: any = {
+        message: userMessage,
+        timestamp: new Date().toISOString(),
+        source: 'PredictLab Chat',
+      };
+
+      if (selectedPatientId) {
+        payload.patient_id = selectedPatientId;
+      }
+
       const response = await fetch(CHAT_WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(() => {
-          const payload: any = {
-            message: userMessage,
-            timestamp: new Date().toISOString(),
-            source: 'PredictLab Chat',
-          };
-
-          if (selectedPatientId) {
-            payload.patient_id = selectedPatientId;
-          }
-
-          return payload;
-        }()),
+        body: JSON.stringify(payload),
       });
 
       console.log('Status da resposta:', response.status);
