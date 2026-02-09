@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePatient } from '@/contexts/PatientContext';
 import { Button } from '@/components/ui/button';
 import PatientExamsModal from '@/components/pets/PatientExamsModal';
 import { 
@@ -34,6 +35,7 @@ type PatientRow = {
 
 const PatientsList = () => {
   const navigate = useNavigate();
+  const { setSelectedPatient: setGlobalPatient } = usePatient();
   const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +78,14 @@ const PatientsList = () => {
   );
 
   const openExamsModal = (patient: PatientRow) => {
+    setGlobalPatient({
+      id: patient.id,
+      name: patient.name,
+      owner_name: patient.owner_name,
+      species: patient.species,
+      breed: patient.breed,
+      age: patient.age,
+    });
     setSelectedPatient(patient);
     setExamsModalOpen(true);
   };

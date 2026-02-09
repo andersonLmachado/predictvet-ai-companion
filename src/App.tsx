@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PatientProvider } from "@/contexts/PatientContext";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -21,69 +22,71 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Rotas protegidas (com layout) */}
-          <Route
-            path="/chat"
-            element={
-              <MainLayout>
-                <ChatPage />
-              </MainLayout>
-            }
-          />
-          <Route
-            path="/register-pet"
-            element={
-              <MainLayout>
-                <RegisterPet />
-              </MainLayout>
-            }
-          />
-          <Route
-            path="/patients"
-            element={
-              <MainLayout>
-                <Patients />
-              </MainLayout>
-            }
-          />
-          <Route
-            path="/patient/:id"
-            element={
-              <MainLayout>
-                <PatientDetails />
-              </MainLayout>
-            }
-          />
-          <Route
-            path="/exams"
-            element={
-              <MainLayout>
-                <Exams />
-              </MainLayout>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <MainLayout>
-                <Dashboard />
-              </MainLayout>
-            }
-          />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <PatientProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Rotas protegidas (com layout) */}
+            <Route
+              path="/chat"
+              element={
+                <MainLayout>
+                  <ChatPage />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/register-pet"
+              element={
+                <MainLayout>
+                  <RegisterPet />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/patients"
+              element={
+                <MainLayout>
+                  <Patients />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/patient/:id"
+              element={
+                <MainLayout>
+                  <PatientDetails />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/exams"
+              element={
+                <MainLayout>
+                  <Exams />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <MainLayout>
+                  <Dashboard />
+                </MainLayout>
+              }
+            />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </PatientProvider>
   </QueryClientProvider>
 );
 
