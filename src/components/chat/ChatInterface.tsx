@@ -16,7 +16,7 @@ interface Message {
   suggestedPatients?: PatientInfo[];
 }
 
-const N8N_WEBHOOK_URL = 'https://a502d49b88db.ngrok-free.app/webhook/7542c3b7-eed8-43fd-b97f-fa5309620430';
+const N8N_WEBHOOK_URL = 'https://vet-api.predictlab.com.br/webhook/chat';
 
 const EXAM_KEYWORDS = ['exame', 'exames', 'resultado', 'resultados', 'histórico', 'hemograma', 'urinálise', 'bioquímico', 'laudo'];
 
