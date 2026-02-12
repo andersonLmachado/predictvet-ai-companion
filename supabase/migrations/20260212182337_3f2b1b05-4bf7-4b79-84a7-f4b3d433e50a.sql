@@ -1,0 +1,1 @@
+ALTER TABLE public.evolution_summaries ENABLE ROW LEVEL SECURITY;
