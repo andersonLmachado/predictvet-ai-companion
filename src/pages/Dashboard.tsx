@@ -6,6 +6,7 @@ import PatientCombobox from '@/components/dashboard/PatientCombobox';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
+import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 
 interface ExamParam {
   parametro: string;
@@ -42,7 +43,6 @@ const Dashboard = () => {
   const { selectedPatient } = usePatient();
   const [history, setHistory] = useState<ExamHistoryRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [clinicalSigns, setClinicalSigns] = useState<string[]>([]);
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -132,9 +132,14 @@ const Dashboard = () => {
 
       {/* Patient summary */}
       {selectedPatient && (
-        <div className="mb-6">
-          <PatientSummary patient={selectedPatient} />
-        </div>
+        <>
+          <div className="mb-6">
+            <PatientSummary patient={selectedPatient} />
+          </div>
+          <div className="mb-6">
+            <EvolutionReportCard trendsByParam={trendsByParam} />
+          </div>
+        </>
       )}
 
       {/* Loading */}
@@ -188,7 +193,7 @@ const Dashboard = () => {
       {/* Clinical signs */}
       {selectedPatient && (
         <div className="max-w-2xl">
-          <ClinicalSignsSection signs={clinicalSigns} onSignsChange={setClinicalSigns} />
+          <ClinicalSignsSection patientId={selectedPatient.id} />
         </div>
       )}
     </div>

@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      clinical_observations: {
+        Row: {
+          created_at: string
+          id: string
+          observation: string
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          observation: string
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          observation?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_observations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           completed_at: string | null
