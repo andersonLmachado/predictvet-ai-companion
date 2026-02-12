@@ -137,7 +137,7 @@ const Dashboard = () => {
             <PatientSummary patient={selectedPatient} />
           </div>
           <div className="mb-6">
-            <EvolutionReportCard trendsByParam={trendsByParam} />
+            <EvolutionReportCard trendsByParam={trendsByParam} patientId={selectedPatient.id} />
           </div>
         </>
       )}
