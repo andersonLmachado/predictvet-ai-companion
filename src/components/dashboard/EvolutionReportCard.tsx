@@ -1,15 +1,41 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Brain, Sparkles } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 import { TrendDataPoint } from './TrendChart';
 
 interface EvolutionReportCardProps {
   trendsByParam: Map<string, { data: TrendDataPoint[]; unidade: string; refMin: number; refMax: number }>;
+  patientId?: string;
 }
 
-const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam }) => {
-  const report = useMemo(() => {
-    if (trendsByParam.size === 0) return null;
+const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam, patientId }) => {
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!patientId) {
+      setAiSummary(null);
+      return;
+    }
+    const fetchSummary = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('evolution_summaries')
+        .select('last_ai_summary')
+        .eq('patient_id', patientId)
+        .maybeSingle();
+
+      setAiSummary(!error && data ? data.last_ai_summary : null);
+      setLoading(false);
+    };
+    fetchSummary();
+  }, [patientId]);
+
+  // Local fallback analysis when no AI summary from backend
+  const localReport = useMemo(() => {
+    if (aiSummary || trendsByParam.size === 0) return null;
 
     const insights: string[] = [];
     let improving = 0;
@@ -52,7 +78,7 @@ const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam
     }
 
     return { summary, insights };
-  }, [trendsByParam]);
+  }, [trendsByParam, aiSummary]);
 
   return (
     <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
@@ -66,14 +92,21 @@ const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {!report ? (
-          <p className="text-sm text-muted-foreground italic">Aguardando nova análise de evolução...</p>
-        ) : (
+        {loading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : aiSummary ? (
+          <p className="text-sm text-foreground whitespace-pre-line">{aiSummary}</p>
+        ) : !patientId ? (
+          <p className="text-sm text-muted-foreground italic">Selecione um paciente para gerar a análise de evolução</p>
+        ) : localReport ? (
           <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground">{report.summary}</p>
-            {report.insights.length > 0 && (
+            <p className="text-sm font-medium text-foreground">{localReport.summary}</p>
+            {localReport.insights.length > 0 && (
               <ul className="space-y-1">
-                {report.insights.map((insight, i) => (
+                {localReport.insights.map((insight, i) => (
                   <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                     <span className="text-primary mt-0.5">•</span>
                     {insight}
@@ -82,6 +115,8 @@ const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam
               </ul>
             )}
           </div>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">Aguardando nova análise de evolução...</p>
         )}
       </CardContent>
     </Card>
