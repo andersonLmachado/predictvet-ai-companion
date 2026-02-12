@@ -47,16 +47,27 @@ export type Database = {
         Row: {
           id: number
           last_ai_summary: string
+          patient_id: string | null
         }
         Insert: {
           id?: number
           last_ai_summary: string
+          patient_id?: string | null
         }
         Update: {
           id?: number
           last_ai_summary?: string
+          patient_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "evolution_summaries_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       exams: {
         Row: {
