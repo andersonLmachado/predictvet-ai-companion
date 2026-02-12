@@ -43,6 +43,21 @@ export type Database = {
           },
         ]
       }
+      evolution_summaries: {
+        Row: {
+          id: number
+          last_ai_summary: string
+        }
+        Insert: {
+          id?: number
+          last_ai_summary: string
+        }
+        Update: {
+          id?: number
+          last_ai_summary?: string
+        }
+        Relationships: []
+      }
       exams: {
         Row: {
           completed_at: string | null
