@@ -58,6 +58,7 @@ const GuidedConsultation: React.FC = () => {
           onChange={updateField('S')}
           accentColor="hsl(210, 70%, 50%)"
           icon={<ClipboardList className="h-5 w-5" />}
+          patientId={selectedPatient?.id}
         />
 
         <SOAPCard
@@ -69,6 +70,7 @@ const GuidedConsultation: React.FC = () => {
           onChange={updateField('O')}
           accentColor="hsl(160, 60%, 40%)"
           icon={<Eye className="h-5 w-5" />}
+          patientId={selectedPatient?.id}
         />
 
         <SOAPCard
@@ -80,6 +82,7 @@ const GuidedConsultation: React.FC = () => {
           onChange={updateField('A')}
           accentColor="hsl(35, 80%, 50%)"
           icon={<Brain className="h-5 w-5" />}
+          patientId={selectedPatient?.id}
         />
 
         <SOAPCard
@@ -91,6 +94,7 @@ const GuidedConsultation: React.FC = () => {
           onChange={updateField('P')}
           accentColor="hsl(270, 50%, 55%)"
           icon={<FileCheck className="h-5 w-5" />}
+          patientId={selectedPatient?.id}
         />
       </div>
     </div>
