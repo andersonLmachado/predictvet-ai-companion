@@ -14,6 +14,8 @@ const GuidedConsultation: React.FC = () => {
     P: '',
   });
 
+  const [aiSuggestions, setAiSuggestions] = useState('');
+
   const updateField = (field: keyof typeof soapData) => (value: string) => {
     setSoapData((prev) => ({ ...prev, [field]: value }));
   };
@@ -95,6 +97,8 @@ const GuidedConsultation: React.FC = () => {
           accentColor="hsl(270, 50%, 55%)"
           icon={<FileCheck className="h-5 w-5" />}
           patientId={selectedPatient?.id}
+          aiSuggestions={aiSuggestions}
+          onAiSuggestionsChange={setAiSuggestions}
         />
       </div>
     </div>
