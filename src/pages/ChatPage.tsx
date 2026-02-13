@@ -1,11 +1,10 @@
-
 import React from 'react';
-import ChatInterface from '@/components/chat/ChatInterface';
+import GuidedConsultation from '@/components/consultation/GuidedConsultation';
 
 const ChatPage = () => {
   return (
-    <div className="h-full">
-      <ChatInterface />
+    <div className="h-full overflow-y-auto">
+      <GuidedConsultation />
     </div>
   );
 };
