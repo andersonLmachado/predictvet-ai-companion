@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +19,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
-
+import { supabase } from '@/integrations/supabase/client';
+import { ClipboardList, Sparkles } from 'lucide-react';
 // Interface para os dados completos do pet e tutor
  interface Patient {
   id: string;
@@ -36,7 +39,6 @@ import { toast } from '@/hooks/use-toast';
     email: string;
     address: string;
   }; 
-
 
 }
 
@@ -103,9 +105,30 @@ const PatientProfile = () => {
   const navigate = useNavigate();
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [soapHistory, setSoapHistory] = useState<any[]>([]);
+  const [loadingSoap, setLoadingSoap] = useState(false);
   
   // Buscar dados do paciente pelo ID
   const patient = id ? samplePatients[id] : null;
+
+  // Fetch SOAP history from Supabase
+  useEffect(() => {
+    if (!id) return;
+    const fetchSoapHistory = async () => {
+      setLoadingSoap(true);
+      try {
+        const { data, error } = await supabase
+          .from('medical_consultations')
+          .select('*')
+          .eq('patient_id', id)
+          .order('created_at', { ascending: false });
+        if (!error && data) setSoapHistory(data);
+      } catch {} finally {
+        setLoadingSoap(false);
+      }
+    };
+    fetchSoapHistory();
+  }, [id]);
   
   if (!patient) {
     return (
@@ -197,6 +220,7 @@ const PatientProfile = () => {
           <Tabs defaultValue="profile">
             <TabsList className="mb-4">
               <TabsTrigger value="profile">Perfil</TabsTrigger>
+              <TabsTrigger value="soap-history">Histórico SOAP</TabsTrigger>
               <TabsTrigger value="history">Histórico</TabsTrigger>
             </TabsList>
             
@@ -261,7 +285,70 @@ const PatientProfile = () => {
                 </div>
               </div>
             </TabsContent>
-            
+
+            <TabsContent value="soap-history">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                  Histórico de Consultas (SOAP)
+                </h3>
+                {loadingSoap ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : soapHistory.length === 0 ? (
+                  <div className="p-6 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      Nenhuma consulta SOAP registrada para este paciente.
+                    </p>
+                    <Button variant="outline" onClick={() => navigate('/chat')}>
+                      Iniciar Consulta Guiada
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {soapHistory.map((entry) => (
+                      <Card key={entry.id} className="border-l-4 border-l-primary/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="secondary" className="font-mono">
+                              Bloco {entry.soap_block}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {entry.created_at
+                                ? new Date(entry.created_at).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '—'}
+                            </span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
+                          {entry.ai_suggestions && (
+                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                                <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+                                  Sugestões da IA
+                                </span>
+                              </div>
+                              <p className="text-xs text-amber-800 dark:text-amber-200 whitespace-pre-wrap">
+                                {entry.ai_suggestions}
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
             <TabsContent value="history">
               <div className="p-6 text-center">
                 <h3 className="text-lg font-semibold mb-2">Histórico de Consultas</h3>
