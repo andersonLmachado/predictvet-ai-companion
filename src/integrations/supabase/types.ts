@@ -148,6 +148,7 @@ export type Database = {
       }
       medical_consultations: {
         Row: {
+          ai_suggestions: string | null
           content: string | null
           created_at: string | null
           id: string
@@ -155,6 +156,7 @@ export type Database = {
           soap_block: string | null
         }
         Insert: {
+          ai_suggestions?: string | null
           content?: string | null
           created_at?: string | null
           id?: string
@@ -162,6 +164,7 @@ export type Database = {
           soap_block?: string | null
         }
         Update: {
+          ai_suggestions?: string | null
           content?: string | null
           created_at?: string | null
           id?: string
