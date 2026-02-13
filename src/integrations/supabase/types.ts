@@ -146,6 +146,38 @@ export type Database = {
           },
         ]
       }
+      medical_consultations: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          patient_id: string | null
+          soap_block: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          patient_id?: string | null
+          soap_block?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          patient_id?: string | null
+          soap_block?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           age: string | null

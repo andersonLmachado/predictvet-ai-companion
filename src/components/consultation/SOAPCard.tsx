@@ -14,6 +14,7 @@ interface SOAPCardProps {
   onChange: (value: string) => void;
   accentColor: string;
   icon: React.ReactNode;
+  patientId?: string;
 }
 
 const SOAPCard: React.FC<SOAPCardProps> = ({
@@ -25,6 +26,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   onChange,
   accentColor,
   icon,
+  patientId,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,9 +70,9 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     setIsProcessing(true);
     try {
       const formData = new FormData();
-      formData.append('audio', blob, 'recording.webm');
-      formData.append('section', letter);
-      formData.append('existing_text', value);
+      formData.append('file', blob, 'recording.webm');
+      formData.append('block', letter);
+      if (patientId) formData.append('patient_id', patientId);
 
       const response = await fetch('https://vet-api.predictlab.com.br/webhook/soap-audio', {
         method: 'POST',
