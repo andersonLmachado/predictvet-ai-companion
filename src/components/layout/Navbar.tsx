@@ -9,7 +9,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { MessageSquare, UserPlus, Users, FileText, LogOut, LayoutDashboard } from 'lucide-react';
+import { ClipboardList, UserPlus, Users, FileText, LogOut, LayoutDashboard } from 'lucide-react';
 import predictlabIcon from '@/assets/predictlab-icon.png';
 
 interface NavbarProps {
@@ -46,8 +46,8 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
                   variant={location.pathname === '/chat' ? 'default' : 'ghost'}
                   className="flex items-center space-x-2"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Chat</span>
+                  <ClipboardList className="w-4 h-4" />
+                  <span>Consulta Guiada</span>
                 </Button>
               </Link>
               
