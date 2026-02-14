@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePatient, PatientInfo } from '@/contexts/PatientContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +14,7 @@ import PatientSummary from '@/components/dashboard/PatientSummary';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
+import PatientExamsModal from '@/components/pets/PatientExamsModal';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
@@ -202,7 +204,7 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
   const [loading, setLoading] = useState(true);
   const [exams, setExams] = useState<any[]>([]);
   const [examsLoading, setExamsLoading] = useState(true);
-  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const [examsModalOpen, setExamsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -293,7 +295,10 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
             <ul className="space-y-2">
               {exams.map((exam) => (
                 <li key={exam.id}>
-                  <div className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                  <div
+                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => setExamsModalOpen(true)}
+                  >
                     <div className="flex items-center gap-2">
                       <ClipboardList className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">
@@ -317,6 +322,15 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
           )}
         </CardContent>
       </Card>
+
+      <PatientExamsModal
+        open={examsModalOpen}
+        onOpenChange={setExamsModalOpen}
+        patientId={patientId}
+        patientName={patient.name}
+        owner_name={patient.owner_name}
+        age={patient.age}
+      />
     </div>
   );
 };
