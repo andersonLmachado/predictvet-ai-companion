@@ -190,12 +190,23 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
 };
 
 // --- Tab: Resumo Clínico ---
+const API_EXAMS_URL = "https://vet-api.predictlab.com.br/webhook/buscar-exames";
+
+const examTypeLabel: Record<string, string> = {
+  sangue: "Hemograma",
+  urina: "Urinálise (EAS)",
+};
+
 const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> = ({ patient, patientId }) => {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exams, setExams] = useState<any[]>([]);
+  const [examsLoading, setExamsLoading] = useState(true);
+  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchSummary = async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('evolution_summaries')
@@ -205,7 +216,33 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
       setAiSummary(!error && data ? data.last_ai_summary : null);
       setLoading(false);
     };
-    fetch();
+
+    const fetchExams = async () => {
+      setExamsLoading(true);
+      try {
+        const url = `${API_EXAMS_URL}?patient_id=${encodeURIComponent(patientId)}`;
+        const response = await fetch(url, { mode: "cors" });
+        if (!response.ok) throw new Error("Falha ao buscar exames");
+        const data = await response.json();
+        const list = Array.isArray(data) ? data : data?.id != null ? [data] : [];
+        const sorted = list
+          .map((e: any, index: number) => ({
+            id: String(e.id ?? index),
+            exam_type: e.exam_type ?? "",
+            clinical_summary: e.clinical_summary ?? e.resumo_clinico ?? "",
+            created_at: e.created_at ?? "",
+          }))
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setExams(sorted);
+      } catch {
+        setExams([]);
+      } finally {
+        setExamsLoading(false);
+      }
+    };
+
+    fetchSummary();
+    fetchExams();
   }, [patientId]);
 
   return (
@@ -229,6 +266,54 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
             <p className="text-sm text-foreground whitespace-pre-line">{aiSummary}</p>
           ) : (
             <p className="text-sm text-muted-foreground italic">Nenhum parecer de evolução disponível. Envie exames para gerar a análise.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Exames do paciente */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Calendar className="h-4 w-4 text-primary" />
+            Exames Realizados
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {examsLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : exams.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground mb-3">Nenhum exame encontrado para este paciente.</p>
+              <Button variant="outline" size="sm" onClick={() => navigate('/exams')}>Realizar Análise</Button>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {exams.map((exam) => (
+                <li key={exam.id}>
+                  <div className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">
+                        {examTypeLabel[exam.exam_type] ?? exam.exam_type}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {exam.created_at
+                        ? new Date(exam.created_at).toLocaleDateString("pt-BR", {
+                            day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+                          })
+                        : "—"}
+                    </span>
+                  </div>
+                  {exam.clinical_summary && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1 ml-6">{exam.clinical_summary}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
         </CardContent>
       </Card>
