@@ -38,6 +38,13 @@ export type Database = {
             foreignKeyName: "clinical_observations_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
+            referencedRelation: "patient_complete_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_observations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
@@ -60,6 +67,13 @@ export type Database = {
           patient_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "evolution_summaries_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patient_complete_record"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "evolution_summaries_patient_id_fkey"
             columns: ["patient_id"]
@@ -141,6 +155,13 @@ export type Database = {
             foreignKeyName: "fk_patient"
             columns: ["patient_id"]
             isOneToOne: false
+            referencedRelation: "patient_complete_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_patient"
+            columns: ["patient_id"]
+            isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
@@ -172,6 +193,13 @@ export type Database = {
           soap_block?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "medical_consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patient_complete_record"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "medical_consultations_patient_id_fkey"
             columns: ["patient_id"]
@@ -231,7 +259,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      patient_complete_record: {
+        Row: {
+          age: string | null
+          breed: string | null
+          created_at: string | null
+          id: string | null
+          last_ai_summary: string | null
+          name: string | null
+          owner_email: string | null
+          owner_name: string | null
+          owner_phone: string | null
+          sex: string | null
+          soap_history: Json | null
+          species: string | null
+          updated_at: string | null
+          veterinarian_id: string | null
+          weight: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
