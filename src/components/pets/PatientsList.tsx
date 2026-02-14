@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePatient } from '@/contexts/PatientContext';
 import { Button } from '@/components/ui/button';
-import PatientExamsModal from '@/components/pets/PatientExamsModal';
-import { 
+import {
   Card, 
   CardContent, 
   CardFooter, 
@@ -39,8 +38,6 @@ const PatientsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [examsModalOpen, setExamsModalOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<PatientRow | null>(null);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -77,7 +74,7 @@ const PatientsList = () => {
     (patient.species && patient.species.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const openExamsModal = (patient: PatientRow) => {
+  const openPatientDetails = (patient: PatientRow) => {
     setGlobalPatient({
       id: patient.id,
       name: patient.name,
@@ -86,8 +83,7 @@ const PatientsList = () => {
       breed: patient.breed,
       age: patient.age,
     });
-    setSelectedPatient(patient);
-    setExamsModalOpen(true);
+    navigate(`/patient/${patient.id}`);
   };
 
   return (
@@ -152,7 +148,7 @@ const PatientsList = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openExamsModal(patient)}
+                          onClick={() => openPatientDetails(patient)}
                         >
                           Ver
                         </Button>
@@ -176,17 +172,6 @@ const PatientsList = () => {
           </div>
         </CardFooter>
       </Card>
-
-      {selectedPatient && (
-        <PatientExamsModal
-          open={examsModalOpen}
-          onOpenChange={setExamsModalOpen}
-          patientId={selectedPatient.id}
-          patientName={selectedPatient.name}
-          owner_name={selectedPatient.owner_name}
-          age={selectedPatient.age}
-        />
-      )}
     </div>
   );
 };
