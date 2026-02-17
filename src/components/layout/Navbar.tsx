@@ -9,7 +9,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { ClipboardList, UserPlus, Users, FileText, LogOut, LayoutDashboard } from 'lucide-react';
+import { ClipboardList, UserPlus, Users, FileText, LogOut, LayoutDashboard, Home } from 'lucide-react';
 import predictlabIcon from '@/assets/predictlab-icon.png';
 
 interface NavbarProps {
@@ -35,12 +35,22 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
-            <Link to="/chat" className="flex items-center space-x-2">
+            <Link to="/home" className="flex items-center space-x-2">
               <img src={predictlabIcon} alt="PredictLab" className="w-10 h-10 object-contain" />
               <span className="text-xl font-bold text-gray-900">PredictLab</span>
             </Link>
             
             <div className="flex space-x-1">
+              <Link to="/home">
+                <Button 
+                  variant={location.pathname === '/home' ? 'default' : 'ghost'}
+                  className="flex items-center space-x-2"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Home</span>
+                </Button>
+              </Link>
+              
               <Link to="/chat">
                 <Button 
                   variant={location.pathname === '/chat' ? 'default' : 'ghost'}

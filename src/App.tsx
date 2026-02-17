@@ -15,6 +15,7 @@ import Patients from "./pages/Patients";
 import PatientDetails from "./pages/PatientDetails";
 import Exams from "./pages/Exams";
 import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import MainLayout from "./components/layout/MainLayout";
 
@@ -33,6 +34,14 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             
             {/* Rotas protegidas (com layout) */}
+            <Route
+              path="/home"
+              element={
+                <MainLayout>
+                  <Home />
+                </MainLayout>
+              }
+            />
             <Route
               path="/chat"
               element={
