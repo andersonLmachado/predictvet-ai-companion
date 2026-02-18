@@ -12,7 +12,7 @@ const Login = () => {
     
     // Para fins de demonstração, simular um login bem-sucedido
     await new Promise(resolve => setTimeout(resolve, 800));
-    navigate('/chat');
+    navigate('/home');
   };
 
   return (
