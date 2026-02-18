@@ -340,14 +340,45 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
 const PatientProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { patients, patientsLoaded } = usePatient();
+  const { patients, patientsLoaded, selectedPatient } = usePatient();
+  const [dbPatient, setDbPatient] = useState<PatientInfo | null>(null);
+  const [dbLoading, setDbLoading] = useState(false);
 
-  const patient = useMemo(() => {
+  // First try from context list, then from DB directly
+  const contextPatient = useMemo(() => {
     if (!id || !patientsLoaded) return null;
     return patients.find((p) => p.id === id) ?? null;
   }, [id, patients, patientsLoaded]);
 
-  if (!patientsLoaded) {
+  // If not found in context, fetch directly from Supabase
+  useEffect(() => {
+    if (!id || contextPatient) return;
+    if (!patientsLoaded) return;
+    const fetchFromDb = async () => {
+      setDbLoading(true);
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, name, owner_name, species, breed, age')
+        .eq('id', id)
+        .maybeSingle();
+      if (!error && data) {
+        setDbPatient({
+          id: String(data.id),
+          name: data.name ?? '',
+          owner_name: data.owner_name ?? '',
+          species: data.species ?? '',
+          breed: data.breed ?? '',
+          age: data.age ?? null,
+        });
+      }
+      setDbLoading(false);
+    };
+    fetchFromDb();
+  }, [id, contextPatient, patientsLoaded]);
+
+  const patient = contextPatient ?? dbPatient ?? (selectedPatient?.id === id ? selectedPatient : null);
+
+  if (!patientsLoaded || dbLoading) {
     return (
       <div className="flex items-center justify-center h-full py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
