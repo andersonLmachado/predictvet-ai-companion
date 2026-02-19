@@ -88,30 +88,41 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       if (!response.ok) throw new Error('Erro no processamento');
 
       const contentType = response.headers.get('content-type');
-      let transcribedText: string;
+      let transcribedText = '';
       let suggestions: string | undefined;
-      let formattedText: string | undefined;
 
       if (contentType?.includes('application/json')) {
-        const data = await response.json();
-        formattedText = typeof data.formattedText === 'string' ? data.formattedText : undefined;
-        transcribedText = formattedText || data.text || data.output || data.result || '';
-        suggestions = data.ai_suggestions || undefined;
+        const rawData = await response.json();
+        const parsedData = Array.isArray(rawData) ? rawData[0] : rawData;
+
+        if (parsedData && typeof parsedData === 'object') {
+          // n8n payload: [{ content: "...", ai_suggestions: "..." }]
+          transcribedText =
+            typeof parsedData.content === 'string'
+              ? parsedData.content
+              : typeof parsedData.formattedText === 'string'
+              ? parsedData.formattedText
+              : typeof parsedData.text === 'string'
+              ? parsedData.text
+              : typeof parsedData.output === 'string'
+              ? parsedData.output
+              : typeof parsedData.result === 'string'
+              ? parsedData.result
+              : '';
+
+          suggestions =
+            typeof parsedData.ai_suggestions === 'string' ? parsedData.ai_suggestions : undefined;
+        }
       } else {
         transcribedText = await response.text();
       }
 
       if (transcribedText.trim()) {
-        const nextText = transcribedText.trim();
-        if (formattedText) {
-          onChange(nextText);
-        } else {
-          onChange(value ? `${value}\n${nextText}` : nextText);
-        }
+        onChange(transcribedText.trim());
       }
 
-      if (suggestions && onAiSuggestionsChange) {
-        onAiSuggestionsChange(suggestions);
+      if (letter === 'P' && onAiSuggestionsChange) {
+        onAiSuggestionsChange(suggestions ?? '');
       }
     } catch {
       toast({
@@ -219,6 +230,14 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             className="min-h-[120px] resize-none pr-14 text-sm"
             disabled={isProcessing}
           />
+          {isProcessing && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70">
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                IA está processando...
+              </div>
+            </div>
+          )}
           {/* Floating mic button */}
           <div className="absolute bottom-3 right-3">
             {isProcessing ? (
