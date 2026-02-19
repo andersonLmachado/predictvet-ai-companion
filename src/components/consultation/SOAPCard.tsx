@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Save, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,6 +37,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [content, setContent] = useState(value);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -44,7 +46,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     setContent(value);
   }, [value]);
 
-  const normalizeAiText = (text: string) => text.replace(/\*\*/g, '').trim();
+  const normalizeAiText = (text: string) => text.trim();
 
   const startRecording = useCallback(async () => {
     try {
@@ -231,29 +233,52 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             <span className="font-semibold">{title}</span>
             <p className="text-xs font-normal text-muted-foreground">{subtitle}</p>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPreviewMode((prev) => !prev)}
+            disabled={isProcessing}
+          >
+            {isPreviewMode ? 'Editar' : 'Visualizar'}
+          </Button>
           <span className="text-muted-foreground">{icon}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="relative space-y-3">
         <div className="relative">
-          <Textarea
-            value={content}
-            onChange={(e) => {
-              const nextValue = e.target.value;
-              setContent(nextValue);
-              onChange(nextValue);
-            }}
-            placeholder={placeholder}
-            className="min-h-[120px] resize-none pr-14 text-sm"
-            readOnly={isProcessing}
-          />
-          {isProcessing && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70">
-              <div className="flex items-center gap-2 text-sm text-primary">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                IA está processando...
-              </div>
+          {isPreviewMode ? (
+            <div className="min-h-[120px] rounded-md border bg-muted/20 p-3">
+              {content.trim() ? (
+                <article className="prose prose-sm max-w-none dark:prose-invert">
+                  <ReactMarkdown>{content}</ReactMarkdown>
+                </article>
+              ) : (
+                <p className="text-sm text-muted-foreground">{placeholder}</p>
+              )}
             </div>
+          ) : (
+            <>
+              <Textarea
+                value={content}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  setContent(nextValue);
+                  onChange(nextValue);
+                }}
+                placeholder={placeholder}
+                className="min-h-[120px] resize-none pr-14 text-sm"
+                readOnly={isProcessing}
+              />
+              {isProcessing && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70">
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    IA está processando...
+                  </div>
+                </div>
+              )}
+            </>
           )}
           {/* Floating mic button */}
           <div className="absolute bottom-3 right-3">
@@ -261,7 +286,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
               </div>
-            ) : (
+            ) : !isPreviewMode ? (
               <Button
                 type="button"
                 size="icon"
@@ -277,6 +302,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
               >
                 {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               </Button>
+            ) : null
             )}
           </div>
         </div>
