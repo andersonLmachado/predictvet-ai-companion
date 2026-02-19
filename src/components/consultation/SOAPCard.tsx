@@ -36,8 +36,15 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [content, setContent] = useState(value);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    setContent(value);
+  }, [value]);
+
+  const normalizeAiText = (text: string) => text.replace(/\*\*/g, '').trim();
 
   const startRecording = useCallback(async () => {
     try {
@@ -92,14 +99,18 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       let suggestions: string | undefined;
 
       if (contentType?.includes('application/json')) {
-        const rawData = await response.json();
-        const parsedData = Array.isArray(rawData) ? rawData[0] : rawData;
+        const data = await response.json();
+        const parsedData = Array.isArray(data) ? data[0] : data;
+        const finalContent =
+          typeof (Array.isArray(data) ? data[0]?.content : data?.content) === 'string'
+            ? (Array.isArray(data) ? data[0].content : data.content)
+            : '';
 
         if (parsedData && typeof parsedData === 'object') {
           // n8n payload: [{ content: "...", ai_suggestions: "..." }]
           transcribedText =
-            typeof parsedData.content === 'string'
-              ? parsedData.content
+            typeof finalContent === 'string' && finalContent
+              ? finalContent
               : typeof parsedData.formattedText === 'string'
               ? parsedData.formattedText
               : typeof parsedData.text === 'string'
@@ -118,7 +129,9 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       }
 
       if (transcribedText.trim()) {
-        onChange(transcribedText.trim());
+        const nextText = normalizeAiText(transcribedText);
+        setContent(nextText);
+        onChange(nextText);
       }
 
       if (letter === 'P' && onAiSuggestionsChange) {
@@ -145,7 +158,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       return;
     }
 
-    if (!value.trim()) {
+    if (!content.trim()) {
       toast({
         title: 'Campo vazio',
         description: 'Preencha o campo antes de salvar.',
@@ -162,7 +175,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
           {
             patient_id: patientId,
             soap_block: letter,
-            content: value.trim(),
+            content: content.trim(),
             ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
           },
           { onConflict: 'patient_id,soap_block' }
@@ -182,7 +195,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
           .insert({
             patient_id: patientId,
             soap_block: letter,
-            content: value.trim(),
+            content: content.trim(),
             ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
           });
 
@@ -224,11 +237,15 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       <CardContent className="relative space-y-3">
         <div className="relative">
           <Textarea
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+            value={content}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setContent(nextValue);
+              onChange(nextValue);
+            }}
             placeholder={placeholder}
             className="min-h-[120px] resize-none pr-14 text-sm"
-            disabled={isProcessing}
+            readOnly={isProcessing}
           />
           {isProcessing && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70">
@@ -288,7 +305,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       <CardFooter className="pt-0">
         <Button
           onClick={handleSave}
-          disabled={isSaving || !value.trim()}
+          disabled={isSaving || !content.trim()}
           className="gap-2"
           style={{ backgroundColor: accentColor }}
         >
