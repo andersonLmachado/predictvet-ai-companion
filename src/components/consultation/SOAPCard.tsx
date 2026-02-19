@@ -90,17 +90,24 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       const contentType = response.headers.get('content-type');
       let transcribedText: string;
       let suggestions: string | undefined;
+      let formattedText: string | undefined;
 
       if (contentType?.includes('application/json')) {
         const data = await response.json();
-        transcribedText = data.text || data.output || data.result || '';
+        formattedText = typeof data.formattedText === 'string' ? data.formattedText : undefined;
+        transcribedText = formattedText || data.text || data.output || data.result || '';
         suggestions = data.ai_suggestions || undefined;
       } else {
         transcribedText = await response.text();
       }
 
       if (transcribedText.trim()) {
-        onChange(value ? `${value}\n${transcribedText.trim()}` : transcribedText.trim());
+        const nextText = transcribedText.trim();
+        if (formattedText) {
+          onChange(nextText);
+        } else {
+          onChange(value ? `${value}\n${nextText}` : nextText);
+        }
       }
 
       if (suggestions && onAiSuggestionsChange) {
