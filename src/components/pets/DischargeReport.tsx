@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { FileText, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { FileText, Mail, Printer } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import type { PatientInfo } from '@/contexts/PatientContext';
-import predictLabLogo from '@/assets/predictlab-logo.png';
 
 interface DischargeReportProps {
   patient: PatientInfo;
@@ -42,24 +49,10 @@ const PRIORITY_PARAMS = [
 
 const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId }) => {
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
+  const [open, setOpen] = useState(false);
   const [soapData, setSoapData] = useState<SOAPEntry[]>([]);
   const [examsData, setExamsData] = useState<ExamRow[]>([]);
-  const [logoDataUrl, setLogoDataUrl] = useState<string>('');
-
-  // Pre-load logo as data URL for the print window
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      canvas.getContext('2d')?.drawImage(img, 0, 0);
-      setLogoDataUrl(canvas.toDataURL('image/png'));
-    };
-    img.src = predictLabLogo;
-  }, []);
+  const printContentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,135 +114,192 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
   };
 
   const generateReport = () => {
-    setGenerating(true);
-    const w = window.open('', '_blank');
-    if (!w) { setGenerating(false); return; }
+    if (!printContentRef.current) return;
+    window.print();
+  };
 
-    const now = new Date().toLocaleString('pt-BR');
-    const evolution = getEvolutionRows();
-
-    const statusColor = (s: string) => s === 'alto' ? '#dc2626' : s === 'baixo' ? '#800020' : '#16a34a';
-
-    const evolutionTableHtml = evolution.length > 0
-      ? `<table>
-          <thead><tr><th>Parâmetro</th><th>Unidade</th><th>Ref.</th>${evolution[0].points.map((p) => `<th>${p.date}</th>`).join('')}<th>Status</th></tr></thead>
-          <tbody>${evolution.map((row) => {
-            const lastPoint = row.points[row.points.length - 1];
-            return `<tr>
-              <td>${row.param}</td>
-              <td>${row.unidade}</td>
-              <td>${row.refMin} - ${row.refMax}</td>
-              ${row.points.map((p) => `<td>${p.value}</td>`).join('')}
-              <td><span class="badge" style="background:${statusColor(lastPoint.status)}">${lastPoint.status.toUpperCase()}</span></td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>`
-      : '<p class="empty">Nenhum dado de evolução laboratorial disponível.</p>';
-
-    const soapHtml = (lastA || lastP)
-      ? `<div class="soap-grid">
-          ${lastA ? `<div class="soap-card"><h4>Avaliação (A)</h4><p>${lastA.content ?? '—'}</p>${lastA.ai_suggestions ? `<div class="ai-note"><strong>💡 IA:</strong> ${lastA.ai_suggestions}</div>` : ''}</div>` : ''}
-          ${lastP ? `<div class="soap-card"><h4>Plano (P)</h4><p>${lastP.content ?? '—'}</p>${lastP.ai_suggestions ? `<div class="ai-note"><strong>💡 IA:</strong> ${lastP.ai_suggestions}</div>` : ''}</div>` : ''}
-        </div>`
-      : '<p class="empty">Nenhum registro SOAP disponível.</p>';
-
-    w.document.write(`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<title>Relatório de Alta - ${patient.name}</title>
-<style>
-  :root { color-scheme: light; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1f2937; margin: 0; padding: 32px 40px; font-size: 13px; }
-  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; }
-  .header img { height: 44px; object-fit: contain; }
-  .header-right { text-align: right; font-size: 11px; color: #6b7280; }
-  .header-right h2 { font-size: 18px; color: #1e3a5f; margin-bottom: 4px; }
-  .patient-box { background: #f0f4ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 24px; font-size: 13px; }
-  .patient-box span { color: #374151; }
-  .section { margin-bottom: 24px; }
-  .section-title { font-weight: 700; font-size: 15px; color: #1e3a5f; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-  th, td { padding: 7px 10px; border: 1px solid #e5e7eb; text-align: left; }
-  th { background: #eef2ff; font-weight: 600; color: #1e3a5f; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #fff; }
-  .soap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .soap-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
-  .soap-card h4 { font-size: 13px; color: #2563eb; margin-bottom: 8px; }
-  .soap-card p { font-size: 12px; white-space: pre-wrap; color: #374151; }
-  .ai-note { margin-top: 10px; padding: 8px 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 11px; color: #92400e; }
-  .empty { color: #9ca3af; font-style: italic; font-size: 12px; }
-  footer { margin-top: 32px; border-top: 2px solid #e5e7eb; padding-top: 12px; display: flex; justify-content: space-between; font-size: 10px; color: #9ca3af; }
-  @media print {
-    body { margin: 12mm 16mm; padding: 0; }
-    .header { page-break-after: avoid; }
-    table { page-break-inside: auto; }
-    tr { page-break-inside: avoid; }
-  }
-</style>
-</head>
-<body>
-  <div class="header">
-    <div>${logoDataUrl ? `<img src="${logoDataUrl}" alt="PredictLab"/>` : '<h1 style="color:#2563eb">PredictLab</h1>'}</div>
-    <div class="header-right">
-      <h2>Relatório de Alta</h2>
-      <div>${now}</div>
-    </div>
-  </div>
-
-  <div class="patient-box">
-    <span><strong>Paciente:</strong> ${patient.name}</span>
-    <span><strong>Tutor:</strong> ${patient.owner_name}</span>
-    <span><strong>Espécie:</strong> ${patient.species ?? '—'}</span>
-    <span><strong>Raça:</strong> ${patient.breed ?? '—'}</span>
-    <span><strong>Idade:</strong> ${patient.age ?? '—'}</span>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Última Avaliação & Plano Terapêutico (SOAP)</div>
-    ${soapHtml}
-  </div>
-
-  <div class="section">
-    <div class="section-title">Evolução Laboratorial</div>
-    ${evolutionTableHtml}
-  </div>
-
-  <footer>
-    <span>Documento gerado automaticamente por PredictLab AI Companion.</span>
-    <span>Consulte um médico veterinário para interpretação definitiva.</span>
-  </footer>
-
-  <script>window.onload=()=>{window.print();};<\/script>
-</body>
-</html>`);
-    w.document.close();
-    setGenerating(false);
+  const handleSendEmail = () => {
+    const subject = `Relatório de Alta - ${patient.name}`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}`, '_blank');
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isDisabled}
-            onClick={generateReport}
-            className="gap-2"
-          >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-            Relatório de Alta
-          </Button>
-        </span>
-      </TooltipTrigger>
-      {isDisabled && !loading && (
-        <TooltipContent>
-          <p>Dados insuficientes para relatório completo</p>
-        </TooltipContent>
-      )}
-    </Tooltip>
+    <>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          .discharge-print-root,
+          .discharge-print-root * {
+            visibility: visible !important;
+          }
+          .discharge-print-root {
+            position: absolute;
+            inset: 0;
+            margin: 0 auto;
+            padding: 0;
+            width: 210mm;
+            max-width: 210mm;
+          }
+          .discharge-sheet {
+            border: 0 !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            min-height: auto !important;
+            width: 210mm !important;
+          }
+          [data-print-hide="true"] {
+            display: none !important;
+          }
+          .discharge-dialog {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: auto !important;
+            transform: translate(0, 0) !important;
+            left: 0 !important;
+            top: 0 !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: #fff !important;
+          }
+          .discharge-dialog > button {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isDisabled} className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Relatório de Alta
+                </Button>
+              </DialogTrigger>
+            </span>
+          </TooltipTrigger>
+          {isDisabled && !loading && (
+            <TooltipContent>
+              <p>Dados insuficientes para relatório completo</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+
+        <DialogContent className="discharge-dialog max-w-[95vw] w-[1100px] h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="px-6 pt-6 pb-3 border-b" data-print-hide="true">
+            <DialogTitle>DischargeSummary</DialogTitle>
+            <DialogDescription>
+              Documento de alta em formato A4.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="px-6 py-3 border-b flex items-center gap-2" data-print-hide="true">
+            <Button onClick={generateReport} disabled={isDisabled} className="gap-2">
+              <Printer className="h-4 w-4" />
+              Exportar PDF
+            </Button>
+            <Button variant="secondary" onClick={handleSendEmail} disabled={isDisabled} className="gap-2">
+              <Mail className="h-4 w-4" />
+              Enviar Email
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-auto bg-slate-100 p-6">
+            <div ref={printContentRef} className="discharge-print-root">
+              <div className="discharge-sheet mx-auto min-h-[297mm] max-w-[210mm] bg-white p-8 shadow-sm text-sm text-slate-800">
+                <header className="mb-6 border-b-2 border-blue-600 pb-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-blue-900">Relatório de Alta</h2>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date().toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+                </header>
+
+                <section className="mb-6 rounded-lg bg-blue-50 p-4">
+                  <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                    <p><strong>Paciente:</strong> {patient.name}</p>
+                    <p><strong>Tutor:</strong> {patient.owner_name}</p>
+                    <p><strong>Espécie:</strong> {patient.species ?? '—'}</p>
+                    <p><strong>Raça:</strong> {patient.breed ?? '—'}</p>
+                    <p><strong>Idade:</strong> {patient.age ?? '—'}</p>
+                  </div>
+                </section>
+
+                <section className="mb-6">
+                  <h3 className="mb-3 border-b pb-1 text-sm font-semibold text-blue-900">
+                    Última Avaliação & Plano Terapêutico (SOAP)
+                  </h3>
+                  {lastA || lastP ? (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {lastA && (
+                        <article className="rounded-lg border p-3">
+                          <p className="mb-2 text-xs font-semibold text-blue-700">Avaliação (A)</p>
+                          <p className="whitespace-pre-wrap">{lastA.content ?? '—'}</p>
+                        </article>
+                      )}
+                      {lastP && (
+                        <article className="rounded-lg border p-3">
+                          <p className="mb-2 text-xs font-semibold text-blue-700">Plano (P)</p>
+                          <p className="whitespace-pre-wrap">{lastP.content ?? '—'}</p>
+                          {lastP.ai_suggestions && (
+                            <div className="mt-3 rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+                              <strong>Sugestão IA:</strong> {lastP.ai_suggestions}
+                            </div>
+                          )}
+                        </article>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs italic text-muted-foreground">Nenhum registro SOAP disponível.</p>
+                  )}
+                </section>
+
+                <section>
+                  <h3 className="mb-3 border-b pb-1 text-sm font-semibold text-blue-900">
+                    Evolução Laboratorial
+                  </h3>
+                  {getEvolutionRows().length > 0 ? (
+                    <div className="overflow-hidden rounded-lg border">
+                      <table className="w-full border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-blue-50">
+                            <th className="border p-2 text-left">Parâmetro</th>
+                            <th className="border p-2 text-left">Unidade</th>
+                            <th className="border p-2 text-left">Ref.</th>
+                            <th className="border p-2 text-left">Último valor</th>
+                            <th className="border p-2 text-left">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getEvolutionRows().map((row) => {
+                            const lastPoint = row.points[row.points.length - 1];
+                            return (
+                              <tr key={row.param}>
+                                <td className="border p-2">{row.param}</td>
+                                <td className="border p-2">{row.unidade}</td>
+                                <td className="border p-2">{row.refMin} - {row.refMax}</td>
+                                <td className="border p-2">{lastPoint?.value ?? '—'}</td>
+                                <td className="border p-2">{lastPoint?.status ?? '—'}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-xs italic text-muted-foreground">Nenhum dado de evolução laboratorial disponível.</p>
+                  )}
+                </section>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
