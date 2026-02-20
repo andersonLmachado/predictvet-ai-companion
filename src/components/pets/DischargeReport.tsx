@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import type { PatientInfo } from '@/contexts/PatientContext';
+import { usePatient } from '@/contexts/PatientContext';
 import predictLabLogo from '@/assets/predictlab-logo.png';
 
 interface DischargeReportProps {
@@ -41,6 +42,7 @@ const PRIORITY_PARAMS = [
 ];
 
 const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId }) => {
+  const { consultationRefreshKey } = usePatient();
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [soapData, setSoapData] = useState<SOAPEntry[]>([]);
@@ -87,7 +89,7 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
       setLoading(false);
     };
     fetchData();
-  }, [patientId]);
+  }, [patientId, consultationRefreshKey]);
 
   const hasData = soapData.length > 0 || examsData.length > 0;
   const isDisabled = loading || !hasData;
