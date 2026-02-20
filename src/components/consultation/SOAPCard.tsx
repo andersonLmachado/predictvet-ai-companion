@@ -179,7 +179,6 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             patient_id: patientId,
             soap_block: letter,
             content: content.trim(),
-            updated_at: new Date().toISOString(),
             ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
           },
           { onConflict: 'patient_id,soap_block' }
