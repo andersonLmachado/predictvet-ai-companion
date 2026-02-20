@@ -7,7 +7,6 @@ import { toast as uiToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { usePatient } from '@/contexts/PatientContext';
-import { useNavigate } from 'react-router-dom';
 
 interface SOAPCardProps {
   letter: string;
@@ -36,13 +35,10 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   aiSuggestions,
   onAiSuggestionsChange,
 }) => {
-  const navigate = useNavigate();
   const { refreshPatientState } = usePatient();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
-  const [hasActiveSession, setHasActiveSession] = useState(true);
   const [content, setContent] = useState(value);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -50,36 +46,6 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   useEffect(() => {
     setContent(value);
   }, [value]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const checkSession = async () => {
-      setIsCheckingSession(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (!isMounted) return;
-      setHasActiveSession(!error && !!session);
-      setIsCheckingSession(false);
-    };
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setHasActiveSession(!!session);
-      setIsCheckingSession(false);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   const normalizeAiText = (text: string) => text.replace(/\*\*/g, '').trim();
 
@@ -205,20 +171,18 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     }
 
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (sessionError || !session) {
-      setHasActiveSession(false);
+    if (authError || !user) {
       uiToast({
         title: 'Sessão expirada',
-        description: 'Renove seu acesso para salvar o registro.',
+        description: 'Faça login novamente para salvar o registro.',
         variant: 'destructive',
       });
       return;
     }
-    setHasActiveSession(true);
 
     setIsSaving(true);
     try {
@@ -335,26 +299,15 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
         )}
       </CardContent>
       <CardFooter className="pt-0">
-        {!hasActiveSession ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/login')}
-            className="gap-2"
-          >
-            Renovar Acesso
-          </Button>
-        ) : (
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || isCheckingSession || !content.trim()}
-            className="gap-2"
-            style={{ backgroundColor: accentColor }}
-          >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Salvar Registro
-          </Button>
-        )}
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || !content.trim()}
+          className="gap-2"
+          style={{ backgroundColor: accentColor }}
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Salvar Registro
+        </Button>
       </CardFooter>
     </Card>
   );
