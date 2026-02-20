@@ -15,7 +15,7 @@ import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
 import PatientExamsModal from '@/components/pets/PatientExamsModal';
-import DischargeReport from '@/components/pets/DischargeReport';
+import DischargeSummary from '@/components/consultation/DischargeSummary';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
@@ -417,7 +417,7 @@ const PatientProfile = () => {
             </p>
           </div>
         </div>
-        <DischargeReport patient={patient} patientId={id} />
+        <DischargeSummary patientId={id} />
       </div>
 
       {/* Tabs */}
