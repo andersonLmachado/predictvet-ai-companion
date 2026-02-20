@@ -170,6 +170,20 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       return;
     }
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      uiToast({
+        title: 'Sessão expirada',
+        description: 'Faça login novamente para salvar o registro.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { error } = await supabase
