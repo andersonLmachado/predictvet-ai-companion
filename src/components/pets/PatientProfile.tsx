@@ -19,6 +19,7 @@ import DischargeReport from '@/components/pets/DischargeReport';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
+  const { consultationRefreshKey } = usePatient();
   const [soapHistory, setSoapHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
       setLoading(false);
     };
     fetch();
-  }, [patientId]);
+  }, [patientId, consultationRefreshKey]);
 
   if (loading) {
     return (
