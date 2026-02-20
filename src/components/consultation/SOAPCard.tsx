@@ -170,17 +170,10 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       return;
     }
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      uiToast({
-        title: 'Sessão expirada',
-        description: 'Faça login novamente para salvar o registro.',
-        variant: 'destructive',
-      });
+    // Silent auth refresh before write.
+    const { error: authRefreshError } = await supabase.auth.getUser();
+    if ((authRefreshError as any)?.status === 401) {
+      toast.error('Sua sessão expirou. Por favor, recarregue a página.');
       return;
     }
 
@@ -202,12 +195,16 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
 
       toast.success(`Bloco ${letter} salvo com sucesso!`);
       refreshPatientState();
-    } catch {
-      uiToast({
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar o registro. Tente novamente.',
-        variant: 'destructive',
-      });
+    } catch (err: any) {
+      if (err?.status === 401 || err?.code === '401') {
+        toast.error('Sua sessão expirou. Por favor, recarregue a página.');
+      } else {
+        uiToast({
+          title: 'Erro ao salvar',
+          description: 'Não foi possível salvar o registro. Tente novamente.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsSaving(false);
     }
