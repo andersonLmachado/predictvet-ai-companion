@@ -38,6 +38,33 @@ interface ExamHistoryDetailed {
   analysisData: ExamHistoryParam[];
 }
 
+const parseNumericIndicator = (value: number | string | null | undefined): number | null => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value !== 'string') return null;
+
+  const normalized = value.trim().replace(',', '.');
+  if (!normalized) return null;
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const getIndicatorHighlightClass = (
+  indicador: number | string | null,
+  status: string | null,
+  refMax: number | string | null
+) => {
+  const normalizedStatus = status?.trim().toLowerCase();
+  const indicatorValue = parseNumericIndicator(indicador);
+  const maxReference = parseNumericIndicator(refMax);
+  const isHigh = normalizedStatus === 'alto' || (indicatorValue !== null && maxReference !== null && indicatorValue > maxReference);
+  const isLow = normalizedStatus === 'baixo';
+
+  if (isHigh) return 'bg-[#fee2e2] font-semibold';
+  if (isLow) return 'bg-[#fef9c3] font-semibold';
+  return '';
+};
+
 const DischargeSummary = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -138,6 +165,10 @@ const DischargeSummary = () => {
           @page { size: A4; margin: 15mm; }
           body * { visibility: hidden !important; }
           .report-print-root, .report-print-root * { visibility: visible !important; }
+          .report-print-root, .report-print-root * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .report-print-root {
             position: absolute !important;
             left: 0 !important;
@@ -255,16 +286,23 @@ const DischargeSummary = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {exam.analysisData.map((param, index) => (
+                              {exam.analysisData.map((param, index) => {
+                                const highlightClass = getIndicatorHighlightClass(
+                                  param.valor_encontrado,
+                                  param.status,
+                                  param.ref_max
+                                );
+
+                                return (
                                 <tr key={`${exam.id}-${param.parametro}-${index}`}>
                                   <td className="border p-2">{param.parametro || '—'}</td>
-                                  <td className="border p-2">{param.valor_encontrado ?? '—'}</td>
+                                  <td className={`border p-2 ${highlightClass}`}>{param.valor_encontrado ?? '—'}</td>
                                   <td className="border p-2">{param.ref_min ?? '—'}</td>
                                   <td className="border p-2">{param.ref_max ?? '—'}</td>
                                   <td className="border p-2">{param.unidade ?? '—'}</td>
-                                  <td className="border p-2">{param.status ?? '—'}</td>
+                                  <td className={`border p-2 ${highlightClass}`}>{param.status ?? '—'}</td>
                                 </tr>
-                              ))}
+                              )})}
                             </tbody>
                           </table>
                         </div>
