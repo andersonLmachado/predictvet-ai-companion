@@ -9,15 +9,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2 } from 'lucide-react';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
 import PatientExamsModal from '@/components/pets/PatientExamsModal';
+import DischargeSummary from '@/components/consultation/DischargeSummary';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
+  const { consultationRefreshKey } = usePatient();
   const [soapHistory, setSoapHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
       setLoading(false);
     };
     fetch();
-  }, [patientId]);
+  }, [patientId, consultationRefreshKey]);
 
   if (loading) {
     return (
@@ -415,15 +417,7 @@ const PatientProfile = () => {
             </p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          onClick={() => navigate(`/paciente/${id}/relatorio-alta`)}
-        >
-          <FileText className="h-4 w-4" />
-          Relatório de Alta
-        </Button>
+        <DischargeSummary patientId={id} />
       </div>
 
       {/* Tabs */}

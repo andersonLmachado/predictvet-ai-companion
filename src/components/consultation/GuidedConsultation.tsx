@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePatient } from '@/contexts/PatientContext';
 import { Stethoscope, ClipboardList, Eye, Brain, FileCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import SOAPCard from './SOAPCard';
 
 const GuidedConsultation: React.FC = () => {
@@ -19,6 +21,63 @@ const GuidedConsultation: React.FC = () => {
   const updateField = (field: keyof typeof soapData) => (value: string) => {
     setSoapData((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadConsultationData = async () => {
+      if (!selectedPatient?.id) {
+        if (isMounted) {
+          setSoapData({ S: '', O: '', A: '', P: '' });
+          setAiSuggestions('');
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('medical_consultations')
+        .select('soap_block, content, ai_suggestions, created_at')
+        .eq('patient_id', selectedPatient.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast({
+          title: 'Erro ao carregar consulta',
+          description: 'Não foi possível carregar os registros SOAP do paciente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (!isMounted) return;
+
+      const nextSoapData = { S: '', O: '', A: '', P: '' };
+      let nextAiSuggestions = '';
+      const filledBlocks = new Set<string>();
+
+      for (const row of data ?? []) {
+        const block = row.soap_block;
+        if (!block || !['S', 'O', 'A', 'P'].includes(block) || filledBlocks.has(block)) continue;
+
+        nextSoapData[block as keyof typeof nextSoapData] = row.content ?? '';
+        if (block === 'P') {
+          nextAiSuggestions = row.ai_suggestions ?? '';
+        }
+        filledBlocks.add(block);
+
+        if (filledBlocks.size === 4) break;
+      }
+
+      setSoapData(nextSoapData);
+      setAiSuggestions(nextAiSuggestions);
+    };
+
+    loadConsultationData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedPatient?.id]);
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto p-4 pb-8">

@@ -175,6 +175,7 @@ export type Database = {
           id: string
           patient_id: string | null
           soap_block: string | null
+          updated_at: string | null
         }
         Insert: {
           ai_suggestions?: string | null
@@ -183,6 +184,7 @@ export type Database = {
           id?: string
           patient_id?: string | null
           soap_block?: string | null
+          updated_at?: string | null
         }
         Update: {
           ai_suggestions?: string | null
@@ -191,6 +193,7 @@ export type Database = {
           id?: string
           patient_id?: string | null
           soap_block?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
