@@ -17,6 +17,7 @@ import Exams from "./pages/Exams";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import DischargeSummary from "./pages/DischargeSummary";
 import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,14 @@ const App = () => (
               element={
                 <MainLayout>
                   <PatientDetails />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/paciente/:id/relatorio-alta"
+              element={
+                <MainLayout>
+                  <DischargeSummary />
                 </MainLayout>
               }
             />
