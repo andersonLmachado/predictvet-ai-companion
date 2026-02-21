@@ -21,6 +21,23 @@ interface ExamHistoryItem {
   status: 'Analisado' | 'Não analisado';
 }
 
+interface ExamHistoryParam {
+  parametro: string;
+  valor_encontrado: number | string | null;
+  ref_min: number | string | null;
+  ref_max: number | string | null;
+  unidade: string | null;
+  status: string | null;
+}
+
+interface ExamHistoryDetailed {
+  id: string;
+  examType: string;
+  createdAt: string | null;
+  clinicalSummary: string | null;
+  analysisData: ExamHistoryParam[];
+}
+
 const DischargeSummary = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -31,6 +48,7 @@ const DischargeSummary = () => {
   const [exams, setExams] = useState<ExamRow[]>([]);
   const [soapEntries, setSoapEntries] = useState<SoapRow[]>([]);
   const [examHistory, setExamHistory] = useState<ExamHistoryItem[]>([]);
+  const [examHistoryDetailed, setExamHistoryDetailed] = useState<ExamHistoryDetailed[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -62,7 +80,8 @@ const DischargeSummary = () => {
       setPatient(patientRes.data ?? null);
       setExams(examsRes.data ?? []);
       setSoapEntries(soapRes.data ?? []);
-      const historyMapped: ExamHistoryItem[] = ((examHistoryRes.data ?? []) as ExamHistoryRow[]).map((item) => {
+      const rawHistory = (examHistoryRes.data ?? []) as ExamHistoryRow[];
+      const historyMapped: ExamHistoryItem[] = rawHistory.map((item) => {
         const hasSummary = Boolean(item.clinical_summary && item.clinical_summary.trim().length > 0);
         const hasAnalysisData = Array.isArray(item.analysis_data)
           ? item.analysis_data.length > 0
@@ -75,7 +94,17 @@ const DischargeSummary = () => {
           status: hasSummary || hasAnalysisData ? 'Analisado' : 'Não analisado',
         };
       });
+      const detailedMapped: ExamHistoryDetailed[] = rawHistory.map((item) => ({
+        id: item.id,
+        examType: item.exam_type || 'Exame sem nome',
+        createdAt: item.created_at,
+        clinicalSummary: item.clinical_summary,
+        analysisData: Array.isArray(item.analysis_data)
+          ? (item.analysis_data as ExamHistoryParam[])
+          : [],
+      }));
       setExamHistory(historyMapped);
+      setExamHistoryDetailed(detailedMapped);
       setLoading(false);
     };
 
@@ -199,7 +228,62 @@ const DischargeSummary = () => {
                 Exames
               </h3>
 
-              {latestExam ? (
+              {examHistoryDetailed.length > 0 ? (
+                <div className="space-y-5">
+                  {examHistoryDetailed.map((exam) => (
+                    <div key={exam.id} className="rounded-md border">
+                      <div className="grid gap-2 border-b bg-slate-50 p-3 text-sm md:grid-cols-3">
+                        <p><strong>Exame:</strong> {exam.examType}</p>
+                        <p>
+                          <strong>Data:</strong>{' '}
+                          {exam.createdAt ? new Date(exam.createdAt).toLocaleString('pt-BR') : '—'}
+                        </p>
+                        <p><strong>Indicadores:</strong> {exam.analysisData.length}</p>
+                      </div>
+
+                      {exam.analysisData.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse text-sm">
+                            <thead className="bg-slate-100">
+                              <tr>
+                                <th className="border p-2 text-left">Parâmetro</th>
+                                <th className="border p-2 text-left">Resultado</th>
+                                <th className="border p-2 text-left">Ref. Min</th>
+                                <th className="border p-2 text-left">Ref. Max</th>
+                                <th className="border p-2 text-left">Unidade</th>
+                                <th className="border p-2 text-left">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exam.analysisData.map((param, index) => (
+                                <tr key={`${exam.id}-${param.parametro}-${index}`}>
+                                  <td className="border p-2">{param.parametro || '—'}</td>
+                                  <td className="border p-2">{param.valor_encontrado ?? '—'}</td>
+                                  <td className="border p-2">{param.ref_min ?? '—'}</td>
+                                  <td className="border p-2">{param.ref_max ?? '—'}</td>
+                                  <td className="border p-2">{param.unidade ?? '—'}</td>
+                                  <td className="border p-2">{param.status ?? '—'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="p-3 text-sm text-muted-foreground">
+                          Sem dados de indicadores para este exame.
+                        </p>
+                      )}
+
+                      {exam.clinicalSummary && (
+                        <div className="border-t p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Resumo Clínico</p>
+                          <p className="soap-text mt-1 text-sm">{exam.clinicalSummary}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : latestExam ? (
                 <div className="space-y-2 text-sm">
                   <p><strong>Último exame:</strong> {latestExam.exam_type || '—'}</p>
                   <p><strong>Status:</strong> {latestExam.status || '—'}</p>
