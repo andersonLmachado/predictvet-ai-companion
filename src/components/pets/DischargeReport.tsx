@@ -127,45 +127,83 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
     <>
       <style>{`
         @media print {
-          body * {
+          html,
+          body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Hide the application shell (header/nav/dashboard and page content) */
+          #root {
+            display: none !important;
+          }
+
+          /* Radix portal: hide everything by default, then show the report modal only */
+          body > [data-radix-portal] > * {
+            display: none !important;
             visibility: hidden !important;
           }
+
+          body > [data-radix-portal] .discharge-dialog {
+            display: block !important;
+            visibility: visible !important;
+            position: relative !important;
+            inset: auto !important;
+            transform: none !important;
+            left: auto !important;
+            top: auto !important;
+            width: auto !important;
+            max-width: none !important;
+            height: auto !important;
+            overflow: visible !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: #fff !important;
+          }
+
+          [data-print-hide="true"] {
+            display: none !important;
+            visibility: hidden !important;
+          }
+
+          .discharge-dialog > button {
+            display: none !important;
+          }
+
           .discharge-print-root,
           .discharge-print-root * {
             visibility: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
+
           .discharge-print-root {
-            position: absolute;
-            inset: 0;
-            margin: 0 auto;
-            padding: 0;
-            width: 210mm;
-            max-width: 210mm;
+            position: relative !important;
+            inset: auto !important;
+            transform: none !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            width: 210mm !important;
+            max-width: 210mm !important;
           }
+
           .discharge-sheet {
             border: 0 !important;
             box-shadow: none !important;
             margin: 0 !important;
             min-height: auto !important;
             width: 210mm !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          [data-print-hide="true"] {
-            display: none !important;
-          }
-          .discharge-dialog {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            height: auto !important;
-            transform: translate(0, 0) !important;
-            left: 0 !important;
-            top: 0 !important;
-            border: 0 !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            background: #fff !important;
-          }
-          .discharge-dialog > button {
-            display: none !important;
+
+          .soap-print-block {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
           }
         }
       `}</style>
@@ -236,13 +274,13 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
                   {lastA || lastP ? (
                     <div className="grid gap-4 md:grid-cols-2">
                       {lastA && (
-                        <article className="rounded-lg border p-3">
+                        <article className="soap-print-block rounded-lg border p-3">
                           <p className="mb-2 text-xs font-semibold text-blue-700">Avaliação (A)</p>
                           <p className="whitespace-pre-wrap">{lastA.content ?? '—'}</p>
                         </article>
                       )}
                       {lastP && (
-                        <article className="rounded-lg border p-3">
+                        <article className="soap-print-block rounded-lg border p-3">
                           <p className="mb-2 text-xs font-semibold text-blue-700">Plano (P)</p>
                           <p className="whitespace-pre-wrap">{lastP.content ?? '—'}</p>
                           {lastP.ai_suggestions && (
