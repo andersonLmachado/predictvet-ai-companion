@@ -15,6 +15,8 @@ interface PatientContextType {
   patients: PatientInfo[];
   loadPatients: () => Promise<void>;
   patientsLoaded: boolean;
+  consultationRefreshKey: number;
+  refreshPatientState: () => void;
 }
 
 const PatientContext = createContext<PatientContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [patients, setPatients] = useState<PatientInfo[]>([]);
   const [patientsLoaded, setPatientsLoaded] = useState(false);
+  const [consultationRefreshKey, setConsultationRefreshKey] = useState(0);
 
   const setSelectedPatient = useCallback((patient: PatientInfo | null) => {
     setSelectedPatientState(patient);
@@ -70,8 +73,27 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
     loadPatients();
   }, [loadPatients]);
 
+  const refreshPatientState = useCallback(() => {
+    setConsultationRefreshKey((prev) => prev + 1);
+
+    if (selectedPatient) {
+      // Force a new object reference so dependent screens can react immediately.
+      setSelectedPatientState({ ...selectedPatient });
+    }
+  }, [selectedPatient]);
+
   return (
-    <PatientContext.Provider value={{ selectedPatient, setSelectedPatient, patients, loadPatients, patientsLoaded }}>
+    <PatientContext.Provider
+      value={{
+        selectedPatient,
+        setSelectedPatient,
+        patients,
+        loadPatients,
+        patientsLoaded,
+        consultationRefreshKey,
+        refreshPatientState,
+      }}
+    >
       {children}
     </PatientContext.Provider>
   );

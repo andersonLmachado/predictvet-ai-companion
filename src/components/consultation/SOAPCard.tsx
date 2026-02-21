@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Save, Sparkles } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast as uiToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { usePatient } from '@/contexts/PatientContext';
 
 interface SOAPCardProps {
   letter: string;
@@ -33,6 +35,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   aiSuggestions,
   onAiSuggestionsChange,
 }) => {
+  const { refreshPatientState } = usePatient();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -66,7 +69,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       mediaRecorder.start();
       setIsRecording(true);
     } catch {
-      toast({
+      uiToast({
         title: 'Permissão negada',
         description: 'Habilite o acesso ao microfone para gravar áudio.',
         variant: 'destructive',
@@ -138,7 +141,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
         onAiSuggestionsChange(suggestions ?? '');
       }
     } catch {
-      toast({
+      uiToast({
         title: 'Erro ao processar áudio',
         description: 'Não foi possível transcrever o áudio. Tente novamente.',
         variant: 'destructive',
@@ -150,7 +153,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
 
   const handleSave = async () => {
     if (!patientId) {
-      toast({
+      uiToast({
         title: 'Paciente não selecionado',
         description: 'Selecione um paciente antes de salvar o registro.',
         variant: 'destructive',
@@ -159,11 +162,18 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     }
 
     if (!content.trim()) {
-      toast({
+      uiToast({
         title: 'Campo vazio',
         description: 'Preencha o campo antes de salvar.',
         variant: 'destructive',
       });
+      return;
+    }
+
+    // Silent auth refresh before write.
+    const { error: authRefreshError } = await supabase.auth.getUser();
+    if ((authRefreshError as any)?.status === 401) {
+      toast.error('Sua sessão expirou. Por favor, recarregue a página.');
       return;
     }
 
@@ -183,30 +193,13 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
 
       if (error) throw error;
 
-      toast({
-        title: 'Prontuário atualizado com sucesso!',
-        description: `Bloco ${letter} salvo para o paciente.`,
-      });
+      toast.success(`Bloco ${letter} salvo com sucesso!`);
+      refreshPatientState();
     } catch (err: any) {
-      // Fallback: try insert if upsert fails
-      try {
-        const { error: insertError } = await supabase
-          .from('medical_consultations')
-          .insert({
-            patient_id: patientId,
-            soap_block: letter,
-            content: content.trim(),
-            ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
-          });
-
-        if (insertError) throw insertError;
-
-        toast({
-          title: 'Prontuário atualizado com sucesso!',
-          description: `Bloco ${letter} salvo para o paciente.`,
-        });
-      } catch {
-        toast({
+      if (err?.status === 401 || err?.code === '401') {
+        toast.error('Sua sessão expirou. Por favor, recarregue a página.');
+      } else {
+        uiToast({
           title: 'Erro ao salvar',
           description: 'Não foi possível salvar o registro. Tente novamente.',
           variant: 'destructive',
