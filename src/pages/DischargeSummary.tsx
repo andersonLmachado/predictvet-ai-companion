@@ -9,9 +9,17 @@ import { useToast } from '@/hooks/use-toast';
 type PatientRow = Tables<'patients'>;
 type ExamRow = Tables<'exams'>;
 type SoapRow = Tables<'medical_consultations'>;
+type ExamHistoryRow = Tables<'exams_history'>;
 type SoapBlock = 'S' | 'O' | 'A' | 'P';
 
 const SOAP_BLOCKS: SoapBlock[] = ['S', 'O', 'A', 'P'];
+
+interface ExamHistoryItem {
+  id: string;
+  examName: string;
+  examDate: string | null;
+  status: 'Analisado' | 'Não analisado';
+}
 
 const DischargeSummary = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +30,7 @@ const DischargeSummary = () => {
   const [patient, setPatient] = useState<PatientRow | null>(null);
   const [exams, setExams] = useState<ExamRow[]>([]);
   const [soapEntries, setSoapEntries] = useState<SoapRow[]>([]);
+  const [examHistory, setExamHistory] = useState<ExamHistoryItem[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -29,13 +38,18 @@ const DischargeSummary = () => {
     const fetchReportData = async () => {
       setLoading(true);
 
-      const [patientRes, examsRes, soapRes] = await Promise.all([
+      const [patientRes, examsRes, soapRes, examHistoryRes] = await Promise.all([
         supabase.from('patients').select('*').eq('id', id).maybeSingle(),
         supabase.from('exams').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
         supabase.from('medical_consultations').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
+        supabase
+          .from('exams_history')
+          .select('id, exam_type, created_at, clinical_summary, analysis_data')
+          .eq('patient_id', id)
+          .order('created_at', { ascending: false }),
       ]);
 
-      if (patientRes.error || examsRes.error || soapRes.error) {
+      if (patientRes.error || examsRes.error || soapRes.error || examHistoryRes.error) {
         toast({
           title: 'Erro ao carregar relatório',
           description: 'Não foi possível carregar os dados de alta do paciente.',
@@ -48,6 +62,20 @@ const DischargeSummary = () => {
       setPatient(patientRes.data ?? null);
       setExams(examsRes.data ?? []);
       setSoapEntries(soapRes.data ?? []);
+      const historyMapped: ExamHistoryItem[] = ((examHistoryRes.data ?? []) as ExamHistoryRow[]).map((item) => {
+        const hasSummary = Boolean(item.clinical_summary && item.clinical_summary.trim().length > 0);
+        const hasAnalysisData = Array.isArray(item.analysis_data)
+          ? item.analysis_data.length > 0
+          : Boolean(item.analysis_data);
+
+        return {
+          id: item.id,
+          examName: item.exam_type || 'Exame sem nome',
+          examDate: item.created_at,
+          status: hasSummary || hasAnalysisData ? 'Analisado' : 'Não analisado',
+        };
+      });
+      setExamHistory(historyMapped);
       setLoading(false);
     };
 
@@ -188,6 +216,39 @@ const DischargeSummary = () => {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Nenhum exame encontrado.</p>
+              )}
+            </section>
+
+            <section className="mb-6">
+              <h3 className="mb-3 border-b pb-1 text-sm font-semibold uppercase tracking-wide text-slate-700">
+                Histórico de Exames
+              </h3>
+
+              {examHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum histórico de exame encontrado.</p>
+              ) : (
+                <div className="overflow-hidden rounded-md border">
+                  <table className="w-full border-collapse text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="border p-2 text-left">Exame</th>
+                        <th className="border p-2 text-left">Data</th>
+                        <th className="border p-2 text-left">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {examHistory.map((item) => (
+                        <tr key={item.id}>
+                          <td className="border p-2">{item.examName}</td>
+                          <td className="border p-2">
+                            {item.examDate ? new Date(item.examDate).toLocaleString('pt-BR') : '—'}
+                          </td>
+                          <td className="border p-2">{item.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </section>
 
