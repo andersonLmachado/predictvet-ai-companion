@@ -127,6 +127,11 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
     <>
       <style>{`
         @media print {
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+
           html,
           body {
             background: #fff !important;
@@ -185,10 +190,23 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
             position: relative !important;
             inset: auto !important;
             transform: none !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             padding: 0 !important;
-            width: 210mm !important;
-            max-width: 210mm !important;
+            width: 100% !important;
+            max-width: none !important;
+            display: block !important;
+            overflow: visible !important;
+            background: #fff !important;
+            box-shadow: none !important;
+          }
+
+          .discharge-print-container {
+            display: block !important;
+            overflow: visible !important;
+            background: #fff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
           }
 
           .discharge-sheet {
@@ -196,7 +214,12 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
             box-shadow: none !important;
             margin: 0 !important;
             min-height: auto !important;
-            width: 210mm !important;
+            width: 100% !important;
+            max-width: none !important;
+            padding: 0 !important;
+            display: block !important;
+            overflow: visible !important;
+            background: #fff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -204,6 +227,12 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
           .soap-print-block {
             break-inside: avoid !important;
             page-break-inside: avoid !important;
+          }
+
+          .soap-print-text {
+            word-wrap: break-word !important;
+            overflow-wrap: anywhere !important;
+            white-space: pre-wrap !important;
           }
         }
       `}</style>
@@ -245,7 +274,7 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
             </Button>
           </div>
 
-          <div className="flex-1 overflow-auto bg-slate-100 p-6">
+          <div className="discharge-print-container flex-1 overflow-auto bg-slate-100 p-6">
             <div ref={printContentRef} className="discharge-print-root">
               <div className="discharge-sheet mx-auto min-h-[297mm] max-w-[210mm] bg-white p-8 shadow-sm text-sm text-slate-800">
                 <header className="mb-6 border-b-2 border-blue-600 pb-4">
@@ -276,15 +305,15 @@ const DischargeReport: React.FC<DischargeReportProps> = ({ patient, patientId })
                       {lastA && (
                         <article className="soap-print-block rounded-lg border p-3">
                           <p className="mb-2 text-xs font-semibold text-blue-700">Avaliação (A)</p>
-                          <p className="whitespace-pre-wrap">{lastA.content ?? '—'}</p>
+                          <p className="soap-print-text whitespace-pre-wrap">{lastA.content ?? '—'}</p>
                         </article>
                       )}
                       {lastP && (
                         <article className="soap-print-block rounded-lg border p-3">
                           <p className="mb-2 text-xs font-semibold text-blue-700">Plano (P)</p>
-                          <p className="whitespace-pre-wrap">{lastP.content ?? '—'}</p>
+                          <p className="soap-print-text whitespace-pre-wrap">{lastP.content ?? '—'}</p>
                           {lastP.ai_suggestions && (
-                            <div className="mt-3 rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+                            <div className="soap-print-text mt-3 rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
                               <strong>Sugestão IA:</strong> {lastP.ai_suggestions}
                             </div>
                           )}
