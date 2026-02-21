@@ -9,13 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, FileText } from 'lucide-react';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
 import PatientExamsModal from '@/components/pets/PatientExamsModal';
-import DischargeReport from '@/components/pets/DischargeReport';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
@@ -416,7 +415,15 @@ const PatientProfile = () => {
             </p>
           </div>
         </div>
-        <DischargeReport patient={patient} patientId={id} />
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => navigate(`/paciente/${id}/relatorio-alta`)}
+        >
+          <FileText className="h-4 w-4" />
+          Relatório de Alta
+        </Button>
       </div>
 
       {/* Tabs */}
