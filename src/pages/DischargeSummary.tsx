@@ -52,16 +52,18 @@ const parseNumericIndicator = (value: number | string | null | undefined): numbe
 const getIndicatorHighlightClass = (
   indicador: number | string | null,
   status: string | null,
+  refMin: number | string | null,
   refMax: number | string | null
 ) => {
   const normalizedStatus = status?.trim().toLowerCase();
   const indicatorValue = parseNumericIndicator(indicador);
+  const minReference = parseNumericIndicator(refMin);
   const maxReference = parseNumericIndicator(refMax);
   const isHigh = normalizedStatus === 'alto' || (indicatorValue !== null && maxReference !== null && indicatorValue > maxReference);
-  const isLow = normalizedStatus === 'baixo';
+  const isLow = normalizedStatus === 'baixo' || (indicatorValue !== null && minReference !== null && indicatorValue < minReference);
 
   if (isHigh) return 'bg-[#fee2e2] font-semibold';
-  if (isLow) return 'bg-[#fef9c3] font-semibold';
+  if (isLow) return 'bg-[#ADD8E6] font-semibold';
   return '';
 };
 
@@ -290,6 +292,7 @@ const DischargeSummary = () => {
                                 const highlightClass = getIndicatorHighlightClass(
                                   param.valor_encontrado,
                                   param.status,
+                                  param.ref_min,
                                   param.ref_max
                                 );
 
