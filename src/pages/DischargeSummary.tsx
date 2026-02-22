@@ -92,7 +92,6 @@ const DischargeSummary = () => {
   const [soapEntries, setSoapEntries] = useState<SoapRow[]>([]);
   const [examHistory, setExamHistory] = useState<ExamHistoryItem[]>([]);
   const [examHistoryDetailed, setExamHistoryDetailed] = useState<ExamHistoryDetailed[]>([]);
-  const [evolutionAiSummary, setEvolutionAiSummary] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -100,7 +99,7 @@ const DischargeSummary = () => {
     const fetchReportData = async () => {
       setLoading(true);
 
-      const [patientRes, examsRes, soapRes, examHistoryRes, evolutionSummaryRes] = await Promise.all([
+      const [patientRes, examsRes, soapRes, examHistoryRes] = await Promise.all([
         supabase.from('patients').select('*').eq('id', id).maybeSingle(),
         supabase.from('exams').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
         supabase.from('medical_consultations').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
@@ -109,14 +108,9 @@ const DischargeSummary = () => {
           .select('id, exam_type, created_at, clinical_summary, analysis_data')
           .eq('patient_id', id)
           .order('created_at', { ascending: false }),
-        supabase
-          .from('evolution_summaries')
-          .select('last_ai_summary')
-          .eq('patient_id', id)
-          .maybeSingle(),
       ]);
 
-      if (patientRes.error || examsRes.error || soapRes.error || examHistoryRes.error || evolutionSummaryRes.error) {
+      if (patientRes.error || examsRes.error || soapRes.error || examHistoryRes.error) {
         toast({
           title: 'Erro ao carregar relatório',
           description: 'Não foi possível carregar os dados de alta do paciente.',
@@ -154,7 +148,6 @@ const DischargeSummary = () => {
       }));
       setExamHistory(historyMapped);
       setExamHistoryDetailed(detailedMapped);
-      setEvolutionAiSummary(evolutionSummaryRes.data?.last_ai_summary ?? null);
       setLoading(false);
     };
 
@@ -476,19 +469,6 @@ const DischargeSummary = () => {
                     </table>
                   </div>
                 </div>
-              )}
-            </section>
-
-            <section className="mb-6">
-              <h3 className="mb-3 border-b pb-1 text-sm font-semibold uppercase tracking-wide text-slate-700">
-                Laudo da IA da Evolução
-              </h3>
-              {evolutionAiSummary ? (
-                <p className="soap-text text-sm">{evolutionAiSummary}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum laudo de evolução da IA encontrado para este paciente.
-                </p>
               )}
             </section>
 
