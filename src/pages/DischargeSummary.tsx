@@ -5,6 +5,12 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
+import {
+  buildExamEvolutionComparison,
+  formatCellValue,
+  formatReferenceRange,
+  type ExamEvolutionExam,
+} from '@/lib/examEvolution';
 
 type PatientRow = Tables<'patients'>;
 type ExamRow = Tables<'exams'>;
@@ -37,6 +43,14 @@ interface ExamHistoryDetailed {
   clinicalSummary: string | null;
   analysisData: ExamHistoryParam[];
 }
+
+const formatExamLabel = (exam: ExamEvolutionExam | null) => {
+  if (!exam) return '—';
+  const dateText = exam.createdAt
+    ? new Date(exam.createdAt).toLocaleDateString('pt-BR')
+    : 'Data indefinida';
+  return `${exam.examType || 'Exame'} (${dateText})`;
+};
 
 const parseNumericIndicator = (value: number | string | null | undefined): number | null => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -78,6 +92,7 @@ const DischargeSummary = () => {
   const [soapEntries, setSoapEntries] = useState<SoapRow[]>([]);
   const [examHistory, setExamHistory] = useState<ExamHistoryItem[]>([]);
   const [examHistoryDetailed, setExamHistoryDetailed] = useState<ExamHistoryDetailed[]>([]);
+  const [evolutionAiSummary, setEvolutionAiSummary] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -85,7 +100,7 @@ const DischargeSummary = () => {
     const fetchReportData = async () => {
       setLoading(true);
 
-      const [patientRes, examsRes, soapRes, examHistoryRes] = await Promise.all([
+      const [patientRes, examsRes, soapRes, examHistoryRes, evolutionSummaryRes] = await Promise.all([
         supabase.from('patients').select('*').eq('id', id).maybeSingle(),
         supabase.from('exams').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
         supabase.from('medical_consultations').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
@@ -94,9 +109,14 @@ const DischargeSummary = () => {
           .select('id, exam_type, created_at, clinical_summary, analysis_data')
           .eq('patient_id', id)
           .order('created_at', { ascending: false }),
+        supabase
+          .from('evolution_summaries')
+          .select('last_ai_summary')
+          .eq('patient_id', id)
+          .maybeSingle(),
       ]);
 
-      if (patientRes.error || examsRes.error || soapRes.error || examHistoryRes.error) {
+      if (patientRes.error || examsRes.error || soapRes.error || examHistoryRes.error || evolutionSummaryRes.error) {
         toast({
           title: 'Erro ao carregar relatório',
           description: 'Não foi possível carregar os dados de alta do paciente.',
@@ -134,6 +154,7 @@ const DischargeSummary = () => {
       }));
       setExamHistory(historyMapped);
       setExamHistoryDetailed(detailedMapped);
+      setEvolutionAiSummary(evolutionSummaryRes.data?.last_ai_summary ?? null);
       setLoading(false);
     };
 
@@ -154,6 +175,19 @@ const DischargeSummary = () => {
   }, [soapEntries]);
 
   const latestExam = exams[0] ?? null;
+
+  const evolutionComparison = useMemo(
+    () =>
+      buildExamEvolutionComparison(
+        examHistoryDetailed.map((exam) => ({
+          id: exam.id,
+          examType: exam.examType,
+          createdAt: exam.createdAt,
+          analysisData: exam.analysisData,
+        }))
+      ),
+    [examHistoryDetailed]
+  );
 
   const sendEmail = () => {
     const subject = `Relatório de Alta - ${patient?.name ?? 'Paciente'}`;
@@ -374,6 +408,87 @@ const DischargeSummary = () => {
                     </tbody>
                   </table>
                 </div>
+              )}
+            </section>
+
+            <section className="mb-6">
+              <h3 className="mb-3 border-b pb-1 text-sm font-semibold uppercase tracking-wide text-slate-700">
+                Evolução do Paciente
+              </h3>
+
+              {evolutionComparison.mode === 'none' ? (
+                <p className="text-sm text-muted-foreground">Nenhum exame analisado encontrado para evolução.</p>
+              ) : (
+                <div className="space-y-3">
+                  {evolutionComparison.mode === 'comparison' && (
+                    <p className="text-xs text-muted-foreground">
+                      Exame X: {formatExamLabel(evolutionComparison.latestExam)} | Exame Y: {formatExamLabel(evolutionComparison.previousExam)}
+                    </p>
+                  )}
+                  {evolutionComparison.mode === 'single' && (
+                    <p className="text-xs text-muted-foreground">
+                      Extrato do exame: {formatExamLabel(evolutionComparison.singleExam)}
+                    </p>
+                  )}
+
+                  <div className="overflow-hidden rounded-md border">
+                    <table className="w-full border-collapse text-sm">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="border p-2 text-left">Campo</th>
+                          <th className="border p-2 text-left">Exame X</th>
+                          {evolutionComparison.mode === 'comparison' && (
+                            <th className="border p-2 text-left">Exame Y</th>
+                          )}
+                          <th className="border p-2 text-left">Referência</th>
+                          {evolutionComparison.mode === 'comparison' && (
+                            <th className="border p-2 text-left">Alteração</th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {evolutionComparison.rows.map((row, index) => (
+                          <tr key={`${row.parameter}-${index}`}>
+                            <td className="border p-2 font-medium">{row.parameter}</td>
+                            <td className="border p-2">{formatCellValue(row.examXValue, row.unit)}</td>
+                            {evolutionComparison.mode === 'comparison' && (
+                              <td className="border p-2">{formatCellValue(row.examYValue, row.unit)}</td>
+                            )}
+                            <td className="border p-2">{formatReferenceRange(row.refMin, row.refMax)}</td>
+                            {evolutionComparison.mode === 'comparison' && (
+                              <td
+                                className={`border p-2 ${
+                                  row.changeDirection === 'up'
+                                    ? 'text-red-600'
+                                    : row.changeDirection === 'down'
+                                    ? 'text-blue-600'
+                                    : row.changeDirection === 'same'
+                                    ? 'text-slate-600'
+                                    : 'text-muted-foreground'
+                                }`}
+                              >
+                                {row.changeText}
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="mb-6">
+              <h3 className="mb-3 border-b pb-1 text-sm font-semibold uppercase tracking-wide text-slate-700">
+                Laudo da IA da Evolução
+              </h3>
+              {evolutionAiSummary ? (
+                <p className="soap-text text-sm">{evolutionAiSummary}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum laudo de evolução da IA encontrado para este paciente.
+                </p>
               )}
             </section>
 
