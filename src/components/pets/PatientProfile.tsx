@@ -15,6 +15,12 @@ import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
 import PatientExamsModal from '@/components/pets/PatientExamsModal';
+import {
+  buildExamEvolutionComparison,
+  formatCellValue,
+  formatReferenceRange,
+  type ExamEvolutionExam,
+} from '@/lib/examEvolution';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
@@ -92,10 +98,10 @@ const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
 interface ExamParam {
   parametro: string;
   valor_encontrado: number | string | null;
-  ref_min: number;
-  ref_max: number;
-  unidade: string;
-  status: string;
+  ref_min: number | string | null;
+  ref_max: number | string | null;
+  unidade: string | null;
+  status: string | null;
 }
 
 interface ExamHistoryRow {
@@ -110,6 +116,14 @@ const PRIORITY_PARAMS = [
   'ERITRÓCITOS', 'HEMOGLOBINA', 'HEMATÓCRITO', 'LEUCÓCITOS TOTAIS', 'PLAQUETAS',
   'CREATININA', 'UREIA', 'ALT ( TGP )', 'FOSFATASE ALCALINA', 'PROTEÍNAS PLASMÁTICAS',
 ];
+
+const formatExamLabel = (exam: ExamEvolutionExam | null) => {
+  if (!exam) return '—';
+  const dateText = exam.createdAt
+    ? new Date(exam.createdAt).toLocaleDateString('pt-BR')
+    : 'Data indefinida';
+  return `${exam.examType || 'Exame'} (${dateText})`;
+};
 
 const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
   const [history, setHistory] = useState<ExamHistoryRow[]>([]);
@@ -157,6 +171,19 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
     return [...priority, ...rest];
   }, [trendsByParam]);
 
+  const evolutionComparison = useMemo(
+    () =>
+      buildExamEvolutionComparison(
+        history.map((exam) => ({
+          id: exam.id,
+          examType: exam.exam_type,
+          createdAt: exam.created_at,
+          analysisData: exam.analysis_data,
+        }))
+      ),
+    [history]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -178,7 +205,76 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Evolução Comparativa</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {evolutionComparison.mode === 'none' ? (
+            <p className="text-sm text-muted-foreground">Nenhum exame analisado encontrado para comparação.</p>
+          ) : (
+            <div className="space-y-3">
+              {evolutionComparison.mode === 'comparison' && (
+                <p className="text-xs text-muted-foreground">
+                  Exame X: {formatExamLabel(evolutionComparison.latestExam)} | Exame Y: {formatExamLabel(evolutionComparison.previousExam)}
+                </p>
+              )}
+              {evolutionComparison.mode === 'single' && (
+                <p className="text-xs text-muted-foreground">
+                  Extrato do exame: {formatExamLabel(evolutionComparison.singleExam)}
+                </p>
+              )}
+              <div className="overflow-x-auto rounded-md border">
+                <table className="w-full border-collapse text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="border p-2 text-left">Campo</th>
+                      <th className="border p-2 text-left">Exame X</th>
+                      {evolutionComparison.mode === 'comparison' && (
+                        <th className="border p-2 text-left">Exame Y</th>
+                      )}
+                      <th className="border p-2 text-left">Referência</th>
+                      {evolutionComparison.mode === 'comparison' && (
+                        <th className="border p-2 text-left">Alteração</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {evolutionComparison.rows.map((row, index) => (
+                      <tr key={`${row.parameter}-${index}`}>
+                        <td className="border p-2 font-medium">{row.parameter}</td>
+                        <td className="border p-2">{formatCellValue(row.examXValue, row.unit)}</td>
+                        {evolutionComparison.mode === 'comparison' && (
+                          <td className="border p-2">{formatCellValue(row.examYValue, row.unit)}</td>
+                        )}
+                        <td className="border p-2">{formatReferenceRange(row.refMin, row.refMax)}</td>
+                        {evolutionComparison.mode === 'comparison' && (
+                          <td
+                            className={`border p-2 ${
+                              row.changeDirection === 'up'
+                                ? 'text-red-600'
+                                : row.changeDirection === 'down'
+                                ? 'text-blue-600'
+                                : row.changeDirection === 'same'
+                                ? 'text-slate-600'
+                                : 'text-muted-foreground'
+                            }`}
+                          >
+                            {row.changeText}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <EvolutionReportCard trendsByParam={trendsByParam} patientId={patientId} />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {sortedParams.map((param) => {
           const info = trendsByParam.get(param)!;
