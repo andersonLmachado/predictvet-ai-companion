@@ -2,11 +2,17 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Loader2, Save, Sparkles } from 'lucide-react';
+import { Mic, MicOff, Loader2, Save, Sparkles, ShieldAlert } from 'lucide-react';
 import { toast as uiToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { usePatient } from '@/contexts/PatientContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface SOAPCardProps {
   letter: string;
@@ -88,7 +94,9 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       const formData = new FormData();
       formData.append('file', blob, 'recording.webm');
       formData.append('block', letter);
-      if (patientId) formData.append('patient_id', patientId);
+      if (patientId) {
+        formData.append('patient_id', patientId);
+      }
 
       const response = await fetch('https://vet-api.predictlab.com.br/webhook/soap-audio', {
         method: 'POST',
@@ -115,14 +123,14 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             typeof finalContent === 'string' && finalContent
               ? finalContent
               : typeof parsedData.formattedText === 'string'
-              ? parsedData.formattedText
-              : typeof parsedData.text === 'string'
-              ? parsedData.text
-              : typeof parsedData.output === 'string'
-              ? parsedData.output
-              : typeof parsedData.result === 'string'
-              ? parsedData.result
-              : '';
+                ? parsedData.formattedText
+                : typeof parsedData.text === 'string'
+                  ? parsedData.text
+                  : typeof parsedData.output === 'string'
+                    ? parsedData.output
+                    : typeof parsedData.result === 'string'
+                      ? parsedData.result
+                      : '';
 
           suggestions =
             typeof parsedData.ai_suggestions === 'string' ? parsedData.ai_suggestions : undefined;
@@ -255,21 +263,36 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
               </div>
             ) : (
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                className={`h-10 w-10 rounded-full shadow-md transition-all ${
-                  isRecording
-                    ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white animate-pulse'
-                    : 'hover:border-primary hover:text-primary'
-                }`}
-                style={!isRecording ? { borderColor: accentColor, color: accentColor } : {}}
-                onClick={isRecording ? stopRecording : startRecording}
-                title={isRecording ? 'Parar gravação' : 'Gravar áudio'}
-              >
-                {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        className={`h-10 w-10 rounded-full shadow-md transition-all ${isRecording
+                            ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white animate-pulse'
+                            : !patientId
+                              ? 'opacity-50 cursor-not-allowed bg-muted border-muted-foreground/30 text-muted-foreground'
+                              : 'hover:border-primary hover:text-primary'
+                          }`}
+                        style={!isRecording && patientId ? { borderColor: accentColor, color: accentColor } : {}}
+                        onClick={isRecording ? stopRecording : startRecording}
+                        disabled={!patientId}
+                      >
+                        {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {!patientId && (
+                    <TooltipContent side="left" className="flex items-center gap-2">
+                      <ShieldAlert className="h-3 w-3 text-amber-500" />
+                      <span>Selecione um paciente para habilitar a consulta por voz</span>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </div>

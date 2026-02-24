@@ -5,9 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import SOAPCard from './SOAPCard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 const GuidedConsultation: React.FC = () => {
-  const { selectedPatient } = usePatient();
+  const { selectedPatient, setSelectedPatient, patients } = usePatient();
+  const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>(
+    selectedPatient?.id
+  );
 
   const [soapData, setSoapData] = useState({
     S: '',
@@ -79,6 +90,20 @@ const GuidedConsultation: React.FC = () => {
     };
   }, [selectedPatient?.id]);
 
+  useEffect(() => {
+    if (selectedPatient?.id !== selectedPatientId) {
+      setSelectedPatientId(selectedPatient?.id);
+    }
+  }, [selectedPatient?.id]);
+
+  const handlePatientChange = (value: string) => {
+    setSelectedPatientId(value);
+    const patient = patients.find((p) => p.id === value);
+    if (patient) {
+      setSelectedPatient(patient);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto p-4 pb-8">
       {/* Patient header */}
@@ -98,9 +123,23 @@ const GuidedConsultation: React.FC = () => {
             </p>
           </div>
         ) : (
-          <p className="flex-1 text-sm text-muted-foreground italic">
-            Nenhum paciente selecionado. Selecione um paciente em <strong>Meus Pacientes</strong> para iniciar a consulta.
-          </p>
+          <div className="flex-1 space-y-2">
+            <Label htmlFor="patient-select" className="text-sm font-medium text-muted-foreground">
+              Selecione um paciente para iniciar
+            </Label>
+            <Select value={selectedPatientId} onValueChange={handlePatientChange}>
+              <SelectTrigger id="patient-select" className="w-full max-w-xs">
+                <SelectValue placeholder="Selecionar paciente..." />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.map((patient) => (
+                  <SelectItem key={patient.id} value={patient.id}>
+                    {patient.name} {patient.species ? `(${patient.species})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
         <Badge variant="outline" className="gap-1.5">
           <ClipboardList className="h-3.5 w-3.5" />
