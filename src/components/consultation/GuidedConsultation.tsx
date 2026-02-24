@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { usePatient } from '@/contexts/PatientContext';
-import { Stethoscope, ClipboardList, Eye, Brain, FileCheck } from 'lucide-react';
+import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import SOAPCard from './SOAPCard';
+import { Link } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -19,6 +21,17 @@ const GuidedConsultation: React.FC = () => {
   const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>(
     selectedPatient?.id
   );
+  const isInitialMount = useRef(true);
+  const [isPreSelected, setIsPreSelected] = useState(false);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      if (selectedPatient?.id) {
+        setIsPreSelected(true);
+      }
+      isInitialMount.current = false;
+    }
+  }, []);
 
   const [soapData, setSoapData] = useState({
     S: '',
@@ -104,6 +117,11 @@ const GuidedConsultation: React.FC = () => {
     }
   };
 
+  const handleResetSelection = () => {
+    setSelectedPatientId(undefined);
+    setSelectedPatient(null);
+  };
+
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto p-4 pb-8">
       {/* Patient header */}
@@ -112,21 +130,43 @@ const GuidedConsultation: React.FC = () => {
           <Stethoscope className="h-5 w-5 text-primary" />
         </div>
         {selectedPatient ? (
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">
-              Consulta em andamento: <span className="text-primary">{selectedPatient.name}</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {[selectedPatient.species, selectedPatient.breed, selectedPatient.owner_name && `Tutor: ${selectedPatient.owner_name}`]
-                .filter(Boolean)
-                .join(' • ')}
-            </p>
+          <div className="flex-1 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Consulta em andamento: <span className="text-primary">{selectedPatient.name}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {[selectedPatient.species, selectedPatient.breed, selectedPatient.owner_name && `Tutor: ${selectedPatient.owner_name}`]
+                  .filter(Boolean)
+                  .join(' • ')}
+              </p>
+            </div>
+            {!isPreSelected && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-muted-foreground hover:text-primary"
+                onClick={handleResetSelection}
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Alterar
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="flex-1 space-y-2">
-            <Label htmlFor="patient-select" className="text-sm font-medium text-muted-foreground">
-              Selecione um paciente para iniciar
-            </Label>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="patient-select" className="text-sm font-medium text-muted-foreground">
+                Selecione um paciente para iniciar
+              </Label>
+              <Link
+                to="/register-pet"
+                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline transition-all"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                Cadastrar Pet
+              </Link>
+            </div>
             <Select value={selectedPatientId} onValueChange={handlePatientChange}>
               <SelectTrigger id="patient-select" className="w-full max-w-xs">
                 <SelectValue placeholder="Selecionar paciente..." />
