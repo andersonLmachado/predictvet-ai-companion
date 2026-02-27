@@ -32,7 +32,7 @@ const Exams = () => {
   const fetchPatients = useCallback(async () => {
     setIsLoadingPatients(true);
     try {
-      const response = await fetch("https://vet-api.predictlab.com.br/webhook/buscar-pacientes");
+      const response = await fetch("https://n8nvet.predictlab.com.br/webhook/buscar-pacientes");
       if (!response.ok) {
         throw new Error("Falha ao buscar pacientes");
       }
@@ -82,12 +82,12 @@ const Exams = () => {
 
   const handleFileSelect = async (file: File) => {
     if (!selectedPatient) {
-        toast({
-            title: "Seleção obrigatória",
-            description: "Por favor, selecione um paciente antes de enviar o exame.",
-            variant: "destructive",
-        });
-        return;
+      toast({
+        title: "Seleção obrigatória",
+        description: "Por favor, selecione um paciente antes de enviar o exame.",
+        variant: "destructive",
+      });
+      return;
     }
     setIsLoading(true);
     setResult(null);
@@ -98,7 +98,7 @@ const Exams = () => {
       formData.append("examType", examType);
       formData.append("patientName", selectedPatient.name);
 
-      const response = await fetch("https://vet-api.predictlab.com.br/webhook/analisar-arquivo", {
+      const response = await fetch("https://n8nvet.predictlab.com.br/webhook/analisar-arquivo", {
         method: "POST",
         body: formData,
       });
@@ -162,7 +162,7 @@ const Exams = () => {
 
     setIsSavingExam(true);
     try {
-      const response = await fetch("https://vet-api.predictlab.com.br/webhook/salvar-exame", {
+      const response = await fetch("https://n8nvet.predictlab.com.br/webhook/salvar-exame", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -198,49 +198,49 @@ const Exams = () => {
 
         {/* Seletor de Paciente (Obrigatório) */}
         <div className="space-y-2">
-           <Label htmlFor="patient-select" className="text-sm font-medium">
-             Selecione o Paciente
-           </Label>
-           <div className="flex items-center gap-2">
-             <Select value={selectedPatientId} onValueChange={handlePatientChange}>
-               <SelectTrigger id="patient-select" className="w-full">
-                 <SelectValue placeholder={isLoadingPatients ? "Carregando..." : "Selecione um paciente cadastrado"} />
-               </SelectTrigger>
-               <SelectContent>
-                 {patients.length > 0 ? (
-                   patients.map((patient) => (
-                     <SelectItem key={patient.id} value={patient.id}>
-                       {patient.name} ({patient.owner_name})
-                     </SelectItem>
-                   ))
-                 ) : (
-                   <SelectItem value="none" disabled>Nenhum paciente encontrado</SelectItem>
-                 )}
-               </SelectContent>
-             </Select>
-             <Button
-               type="button"
-               variant="outline"
-               size="icon"
-               onClick={fetchPatients}
-               disabled={isLoadingPatients}
-               title="Atualizar lista de pacientes"
-             >
-               <RefreshCw className={`h-4 w-4 ${isLoadingPatients ? 'animate-spin' : ''}`} />
-             </Button>
-           </div>
-           <PatientHeader patient={selectedPatient} />
+          <Label htmlFor="patient-select" className="text-sm font-medium">
+            Selecione o Paciente
+          </Label>
+          <div className="flex items-center gap-2">
+            <Select value={selectedPatientId} onValueChange={handlePatientChange}>
+              <SelectTrigger id="patient-select" className="w-full">
+                <SelectValue placeholder={isLoadingPatients ? "Carregando..." : "Selecione um paciente cadastrado"} />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.length > 0 ? (
+                  patients.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      {patient.name} ({patient.owner_name})
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>Nenhum paciente encontrado</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={fetchPatients}
+              disabled={isLoadingPatients}
+              title="Atualizar lista de pacientes"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoadingPatients ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+          <PatientHeader patient={selectedPatient} />
         </div>
 
         {selectedPatient ? (
-           <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
+          <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
         ) : (
-           <Card className="border-dashed bg-muted/50">
-             <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-               <FileSearch className="h-12 w-12 mb-4 opacity-50" />
-               <p>Selecione um paciente acima para enviar exames.</p>
-             </CardContent>
-           </Card>
+          <Card className="border-dashed bg-muted/50">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+              <FileSearch className="h-12 w-12 mb-4 opacity-50" />
+              <p>Selecione um paciente acima para enviar exames.</p>
+            </CardContent>
+          </Card>
         )}
 
         {isLoading && (

@@ -4,23 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { usePatient } from '@/contexts/PatientContext';
 import { Button } from '@/components/ui/button';
 import {
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
 } from '@/components/ui/card';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { Search, Loader2 } from 'lucide-react';
 
-const API_PATIENTS_URL = 'https://vet-api.predictlab.com.br/webhook/buscar-pacientes';
+const API_PATIENTS_URL = 'https://n8nvet.predictlab.com.br/webhook/buscar-pacientes';
 
 type PatientRow = {
   id: string;

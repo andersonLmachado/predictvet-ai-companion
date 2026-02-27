@@ -98,7 +98,7 @@ const PetRegistrationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -131,7 +131,7 @@ const PetRegistrationForm = () => {
 
       console.log(JSON.stringify(payload));
 
-      const response = await fetch('https://vet-api.predictlab.com.br/webhook/cadastrar-paciente', {
+      const response = await fetch('https://n8nvet.predictlab.com.br/webhook/cadastrar-paciente', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const PetRegistrationForm = () => {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `Erro ${response.status}: Falha ao cadastrar paciente`);
       }
-      
+
       toast({
         title: "Pet cadastrado com sucesso!",
         description: `${petData.name} foi adicionado aos seus pacientes.`,
@@ -159,7 +159,7 @@ const PetRegistrationForm = () => {
         weight: '',
         observations: '',
       });
-      
+
       setTutorData({
         name: '',
         phone: '',
@@ -169,7 +169,7 @@ const PetRegistrationForm = () => {
 
       // Redirecionar para lista de pacientes
       navigate('/patients');
-      
+
     } catch (error: any) {
       console.error('Erro completo:', error);
       toast({
@@ -192,14 +192,14 @@ const PetRegistrationForm = () => {
       weight: '',
       observations: '',
     });
-    
+
     setTutorData({
       name: '',
       phone: '',
       email: '',
       address: '',
     });
-    
+
     toast({
       title: "Formulário limpo",
       description: "Todos os campos foram resetados.",
@@ -285,8 +285,8 @@ const PetRegistrationForm = () => {
 
                 <div className="space-y-2">
                   <Label>Gênero *</Label>
-                  <RadioGroup 
-                    value={petData.gender} 
+                  <RadioGroup
+                    value={petData.gender}
                     onValueChange={(value) => handlePetChange('gender', value)}
                     className="flex space-x-4"
                   >
@@ -371,9 +371,9 @@ const PetRegistrationForm = () => {
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={handleCancel}
               >
                 Limpar Formulário
