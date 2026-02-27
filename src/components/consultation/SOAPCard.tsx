@@ -98,7 +98,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
         formData.append('patient_id', patientId);
       }
 
-      const response = await fetch('https://vet-api.predictlab.com.br/webhook/soap-audio', {
+      const response = await fetch('https://n8nvet.predictlab.com.br/webhook/soap-audio', {
         method: 'POST',
         body: formData,
       });
@@ -272,10 +272,10 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
                         size="icon"
                         variant="outline"
                         className={`h-10 w-10 rounded-full shadow-md transition-all ${isRecording
-                            ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white animate-pulse'
-                            : !patientId
-                              ? 'opacity-50 cursor-not-allowed bg-muted border-muted-foreground/30 text-muted-foreground'
-                              : 'hover:border-primary hover:text-primary'
+                          ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:text-white animate-pulse'
+                          : !patientId
+                            ? 'opacity-50 cursor-not-allowed bg-muted border-muted-foreground/30 text-muted-foreground'
+                            : 'hover:border-primary hover:text-primary'
                           }`}
                         style={!isRecording && patientId ? { borderColor: accentColor, color: accentColor } : {}}
                         onClick={isRecording ? stopRecording : startRecording}

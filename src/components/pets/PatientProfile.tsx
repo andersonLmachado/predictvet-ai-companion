@@ -72,8 +72,8 @@ const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
               <span className="text-xs text-muted-foreground">
                 {entry.created_at
                   ? new Date(entry.created_at).toLocaleDateString('pt-BR', {
-                      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                    })
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })
                   : '—'}
               </span>
             </div>
@@ -250,15 +250,14 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
                         <td className="border p-2">{formatReferenceRange(row.refMin, row.refMax)}</td>
                         {evolutionComparison.mode === 'comparison' && (
                           <td
-                            className={`border p-2 ${
-                              row.changeDirection === 'up'
+                            className={`border p-2 ${row.changeDirection === 'up'
                                 ? 'text-red-600'
                                 : row.changeDirection === 'down'
-                                ? 'text-blue-600'
-                                : row.changeDirection === 'same'
-                                ? 'text-slate-600'
-                                : 'text-muted-foreground'
-                            }`}
+                                  ? 'text-blue-600'
+                                  : row.changeDirection === 'same'
+                                    ? 'text-slate-600'
+                                    : 'text-muted-foreground'
+                              }`}
                           >
                             {row.changeText}
                           </td>
@@ -289,7 +288,7 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
 };
 
 // --- Tab: Resumo Clínico ---
-const API_EXAMS_URL = "https://vet-api.predictlab.com.br/webhook/buscar-exames";
+const API_EXAMS_URL = "https://n8nvet.predictlab.com.br/webhook/buscar-exames";
 
 const examTypeLabel: Record<string, string> = {
   sangue: "Hemograma",
@@ -405,8 +404,8 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
                     <span className="text-xs text-muted-foreground">
                       {exam.created_at
                         ? new Date(exam.created_at).toLocaleDateString("pt-BR", {
-                            day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
-                          })
+                          day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+                        })
                         : "—"}
                     </span>
                   </div>

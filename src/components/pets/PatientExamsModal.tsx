@@ -16,7 +16,7 @@ import AnalysisResults, {
 } from "@/components/analysis/AnalysisResults";
 import ExamReport from "@/components/analysis/ExamReport";
 
-const API_EXAMS_URL = "https://vet-api.predictlab.com.br/webhook/buscar-exames";
+const API_EXAMS_URL = "https://n8nvet.predictlab.com.br/webhook/buscar-exames";
 
 export type ExamHistoryRecord = {
   id: string;
@@ -102,10 +102,10 @@ const PatientExamsModal = ({
   const syntheticResult =
     selectedExam != null
       ? ({
-          cabecalho: patientData,
-          resumo_clinico: selectedExam.clinical_summary,
-          resultados: selectedExam.analysis_data,
-        } satisfies AnalysisResponse)
+        cabecalho: patientData,
+        resumo_clinico: selectedExam.clinical_summary,
+        resultados: selectedExam.analysis_data,
+      } satisfies AnalysisResponse)
       : null;
 
   return (
@@ -187,12 +187,12 @@ const PatientExamsModal = ({
                         <span className="text-sm text-muted-foreground">
                           {exam.created_at
                             ? new Date(exam.created_at).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
                             : "—"}
                         </span>
                       </div>

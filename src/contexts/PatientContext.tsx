@@ -22,7 +22,7 @@ interface PatientContextType {
 const PatientContext = createContext<PatientContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'predictlab_selected_patient';
-const API_PATIENTS_URL = 'https://vet-api.predictlab.com.br/webhook/buscar-pacientes';
+const API_PATIENTS_URL = 'https://n8nvet.predictlab.com.br/webhook/buscar-pacientes';
 
 export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedPatient, setSelectedPatientState] = useState<PatientInfo | null>(() => {
