@@ -91,11 +91,16 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   const processAudio = async (blob: Blob) => {
     setIsProcessing(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
       const formData = new FormData();
       formData.append('file', blob, 'recording.webm');
       formData.append('block', letter);
       if (patientId) {
         formData.append('patient_id', patientId);
+      }
+      if (user?.id) {
+        formData.append('veterinarian_id', user.id);
       }
 
       const response = await fetch('https://n8nvet.predictlab.com.br/webhook/soap-audio', {
