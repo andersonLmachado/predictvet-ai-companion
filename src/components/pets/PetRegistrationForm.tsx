@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PetData {
   name: string;
@@ -115,7 +116,19 @@ const PetRegistrationForm = () => {
         age--;
       }
 
-      // Payload único: name, species, breed, age, sex, weight, owner_name, owner_phone, owner_email, veterinarian_id (gender -> sex)
+      // Buscar usuário logado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: 'Sessão expirada',
+          description: 'Faça login novamente para cadastrar um paciente.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Payload único: name, species, breed, age, sex, weight, owner_name, owner_phone, owner_email, veterinarian_id
       const payload = {
         name: petData.name,
         species: petData.species,
@@ -126,7 +139,7 @@ const PetRegistrationForm = () => {
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
         owner_email: tutorData.email,
-        veterinarian_id: 'cb0d8c84-2a9b-4d36-b1e0-21cce47baf06',
+        veterinarian_id: user.id,
       };
 
       console.log(JSON.stringify(payload));
