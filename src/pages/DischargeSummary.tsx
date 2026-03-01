@@ -143,7 +143,7 @@ const DischargeSummary = () => {
         createdAt: item.created_at,
         clinicalSummary: item.clinical_summary,
         analysisData: Array.isArray(item.analysis_data)
-          ? (item.analysis_data as ExamHistoryParam[])
+          ? (item.analysis_data as unknown as ExamHistoryParam[])
           : [],
       }));
       setExamHistory(historyMapped);

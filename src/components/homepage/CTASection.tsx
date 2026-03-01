@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -6,30 +5,21 @@ import { ArrowRight } from 'lucide-react';
 
 const CTASection = () => {
   return (
-    <section className="py-20 px-4 bg-gradient-to-r from-vet-blue-600 to-vet-green-600">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-          Pronto para Transformar sua Prática Veterinária?
+    <section className="py-20 px-6 md:px-12 bg-primary">
+      <div className="max-w-3xl mx-auto text-center space-y-6">
+        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
+          Pronto para Transformar sua Clínica?
         </h2>
-        
-        <p className="text-xl text-white/90 mb-8 leading-relaxed">
-          Junte-se aos veterinários que já estão usando a inteligência artificial 
-          para oferecer um atendimento mais preciso e eficiente.
+        <p className="text-primary-foreground/80 text-lg">
+          Junte-se aos veterinários que já usam IA para atender com mais precisão e eficiência.
         </p>
-        
         <Link to="/register">
-          <Button 
-            size="lg" 
-            className="bg-white text-vet-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            Começar Sua Jornada com o PredictLab
-            <ArrowRight className="w-5 h-5 ml-2" />
+          <Button size="lg" variant="secondary" className="mt-4 px-8 text-base font-semibold">
+            Começar Gratuitamente
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
-        
-        <p className="text-white/70 text-sm mt-6">
-          Teste gratuito • Sem cartão de crédito • Configuração em 2 minutos
-        </p>
+        <p className="text-primary-foreground/60 text-sm">Sem cartão de crédito • Configuração em 2 minutos</p>
       </div>
     </section>
   );

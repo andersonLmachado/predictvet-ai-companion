@@ -47,11 +47,11 @@ const formatDateTime = (value: string | null | undefined) => {
 
 const escapeHtml = (value: string | null | undefined) =>
   (value ?? '—')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .split('&').join('&amp;')
+    .split('<').join('&lt;')
+    .split('>').join('&gt;')
+    .split('"').join('&quot;')
+    .split("'").join('&#39;');
 
 const DischargeSummary: React.FC<DischargeSummaryProps> = ({ patientId }) => {
   const { toast } = useToast();
