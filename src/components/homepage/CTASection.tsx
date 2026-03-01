@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 
 const CTASection = () => {
   return (
-    <section className="py-20 px-6 md:px-12 bg-primary">
+    <section className="py-20 px-6 md:px-12 bg-gradient-to-r from-[#2564e9] to-[#05956a]">
       <div className="max-w-3xl mx-auto text-center space-y-6">
         <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
           Pronto para Transformar sua Clínica?
