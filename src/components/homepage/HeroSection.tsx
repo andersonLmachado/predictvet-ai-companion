@@ -11,7 +11,7 @@ const HeroSection = () => {
       {/* Navbar */}
       <nav className="flex justify-between items-center px-6 md:px-12 py-5 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <img src={predictlabIcon} alt="PredictLab" className="w-10 h-10 object-contain" />
+          <img src={predictlabIcon} alt="PredictLab" className="w-10 h-10 object-contain mix-blend-multiply dark:mix-blend-screen" />
           <span className="text-xl font-bold text-foreground tracking-tight">PredictLab</span>
         </div>
         <div className="flex items-center gap-3">
@@ -21,7 +21,7 @@ const HeroSection = () => {
             </Button>
           </Link>
           <Link to="/register">
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
+            <Button size="sm" className="bg-gradient-to-r from-[#2564e9] to-[#05956a] hover:opacity-90 text-white border-0">
               Criar Conta
             </Button>
           </Link>
@@ -34,7 +34,7 @@ const HeroSection = () => {
           <img
             src={predictlabLogo}
             alt="PredictLab - Inteligência Artificial Veterinária"
-            className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto"
+            className="w-48 h-48 md:w-60 md:h-60 object-contain mx-auto mix-blend-multiply dark:mix-blend-screen"
           />
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
@@ -48,7 +48,7 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Link to="/register">
-              <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 px-8 text-base">
+              <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-[#2564e9] to-[#05956a] hover:opacity-90 text-white border-0 px-8 text-base">
                 Começar Gratuitamente
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
