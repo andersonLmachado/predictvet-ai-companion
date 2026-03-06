@@ -1,18 +1,32 @@
-
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import RegisterForm from '@/components/auth/RegisterForm';
+import { supabase } from '@/integrations/supabase/client';
 
 const Register = () => {
   const navigate = useNavigate();
 
-  const handleRegister = async (email: string, password: string) => {
-    // Simulação de registro, futuramente será integrado com Supabase Auth
-    console.log('Registro com:', email, password);
-    
-    // Para fins de demonstração, simular um registro bem-sucedido
-    await new Promise(resolve => setTimeout(resolve, 800));
-    navigate('/chat');
+  const handleRegister = async (
+    email: string,
+    password: string,
+    fullName: string,
+    crmv: string,
+    clinicName: string
+  ) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          crmv: crmv,
+          clinic_name: clinicName,
+        },
+      },
+    });
+
+    if (error) throw error;
+
+    navigate('/login');
   };
 
   return (

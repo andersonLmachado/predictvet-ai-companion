@@ -1,17 +1,15 @@
-
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginForm from '@/components/auth/LoginForm';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (email: string, password: string) => {
-    // Simulação de login, futuramente será integrado com Supabase Auth
-    console.log('Login com:', email, password);
-    
-    // Para fins de demonstração, simular um login bem-sucedido
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) throw error;
+
     navigate('/home');
   };
 
