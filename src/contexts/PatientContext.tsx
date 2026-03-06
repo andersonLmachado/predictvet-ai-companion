@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface PatientInfo {
   id: string;
@@ -25,6 +26,7 @@ const STORAGE_KEY = 'predictlab_selected_patient';
 const API_PATIENTS_URL = 'https://n8nvet.predictlab.com.br/webhook/buscar-pacientes';
 
 export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [selectedPatient, setSelectedPatientState] = useState<PatientInfo | null>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -48,8 +50,9 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const loadPatients = useCallback(async () => {
+    if (!user?.id) return;
     try {
-      const response = await fetch(API_PATIENTS_URL);
+      const response = await fetch(`${API_PATIENTS_URL}?veterinarian_id=${user.id}`);
       if (!response.ok) throw new Error('Falha ao buscar pacientes');
       const data = await response.json();
       const rawList = Array.isArray(data) ? data : data?.id != null ? [data] : [];
@@ -67,11 +70,11 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Erro ao buscar pacientes:', error);
       setPatientsLoaded(true);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    loadPatients();
-  }, [loadPatients]);
+    if (user?.id) loadPatients();
+  }, [loadPatients, user]);
 
   const refreshPatientState = useCallback(() => {
     setConsultationRefreshKey((prev) => prev + 1);
