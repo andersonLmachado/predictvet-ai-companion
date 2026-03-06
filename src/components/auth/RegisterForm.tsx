@@ -8,10 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/hooks/use-toast';
 
 interface RegisterFormProps {
-  onRegister: (email: string, password: string) => void;
+  onRegister: (
+    email: string,
+    password: string,
+    fullName: string,
+    crmv: string,
+    clinicName: string
+  ) => Promise<void>;
 }
 
 const RegisterForm = ({ onRegister }: RegisterFormProps) => {
+  const [fullName, setFullName] = useState('');
+  const [crmv, setCrmv] = useState('');
+  const [clinicName, setClinicName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,7 +29,7 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !confirmPassword) {
+    if (!fullName || !crmv || !email || !password || !confirmPassword) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos.",
@@ -50,10 +59,10 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
     setIsLoading(true);
     
     try {
-      await onRegister(email, password);
+      await onRegister(email, password, fullName, crmv, clinicName);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Bem-vindo ao PredictLab.",
+        description: "Verifique seu e-mail para confirmar o cadastro.",
       });
     } catch (error) {
       toast({
@@ -81,6 +90,41 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="fullName">Nome completo</Label>
+            <Input
+              id="fullName"
+              type="text"
+              placeholder="Dr. Ana Lima"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="crmv">CRMV</Label>
+            <Input
+              id="crmv"
+              type="text"
+              placeholder="CRMV-SP 12345"
+              value={crmv}
+              onChange={(e) => setCrmv(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="clinicName">Nome da clínica (opcional)</Label>
+            <Input
+              id="clinicName"
+              type="text"
+              placeholder="Clínica VetPro"
+              value={clinicName}
+              onChange={(e) => setClinicName(e.target.value)}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
             <Input

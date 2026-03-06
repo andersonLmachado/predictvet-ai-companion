@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PatientProvider } from "@/contexts/PatientContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -24,87 +26,105 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <PatientProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Rotas protegidas (com layout) */}
-            <Route
-              path="/home"
-              element={
-                <MainLayout>
-                  <Home />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <MainLayout>
-                  <ChatPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/register-pet"
-              element={
-                <MainLayout>
-                  <RegisterPet />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/patients"
-              element={
-                <MainLayout>
-                  <Patients />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/patient/:id"
-              element={
-                <MainLayout>
-                  <PatientDetails />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/paciente/:id/relatorio-alta"
-              element={
-                <MainLayout>
-                  <DischargeSummary />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/exams"
-              element={
-                <MainLayout>
-                  <Exams />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
-              }
-            />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </PatientProvider>
+    <AuthProvider>
+      <PatientProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+
+              {/* Rotas protegidas (com layout) */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Home />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ChatPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/register-pet"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <RegisterPet />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patients"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Patients />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient/:id"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <PatientDetails />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/paciente/:id/relatorio-alta"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <DischargeSummary />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exams"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Exams />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </PatientProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
