@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, FileSearch, RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 type ExamType = "sangue" | "urina";
 
 const Exams = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
@@ -30,9 +32,10 @@ const Exams = () => {
   const [isSavingExam, setIsSavingExam] = useState(false);
 
   const fetchPatients = useCallback(async () => {
+    if (!user?.id) return;
     setIsLoadingPatients(true);
     try {
-      const response = await fetch("https://n8nvet.predictlab.com.br/webhook/buscar-pacientes");
+      const response = await fetch(`https://n8nvet.predictlab.com.br/webhook/buscar-pacientes?veterinarian_id=${user.id}`);
       if (!response.ok) {
         throw new Error("Falha ao buscar pacientes");
       }
@@ -61,12 +64,12 @@ const Exams = () => {
     } finally {
       setIsLoadingPatients(false);
     }
-  }, [toast]);
+  }, [toast, user]);
 
   // Busca a lista de pacientes do webhook n8n ao carregar a página
   useEffect(() => {
-    fetchPatients();
-  }, [fetchPatients]);
+    if (user?.id) fetchPatients();
+  }, [fetchPatients, user]);
 
   const handlePatientChange = (value: string) => setSelectedPatientId(value);
 

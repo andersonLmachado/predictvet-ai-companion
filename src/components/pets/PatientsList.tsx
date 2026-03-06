@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePatient } from '@/contexts/PatientContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -33,6 +34,7 @@ type PatientRow = {
 };
 
 const PatientsList = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { setSelectedPatient: setGlobalPatient } = usePatient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,10 +42,11 @@ const PatientsList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user?.id) return;
     const fetchPatients = async () => {
       setLoading(true);
       try {
-        const response = await fetch(API_PATIENTS_URL);
+        const response = await fetch(`${API_PATIENTS_URL}?veterinarian_id=${user.id}`);
         if (!response.ok) throw new Error('Falha ao buscar pacientes');
         const data = await response.json();
         const rawList = Array.isArray(data) ? data : data?.id != null ? [data] : [];
@@ -65,7 +68,7 @@ const PatientsList = () => {
       }
     };
     fetchPatients();
-  }, []);
+  }, [user]);
 
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
