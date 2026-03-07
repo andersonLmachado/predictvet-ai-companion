@@ -453,3 +453,192 @@ Essas variáveis já são consumidas corretamente em `src/integrations/supabase/
 - [Sign-up database trigger discussion | Supabase GitHub](https://github.com/orgs/supabase/discussions/306)
 - [Best practices for profiles table at signup | Supabase GitHub](https://github.com/orgs/supabase/discussions/3491)
 - [React Supabase Auth Template | GitHub](https://github.com/mmvergara/react-supabase-auth-template)
+
+---
+
+---
+
+# PRD — Isolamento de Dados por Veterinário na Página Home
+
+## 1. Contexto e Diagnóstico
+
+### Problema
+
+A página `src/pages/Home.tsx` exibe KPIs e listas de pacientes recentes com dados **agregados de todos os veterinários** cadastrados no sistema. Qualquer usuário autenticado vê os totais globais do banco, não apenas os dados da sua própria clínica.
+
+A página **Meus Pacientes** (`src/components/pets/PatientsList.tsx`) já foi corrigida e serve como padrão de referência.
+
+### Análise do Código Atual
+
+**`src/pages/Home.tsx`** — 6 queries ao Supabase sem nenhum filtro por `veterinarian_id`:
+
+```typescript
+// PROBLEMA: todas sem filtro de usuário
+supabase.from('patients').select('id', { count: 'exact', head: true })
+supabase.from('exams_history').select('id', { count: 'exact', head: true })
+supabase.from('medical_consultations').select('id', { count: 'exact', head: true })
+supabase.from('patients').select('id', { count: 'exact', head: true }).gte('created_at', ...)
+supabase.from('patients').select('species')
+supabase.from('patients').select('id, name, species, breed, owner_name, updated_at').order(...).limit(5)
+```
+
+### Schema das Tabelas (confirmado em `src/integrations/supabase/types.ts`)
+
+| Tabela | Coluna `veterinarian_id` | Observação |
+|---|---|---|
+| `patients` | ✅ Presente (`string`, obrigatório) | Filtro direto possível |
+| `medical_consultations` | ✅ Presente (`string \| null`) | Filtro direto possível |
+| `exams_history` | ❌ Ausente | Só possui `patient_id` — filtro via JOIN necessário |
+
+### Padrão de Referência (já implementado)
+
+**`src/components/pets/PatientsList.tsx`:**
+```typescript
+const { user } = useAuth();
+
+useEffect(() => {
+  if (!user?.id) return;
+  // passa veterinarian_id como query param para o webhook n8n
+  fetch(`${API_PATIENTS_URL}?veterinarian_id=${user.id}`)
+}, [user]);
+```
+
+**`src/pages/Exams.tsx`** segue o mesmo padrão — ambas as páginas usam `useAuth()` + `veterinarian_id` no fetch.
+
+---
+
+## 2. Especificação da Correção
+
+### 2.1 Arquivo a Modificar
+
+**`src/pages/Home.tsx`** — único arquivo que precisa ser alterado.
+
+### 2.2 Alterações Necessárias
+
+#### Importar `useAuth` e obter `user`
+
+```typescript
+import { useAuth } from '@/contexts/AuthContext';
+
+const Home = () => {
+  const { user } = useAuth();
+  // ...
+```
+
+#### Aguardar `user` antes de buscar dados
+
+```typescript
+useEffect(() => {
+  if (!user?.id) return; // bloqueia fetch se não autenticado
+  fetchAll();
+}, [user]);
+```
+
+#### Filtrar queries da tabela `patients` (4 queries)
+
+Adicionar `.eq('veterinarian_id', user.id)` em todas:
+
+```typescript
+// Total de pacientes
+supabase.from('patients')
+  .select('id', { count: 'exact', head: true })
+  .eq('veterinarian_id', user.id)
+
+// Novos pacientes no mês
+supabase.from('patients')
+  .select('id', { count: 'exact', head: true })
+  .eq('veterinarian_id', user.id)
+  .gte('created_at', thirtyDaysAgo.toISOString())
+
+// Distribuição por espécie
+supabase.from('patients')
+  .select('species')
+  .eq('veterinarian_id', user.id)
+
+// Pacientes recentes
+supabase.from('patients')
+  .select('id, name, species, breed, owner_name, updated_at')
+  .eq('veterinarian_id', user.id)
+  .order('updated_at', { ascending: false })
+  .limit(5)
+```
+
+#### Filtrar query da tabela `medical_consultations`
+
+```typescript
+supabase.from('medical_consultations')
+  .select('id', { count: 'exact', head: true })
+  .eq('veterinarian_id', user.id)
+```
+
+#### Filtrar query da tabela `exams_history` (via JOIN com `patients`)
+
+`exams_history` não possui coluna `veterinarian_id`. A abordagem correta é um JOIN com `patients` usando a FK `fk_patient`:
+
+```typescript
+supabase.from('exams_history')
+  .select('id, patients!fk_patient!inner(veterinarian_id)', { count: 'exact', head: true })
+  .eq('patients.veterinarian_id', user.id)
+```
+
+> **Alternativa:** Adicionar coluna `veterinarian_id` à tabela `exams_history` via migration SQL e populá-la com trigger ou retroativamente. Esta abordagem simplifica futuras queries mas requer mudança de schema.
+
+---
+
+## 3. Considerações de Segurança (RLS)
+
+O filtro no cliente (`.eq('veterinarian_id', user.id)`) é necessário, mas por si só é insuficiente em produção. A defesa em profundidade exige **Row Level Security (RLS)** no Supabase para que o banco bloqueie qualquer acesso não autorizado, mesmo que o filtro client-side seja removido ou bypassado.
+
+### Políticas RLS Recomendadas
+
+```sql
+-- patients
+CREATE POLICY "Veterinário acessa apenas seus pacientes"
+  ON public.patients FOR ALL
+  USING (auth.uid() = veterinarian_id);
+
+-- medical_consultations
+CREATE POLICY "Veterinário acessa apenas suas consultas"
+  ON public.medical_consultations FOR ALL
+  USING (auth.uid() = veterinarian_id);
+
+-- exams_history (via subquery, pois não tem veterinarian_id direto)
+CREATE POLICY "Veterinário acessa apenas exames de seus pacientes"
+  ON public.exams_history FOR ALL
+  USING (
+    patient_id IN (
+      SELECT id FROM public.patients WHERE veterinarian_id = auth.uid()
+    )
+  );
+```
+
+> Se RLS já estiver ativo e configurado, o filtro no cliente passa a ser uma otimização de performance, não a única linha de defesa.
+
+---
+
+## 4. Impacto e Escopo
+
+| Item | Status |
+|---|---|
+| `src/pages/Home.tsx` | Requer correção (único arquivo) |
+| `src/components/pets/PatientsList.tsx` | Já corrigido (padrão de referência) |
+| `src/pages/Exams.tsx` | Já corrigido (padrão de referência) |
+| RLS no banco | Verificar e aplicar se ausente |
+
+**Sem impacto em:** rotas, componentes de layout, AuthContext, n8n workflows.
+
+---
+
+## 5. Ordem de Implementação
+
+1. **Modificar `src/pages/Home.tsx`:**
+   - Importar `useAuth`
+   - Adicionar `user` ao componente
+   - Adicionar `if (!user?.id) return` no `useEffect`
+   - Adicionar `.eq('veterinarian_id', user.id)` nas 4 queries de `patients`
+   - Adicionar `.eq('veterinarian_id', user.id)` na query de `medical_consultations`
+   - Substituir query de `exams_history` para usar JOIN com `patients`
+
+2. **Verificar RLS no Supabase Dashboard** (`Database > Tables > RLS`) e aplicar as políticas da seção 3 se ausentes.
+
+3. **Testar com dois usuários distintos** — confirmar que cada um vê apenas seus próprios dados em todos os KPIs, gráfico de espécies e lista de pacientes recentes.
