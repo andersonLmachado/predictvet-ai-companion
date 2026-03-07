@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ interface PatientRow {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [totalPatients, setTotalPatients] = useState(0);
   const [totalExams, setTotalExams] = useState(0);
@@ -52,6 +54,8 @@ const Home = () => {
   const [recentPatients, setRecentPatients] = useState<PatientRow[]>([]);
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const fetchAll = async () => {
       setLoading(true);
 
@@ -60,17 +64,19 @@ const Home = () => {
 
       const [patientsRes, examsRes, consultRes, newPatsRes, speciesRes, recentRes] =
         await Promise.all([
-          supabase.from('patients').select('id', { count: 'exact', head: true }),
-          supabase.from('exams_history').select('id', { count: 'exact', head: true }),
-          supabase.from('medical_consultations').select('id', { count: 'exact', head: true }),
+          supabase.from('patients').select('id', { count: 'exact', head: true }).eq('veterinarian_id', user.id),
+          supabase.from('exams_history').select('id, patients!fk_patient!inner(veterinarian_id)', { count: 'exact', head: true }).eq('patients.veterinarian_id', user.id),
+          supabase.from('medical_consultations').select('id', { count: 'exact', head: true }).eq('veterinarian_id', user.id),
           supabase
             .from('patients')
             .select('id', { count: 'exact', head: true })
+            .eq('veterinarian_id', user.id)
             .gte('created_at', thirtyDaysAgo.toISOString()),
-          supabase.from('patients').select('species'),
+          supabase.from('patients').select('species').eq('veterinarian_id', user.id),
           supabase
             .from('patients')
             .select('id, name, species, breed, owner_name, updated_at')
+            .eq('veterinarian_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(5),
         ]);
