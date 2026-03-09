@@ -19,3 +19,19 @@ Goal: eliminate friction during consultations, standardize unstructured medical 
 
 @.claude/instructions/architecture.md
 @.claude/instructions/coding-rules.md
+
+## Frontend Design System
+
+All frontend work MUST follow the PredictLab Design System skill. Before writing any JSX, component, or styling:
+
+```
+Use Skill: predictlab-design-system
+```
+
+Key references inside the skill:
+- Color tokens (HSL palette from the brand logo)
+- Typography: Sora (headings) + Nunito Sans (body)
+- Component patterns: cards, buttons, forms, badges
+- Dark section pattern (navbar, hero, banners)
+- Utility classes: `.pl-*` defined in `src/index.css`
+- Logo usage rules
