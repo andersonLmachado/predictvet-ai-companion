@@ -75,22 +75,17 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
       >
         {/* Brand */}
         <Link to="/home" className="flex items-center gap-2.5 shrink-0 group">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden"
-            style={{ background: 'hsla(0,0%,100%,0.08)', border: '1px solid hsla(217,88%,57%,0.25)' }}
-          >
-            <img
-              src={predictlabIcon}
-              alt="PredictLab"
-              className="w-7 h-7 object-contain"
-            />
-          </div>
           <span
             className="text-lg font-bold tracking-tight"
             style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
           >
             PredictLab
           </span>
+          <img
+            src={predictlabIcon}
+            alt="PredictLab"
+            className="w-8 h-8 object-contain"
+          />
         </Link>
 
         {/* Nav Links */}
@@ -194,18 +189,13 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
       >
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/home" className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-md flex items-center justify-center overflow-hidden"
-              style={{ background: 'hsla(0,0%,100%,0.08)', border: '1px solid hsla(217,88%,57%,0.25)' }}
-            >
-              <img src={predictlabIcon} alt="PredictLab" className="w-6 h-6 object-contain" />
-            </div>
             <span
               className="text-base font-bold"
               style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
             >
               PredictLab
             </span>
+            <img src={predictlabIcon} alt="PredictLab" className="w-7 h-7 object-contain" />
           </Link>
 
           <button
