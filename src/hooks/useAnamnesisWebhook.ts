@@ -40,6 +40,10 @@ export function useAnamnesisWebhook(): UseAnamnesisWebhookReturn {
     | string
     | undefined;
 
+  const webhookSecret = import.meta.env.VITE_N8N_WEBHOOK_SECRET as
+    | string
+    | undefined;
+
   const send = useCallback(
     async (payload: AnamnesisPayload): Promise<boolean> => {
       if (!webhookUrl) {
@@ -55,7 +59,10 @@ export function useAnamnesisWebhook(): UseAnamnesisWebhookReturn {
       try {
         const response = await fetch(webhookUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(webhookSecret && { Authorization: `Bearer ${webhookSecret}` }),
+          },
           body: JSON.stringify(payload),
         });
 
