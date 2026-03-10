@@ -34,7 +34,7 @@ for (let i = 2; i < rows.length; i++) {
 
   const rawOptions = [row[4], row[5], row[6], row[7], row[8], row[9]]
     .map(o => String(o).trim())
-    .filter(o => o && o !== 'Sim' && o !== 'Não' && o !== '0');
+    .filter(o => o && o !== 'Sim' && o !== 'Não' && o !== 'Não sei' && o !== '0');
 
   categories[currentCategory].push({
     id: String(i),
