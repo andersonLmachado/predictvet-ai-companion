@@ -1,18 +1,11 @@
 import { useCallback, useState } from 'react';
+import {
+  sendAnamnesisPayload,
+  type AnamnesisPayload,
+  type FollowUpAnswer,
+} from '@/lib/anamnesisApi';
 
-// ─── Payload ────────────────────────────────────────────────────────────────
-
-export interface FollowUpAnswer {
-  question: string;
-  answer: string;
-}
-
-export interface AnamnesisPayload {
-  patient_id: string;
-  chief_complaint: string;
-  followup_answers: FollowUpAnswer[];
-  transcription: string;
-}
+export type { FollowUpAnswer, AnamnesisPayload };
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
@@ -46,42 +39,20 @@ export function useAnamnesisWebhook(): UseAnamnesisWebhookReturn {
 
   const send = useCallback(
     async (payload: AnamnesisPayload): Promise<boolean> => {
-      if (!webhookUrl) {
-        setError(
-          'Webhook n8n não configurado. Defina VITE_N8N_ANAMNESIS_WEBHOOK_URL no .env.'
-        );
-        return false;
-      }
-
       setLoading(true);
       setError(null);
 
-      try {
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(webhookSecret && { Authorization: `Bearer ${webhookSecret}` }),
-          },
-          body: JSON.stringify(payload),
-        });
+      const result = await sendAnamnesisPayload(webhookUrl, webhookSecret, payload);
 
-        if (!response.ok) {
-          const text = await response.text().catch(() => response.statusText);
-          throw new Error(`n8n respondeu ${response.status}: ${text}`);
-        }
+      setLoading(false);
 
-        return true;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Erro desconhecido ao chamar o webhook.';
-        setError(message);
-        return false;
-      } finally {
-        setLoading(false);
+      if (!result.ok) {
+        setError(result.error);
       }
+
+      return result.ok;
     },
-    [webhookUrl]
+    [webhookUrl, webhookSecret]
   );
 
   const reset = useCallback(() => setError(null), []);

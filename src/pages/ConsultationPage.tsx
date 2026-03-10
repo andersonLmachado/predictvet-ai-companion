@@ -12,7 +12,12 @@ import {
 } from 'lucide-react';
 
 import { usePatient } from '@/contexts/PatientContext';
-import { useAnamnesisWebhook, type FollowUpAnswer } from '@/hooks/useAnamnesisWebhook';
+import { useAnamnesisWebhook } from '@/hooks/useAnamnesisWebhook';
+import { buildAnamnesisPayload } from '@/lib/anamnesisApi';
+import {
+  sessionReducer,
+  initialSession,
+} from '@/lib/consultationSession';
 import ConsultationStepper from '@/components/consultation/ConsultationStepper';
 import ComplaintSelector, { type Complaint } from '@/components/consultation/ComplaintSelector';
 import FollowUpCard from '@/components/consultation/FollowUpCard';
@@ -32,66 +37,6 @@ const STEPS = [
   { label: 'Detalhes', description: 'Perguntas clínicas' },
   { label: 'Relato', description: 'Histórico do tutor' },
 ];
-
-// ─── Session state & reducer ─────────────────────────────────────────────────
-
-interface ConsultationSession {
-  step: number;
-  complaint: Complaint | null;
-  followupAnswers: FollowUpAnswer[];
-  transcription: string;
-  submitStatus: 'idle' | 'sending' | 'success' | 'error';
-  submitError: string | null;
-}
-
-const initialSession: ConsultationSession = {
-  step: 0,
-  complaint: null,
-  followupAnswers: [],
-  transcription: '',
-  submitStatus: 'idle',
-  submitError: null,
-};
-
-type SessionAction =
-  | { type: 'SELECT_COMPLAINT'; payload: Complaint }
-  | { type: 'ANSWER_FOLLOWUP'; payload: FollowUpAnswer }
-  | { type: 'SET_TRANSCRIPTION'; payload: string }
-  | { type: 'BACK' }
-  | { type: 'SUBMIT_START' }
-  | { type: 'SUBMIT_SUCCESS' }
-  | { type: 'SUBMIT_ERROR'; payload: string }
-  | { type: 'RESET' };
-
-function sessionReducer(
-  state: ConsultationSession,
-  action: SessionAction
-): ConsultationSession {
-  switch (action.type) {
-    case 'SELECT_COMPLAINT':
-      return { ...state, complaint: action.payload, followupAnswers: [], step: 1 };
-    case 'ANSWER_FOLLOWUP':
-      return {
-        ...state,
-        followupAnswers: [...state.followupAnswers, action.payload],
-        step: 2,
-      };
-    case 'SET_TRANSCRIPTION':
-      return { ...state, transcription: action.payload };
-    case 'BACK':
-      return { ...state, step: Math.max(0, state.step - 1), submitStatus: 'idle', submitError: null };
-    case 'SUBMIT_START':
-      return { ...state, submitStatus: 'sending', submitError: null };
-    case 'SUBMIT_SUCCESS':
-      return { ...state, submitStatus: 'success' };
-    case 'SUBMIT_ERROR':
-      return { ...state, submitStatus: 'error', submitError: action.payload };
-    case 'RESET':
-      return initialSession;
-    default:
-      return state;
-  }
-}
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -132,12 +77,15 @@ const ConsultationPage: React.FC = () => {
 
     dispatch({ type: 'SUBMIT_START' });
 
-    const ok = await send({
-      patient_id: selectedPatient.id,
-      chief_complaint: session.complaint.label,
-      followup_answers: session.followupAnswers,
+    const payload = buildAnamnesisPayload({
+      consultationId: crypto.randomUUID(),
+      patientId: selectedPatient.id,
+      chiefComplaint: session.complaint.label,
+      followupAnswers: session.followupAnswers,
       transcription: session.transcription,
     });
+
+    const ok = await send(payload);
 
     if (ok) {
       dispatch({ type: 'SUBMIT_SUCCESS' });
