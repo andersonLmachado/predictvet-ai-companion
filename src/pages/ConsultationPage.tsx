@@ -1,5 +1,5 @@
-import React, { useCallback, useReducer } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useReducer } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import {
   AlertCircle,
   CheckCircle2,
@@ -96,9 +96,17 @@ function sessionReducer(
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 const ConsultationPage: React.FC = () => {
-  const { selectedPatient, setSelectedPatient, patients } = usePatient();
+  const { patientId } = useParams<{ patientId: string }>();
+  const { selectedPatient, setSelectedPatient, patients, patientsLoaded } = usePatient();
   const { send } = useAnamnesisWebhook();
   const [session, dispatch] = useReducer(sessionReducer, initialSession);
+
+  // Pre-select patient from URL param once the list is loaded
+  useEffect(() => {
+    if (!patientId || !patientsLoaded) return;
+    const match = patients.find((p) => p.id === patientId);
+    if (match) setSelectedPatient(match);
+  }, [patientId, patientsLoaded, patients, setSelectedPatient]);
 
   const handleSelectComplaint = useCallback((complaint: Complaint) => {
     dispatch({ type: 'SELECT_COMPLAINT', payload: complaint });
