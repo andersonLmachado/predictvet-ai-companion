@@ -12,7 +12,6 @@
           "Não",
           "7 dias",
           "+ 7 dias",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -26,7 +25,6 @@
           "Não",
           "Lesões",
           "Inchaços",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -40,7 +38,6 @@
           "Não",
           "Vermelho",
           "Lesões",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -54,7 +51,6 @@
           "Não",
           "Local",
           "Geral",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -68,7 +64,6 @@
           "Não",
           "Momentos",
           "Após Ativ",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -80,7 +75,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -94,7 +88,6 @@
           "Não",
           "Ruídos",
           "Roncos",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -108,7 +101,6 @@
           "Não",
           "Inchaço",
           "Toque",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -120,7 +112,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -134,7 +125,6 @@
           "Não",
           "Dieta",
           "Hábitos Alim",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -146,7 +136,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -160,7 +149,6 @@
           "Não",
           "1 Diaria",
           "+ 1 por Dia",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -172,7 +160,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -184,7 +171,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -196,7 +182,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -210,7 +195,6 @@
           "Não",
           "Uma",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -222,7 +206,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -236,7 +219,6 @@
           "Não",
           "Lesões",
           "Irritações",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -249,7 +231,6 @@
           "Sim",
           "Não",
           "*Sim",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -264,7 +245,6 @@
           "Específicos",
           "Durante nono",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -276,7 +256,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -290,7 +269,6 @@
           "Não",
           "A urinar",
           "Apres. sinais",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -302,7 +280,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -316,7 +293,6 @@
           "Não",
           "Derrepente",
           "Gradual",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -331,7 +307,6 @@
           "Dor",
           "Falta Corenção",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -346,7 +321,6 @@
           "Hesita",
           "Medo",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -358,7 +332,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -370,7 +343,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -382,7 +354,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -396,7 +367,6 @@
           "Não",
           "Quebradiça",
           "Oleosa",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -411,7 +381,6 @@
           "Dianteira",
           "Traseira",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -426,7 +395,6 @@
           "Cai",
           "Tropeça",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -441,7 +409,6 @@
           "Cor",
           "Formato",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -456,7 +423,6 @@
           "Coceira",
           "Vermelhidão",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -468,7 +434,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -480,7 +445,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -495,7 +459,6 @@
           "Gases",
           "Desconforto",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -510,7 +473,6 @@
           "Objetos",
           "Evita escuro",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -522,7 +484,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -534,7 +495,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -549,7 +509,6 @@
           "Vômitos",
           "Diarréia",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -563,7 +522,6 @@
           "Não",
           "Cicratizando",
           "Piora",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -575,7 +533,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -587,7 +544,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -601,7 +557,6 @@
           "Não",
           "Clara",
           "Espessa",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -613,7 +568,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -625,7 +579,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -640,7 +593,6 @@
           "Agitação",
           "Nervosismo",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -652,7 +604,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -664,7 +615,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -676,7 +626,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -688,7 +637,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -700,7 +648,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -712,7 +659,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -727,7 +673,6 @@
           "Específicos",
           "Com atividades",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -739,7 +684,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -753,7 +697,6 @@
           "Não",
           "Duros",
           "Secos",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -767,7 +710,6 @@
           "Não",
           "Filhote",
           "Recente",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -782,7 +724,6 @@
           "Dor",
           "Desconforto",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -797,7 +738,6 @@
           "Vômitos",
           "Diarréia",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -812,7 +752,6 @@
           "Tremores",
           "Calafrios",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -827,7 +766,6 @@
           "Letargia",
           "Falta Apetite",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -839,7 +777,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -851,7 +788,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -865,7 +801,6 @@
           "Não",
           "Após",
           "Constante",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -880,7 +815,6 @@
           "Tosse",
           "Chiado",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       }
@@ -899,7 +833,6 @@
           "Não",
           "Diário",
           "Semanal",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -914,7 +847,6 @@
           "Sangue",
           "Muco",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -928,7 +860,6 @@
           "Não",
           "Clara",
           "Escura",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -940,7 +871,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -955,7 +885,6 @@
           "Coloração",
           "Odor",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -969,7 +898,6 @@
           "Não",
           "Uma",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -983,7 +911,6 @@
           "Não",
           "Alimento",
           "Situação",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -995,7 +922,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1007,7 +933,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1021,7 +946,6 @@
           "Não",
           "Escura",
           "Vermelho Vivo",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1036,7 +960,6 @@
           "Mau Cheiro",
           "Cor incomum",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1051,7 +974,6 @@
           "Odor Forte",
           "Incomum",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1066,7 +988,6 @@
           "Frequente",
           "Esporadica",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1081,7 +1002,6 @@
           "Frequente",
           "Esporadica",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1096,7 +1016,6 @@
           "Frequente",
           "Esporadica",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1108,7 +1027,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1123,7 +1041,6 @@
           "Frequente",
           "Esporadica",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       }
@@ -1143,7 +1060,6 @@
           "Menos",
           "Interação",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1155,7 +1071,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1167,7 +1082,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1179,7 +1093,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1191,7 +1104,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1206,7 +1118,6 @@
           "Irritado",
           "Agressivo",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1220,7 +1131,6 @@
           "Não",
           "Acorda",
           "Dificultade",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1232,7 +1142,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1244,7 +1153,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1259,7 +1167,6 @@
           "Pessoas",
           "Animais",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1271,7 +1178,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1283,7 +1189,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1298,7 +1203,6 @@
           "Pesadelos",
           "Acorda Freq",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1310,7 +1214,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1325,7 +1228,6 @@
           "Alimento",
           "Brinquedos",
           "Ambas",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1337,7 +1239,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       },
@@ -1349,7 +1250,6 @@
         "options": [
           "Sim",
           "Não",
-          "Não sei",
           "Não sei"
         ]
       }
