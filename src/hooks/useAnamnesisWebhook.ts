@@ -9,8 +9,13 @@ export type { FollowUpAnswer, AnamnesisPayload };
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
+interface SendOutcome {
+  ok: boolean;
+  error: string | null;
+}
+
 interface UseAnamnesisWebhookReturn {
-  send: (payload: AnamnesisPayload) => Promise<boolean>;
+  send: (payload: AnamnesisPayload) => Promise<SendOutcome>;
   loading: boolean;
   error: string | null;
   reset: () => void;
@@ -38,7 +43,7 @@ export function useAnamnesisWebhook(): UseAnamnesisWebhookReturn {
     | undefined;
 
   const send = useCallback(
-    async (payload: AnamnesisPayload): Promise<boolean> => {
+    async (payload: AnamnesisPayload): Promise<SendOutcome> => {
       setLoading(true);
       setError(null);
 
@@ -50,7 +55,7 @@ export function useAnamnesisWebhook(): UseAnamnesisWebhookReturn {
         setError(result.error);
       }
 
-      return result.ok;
+      return result;
     },
     [webhookUrl, webhookSecret]
   );
