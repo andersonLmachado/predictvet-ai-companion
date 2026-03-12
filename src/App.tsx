@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import DischargeSummary from "./pages/DischargeSummary";
+import ConsultationPage from "./pages/ConsultationPage";
 import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -114,6 +115,17 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/anamnese/:patientId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ConsultationPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

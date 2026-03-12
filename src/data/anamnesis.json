@@ -1,0 +1,1258 @@
+[
+  {
+    "category": "Análise Física",
+    "complaints": [
+      {
+        "id": "2",
+        "label": "3. Meu animal está com falta de apetite.",
+        "topic": "3. Falta de apetite",
+        "followup": "Há quanto tempo seu animal está com falta de apetite?",
+        "options": [
+          "Sim",
+          "Não",
+          "7 dias",
+          "+ 7 dias",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "3",
+        "label": "6. Meu cão/gato está mancando.",
+        "topic": "6. Mancar",
+        "followup": "Há sinais de lesões ou inchaço nas patas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Lesões",
+          "Inchaços",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "4",
+        "label": "7. Meu animal apresenta coceira intensa.",
+        "topic": "7. Coceira intensa",
+        "followup": "A pele do seu animal apresenta vermelhidão ou lesões?",
+        "options": [
+          "Sim",
+          "Não",
+          "Vermelho",
+          "Lesões",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "5",
+        "label": "8. Meu cão/gato está com queda de pelo.",
+        "topic": "8. Queda de pelo",
+        "followup": "A queda de pelo é localizada ou generalizada?",
+        "options": [
+          "Sim",
+          "Não",
+          "Local",
+          "Geral",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "6",
+        "label": "9. Meu animal está com tosse persistente.",
+        "topic": "9. Tosse persistente",
+        "followup": "A tosse ocorre em determinados momentos do dia ou após atividade física?",
+        "options": [
+          "Sim",
+          "Não",
+          "Momentos",
+          "Após Ativ",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "7",
+        "label": "10. Meu cão/gato está espirrando muito.",
+        "topic": "10. Espirros frequentes",
+        "followup": "Os espirros são acompanhados de secreção nasal?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "8",
+        "label": "13. Meu animal está com dificuldade para respirar.",
+        "topic": "13. Dificuldade para respirar",
+        "followup": "Há presença de ruídos respiratórios como chiado ou ronco?",
+        "options": [
+          "Sim",
+          "Não",
+          "Ruídos",
+          "Roncos",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "9",
+        "label": "14. Meu cão/gato apresenta dor abdominal.",
+        "topic": "14. Dor abdominal",
+        "followup": "Seu animal apresenta inchaço ou sensibilidade ao toque na região abdominal?",
+        "options": [
+          "Sim",
+          "Não",
+          "Inchaço",
+          "Toque",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "10",
+        "label": "15. Meu animal está com inchaço no abdômen.",
+        "topic": "15. Inchaço abdominal",
+        "followup": "O inchaço aumenta após as refeições?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "11",
+        "label": "16. Meu cão/gato está com perda de peso.",
+        "topic": "16. Perda de peso",
+        "followup": "Houve mudança na dieta ou nos hábitos alimentares recentemente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Dieta",
+          "Hábitos Alim",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "12",
+        "label": "19. Meu animal está com dificuldade para andar.",
+        "topic": "19. Dificuldade para andar",
+        "followup": "A dificuldade é mais evidente em superfícies específicas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "13",
+        "label": "20. Meu cão/gato está com convulsões.",
+        "topic": "20. Convulsões",
+        "followup": "Qual é a duração e a frequência das convulsões?",
+        "options": [
+          "Sim",
+          "Não",
+          "1 Diaria",
+          "+ 1 por Dia",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "14",
+        "label": "22. Meu cão/gato está com mau hálito.",
+        "topic": "22. Mau hálito",
+        "followup": "Você notou alterações nas gengivas ou nos dentes do seu animal?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "15",
+        "label": "23. Meu animal está com dificuldade para mastigar.",
+        "topic": "23. Dificuldade para mastigar",
+        "followup": "Seu animal evita certos tipos de alimentos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "16",
+        "label": "24. Meu cão/gato está com gengivas inflamadas.",
+        "topic": "24. Gengivas inflamadas",
+        "followup": "As gengivas apresentam sangramento ao toque?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "17",
+        "label": "25. Meu animal está com inchaço nas patas.",
+        "topic": "25. Inchaço nas patas",
+        "followup": "O inchaço está presente em uma ou em ambas as patas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Uma",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "18",
+        "label": "27. Meu animal está com dor nas articulações.",
+        "topic": "27. Dor nas articulações",
+        "followup": "A dor nas articulações piora após exercícios?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "19",
+        "label": "28. Meu cão/gato está lambendo excessivamente as patas.",
+        "topic": "28. Lambendo excessivamente as patas",
+        "followup": "Há sinais de lesões ou irritação nas áreas lambidas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Lesões",
+          "Irritações",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "20",
+        "label": "29. Meu animal está com febre.",
+        "topic": "29. Febre",
+        "followup": "Você mediu a temperatura do seu animal? Se sim, qual foi?",
+        "options": [
+          "Sim",
+          "Não",
+          "*Sim",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "21",
+        "label": "30. Meu cão/gato apresenta tremores.",
+        "topic": "30. Tremores",
+        "followup": "Os tremores ocorrem em momentos específicos, como após exercícios ou durante o sono?",
+        "options": [
+          "Sim",
+          "Não",
+          "Específicos",
+          "Durante nono",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "22",
+        "label": "31. Meu animal está com olhos vermelhos.",
+        "topic": "31. Olhos vermelhos",
+        "followup": "Seu animal apresenta sensibilidade à luz?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "23",
+        "label": "33. Meu animal está com dificuldade para urinar.",
+        "topic": "33. Dificuldade para urinar",
+        "followup": "O seu animal faz força ao urinar ou apresenta sinais de dor?",
+        "options": [
+          "Sim",
+          "Não",
+          "A urinar",
+          "Apres. sinais",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "24",
+        "label": "36. Meu cão/gato está com pele vermelha ou irritada.",
+        "topic": "36. Pele vermelha ou irritada",
+        "followup": "Seu animal coça frequentemente a área afetada?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "25",
+        "label": "37. Meu animal está com inchaço no rosto.",
+        "topic": "37. Inchaço no rosto",
+        "followup": "O inchaço apareceu de repente ou foi aumentando gradualmente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Derrepente",
+          "Gradual",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "26",
+        "label": "39. Meu animal está com dificuldade para subir escadas.",
+        "topic": "39. Dificuldade para subir escadas",
+        "followup": "A dificuldade é acompanhada de dor ou falta de coordenação?",
+        "options": [
+          "Sim",
+          "Não",
+          "Dor",
+          "Falta Corenção",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "27",
+        "label": "40. Meu cão/gato está com dificuldade para descer escadas.",
+        "topic": "40. Dificuldade para descer escadas",
+        "followup": "Seu animal hesita ao descer ou mostra sinais de medo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Hesita",
+          "Medo",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "28",
+        "label": "41. Meu animal está com aumento de sede.",
+        "topic": "41. Aumento de sede",
+        "followup": "A frequência urinária também aumentou?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "29",
+        "label": "42. Meu cão/gato está com aumento de apetite.",
+        "topic": "42. Aumento de apetite",
+        "followup": "Mesmo com o aumento de apetite, houve perda de peso?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "30",
+        "label": "44. Meu cão/gato está com olhos amarelados.",
+        "topic": "44. Olhos amarelados",
+        "followup": "Houve mudança na cor das fezes ou da urina?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "31",
+        "label": "45. Meu animal está com pelagem sem brilho.",
+        "topic": "45. Pelagem sem brilho",
+        "followup": "A pelagem está quebradiça ou oleosa?",
+        "options": [
+          "Sim",
+          "Não",
+          "Quebradiça",
+          "Oleosa",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "32",
+        "label": "46. Meu cão/gato está com falta de coordenação.",
+        "topic": "46. Falta de coordenação",
+        "followup": "A falta de coordenação está presente nas patas dianteiras, traseiras ou em ambas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Dianteira",
+          "Traseira",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "33",
+        "label": "47. Meu animal está com falta de equilíbrio.",
+        "topic": "47. Falta de equilíbrio",
+        "followup": "Seu animal cai frequentemente ou tropeça em objetos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Cai",
+          "Tropeça",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "34",
+        "label": "48. Meu cão/gato está com unhas quebradiças.",
+        "topic": "48. Unhas quebradiças",
+        "followup": "As unhas estão mudando de cor ou formato?",
+        "options": [
+          "Sim",
+          "Não",
+          "Cor",
+          "Formato",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "35",
+        "label": "49. Meu animal está com pele descamando.",
+        "topic": "49. Pele descamando",
+        "followup": "A descamação está acompanhada de coceira ou vermelhidão?",
+        "options": [
+          "Sim",
+          "Não",
+          "Coceira",
+          "Vermelhidão",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "36",
+        "label": "51. Meu animal está com inchaço nos linfonodos.",
+        "topic": "51. Inchaço nos linfonodos",
+        "followup": "O inchaço é dolorido ao toque?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "37",
+        "label": "52. Meu cão/gato está com dificuldade para defecar.",
+        "topic": "52. Dificuldade para defecar",
+        "followup": "Há presença de esforço excessivo ao defecar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "38",
+        "label": "53. Meu animal está com inchaço no abdômen.",
+        "topic": "53. Inchaço abdominal",
+        "followup": "O inchaço é acompanhado de gases ou desconforto?",
+        "options": [
+          "Sim",
+          "Não",
+          "Gases",
+          "Desconforto",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "39",
+        "label": "56. Meu cão/gato está com dificuldade para enxergar.",
+        "topic": "56. Dificuldade para enxergar",
+        "followup": "Seu animal colide com objetos ou evita áreas escuras?",
+        "options": [
+          "Sim",
+          "Não",
+          "Objetos",
+          "Evita escuro",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "40",
+        "label": "57. Meu animal está com dificuldade para ouvir.",
+        "topic": "57. Dificuldade para ouvir",
+        "followup": "Seu animal não responde a sons que normalmente atrairiam sua atenção?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "41",
+        "label": "59. Meu animal está com inchaço no pescoço.",
+        "topic": "59. Inchaço no pescoço",
+        "followup": "O inchaço está presente em um ou ambos os lados do pescoço?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "42",
+        "label": "61. Meu animal está com febre persistente.",
+        "topic": "61. Febre persistente",
+        "followup": "A febre é acompanhada de outros sintomas, como vômitos ou diarreia?",
+        "options": [
+          "Sim",
+          "Não",
+          "Vômitos",
+          "Diarréia",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "43",
+        "label": "62. Meu cão/gato está com lesões na pele.",
+        "topic": "62. Lesões na pele",
+        "followup": "As lesões estão cicatrizando ou piorando?",
+        "options": [
+          "Sim",
+          "Não",
+          "Cicratizando",
+          "Piora",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "44",
+        "label": "63. Meu animal está com dificuldade para mastigar alimentos secos.",
+        "topic": "63. Dificuldade para mastigar alimentos secos",
+        "followup": "Seu animal prefere alimentos úmidos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "45",
+        "label": "64. Meu cão/gato está com dificuldade para engolir.",
+        "topic": "64. Dificuldade para engolir",
+        "followup": "Seu animal se engasga frequentemente ao comer?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "46",
+        "label": "65. Meu animal está com olhos lacrimejando.",
+        "topic": "65. Olhos lacrimejando",
+        "followup": "A secreção ocular é clara ou espessa?",
+        "options": [
+          "Sim",
+          "Não",
+          "Clara",
+          "Espessa",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "47",
+        "label": "67. Meu animal está com gengivas pálidas.",
+        "topic": "67. Gengivas pálidas",
+        "followup": "As gengivas voltam à cor normal rapidamente quando pressionadas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "48",
+        "label": "69. Meu animal está com falta de ar.",
+        "topic": "69. Falta de ar",
+        "followup": "Seu animal está respirando com a boca aberta frequentemente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "49",
+        "label": "70. Meu cão/gato está com frequência cardíaca acelerada.",
+        "topic": "70. Frequência cardíaca acelerada",
+        "followup": "Seu animal apresenta agitação ou nervosismo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Agitação",
+          "Nervosismo",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "50",
+        "label": "71. Meu animal está com pressão alta.",
+        "topic": "71. Pressão alta",
+        "followup": "O comportamento do seu animal mudou desde que os sintomas começaram?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "51",
+        "label": "73. Meu animal está com dificuldade para ficar em pé.",
+        "topic": "73. Dificuldade para ficar em pé",
+        "followup": "A dificuldade está associada a alguma lesão visível?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "52",
+        "label": "74. Meu cão/gato está com dificuldade para se levantar.",
+        "topic": "74. Dificuldade para se levantar",
+        "followup": "Seu animal mostra sinais de dor ao tentar se levantar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "53",
+        "label": "75. Meu animal está com dor ao ser tocado.",
+        "topic": "75. Dor ao ser tocado",
+        "followup": "A dor está localizada em alguma parte específica do corpo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "54",
+        "label": "77. Meu animal está com inchaço no abdômen.",
+        "topic": "77. Inchaço abdominal",
+        "followup": "O inchaço é mais pronunciado após as refeições?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "55",
+        "label": "78. Meu cão/gato está com falta de coordenação ao andar.",
+        "topic": "78. Falta de coordenação ao andar",
+        "followup": "Seu animal apresenta tremores nas patas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "56",
+        "label": "80. Meu cão/gato está com espirros frequentes.",
+        "topic": "80. Espirros frequentes",
+        "followup": "Os espirros ocorrem mais em locais específicos ou durante certas atividades?",
+        "options": [
+          "Sim",
+          "Não",
+          "Específicos",
+          "Com atividades",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "57",
+        "label": "81. Meu animal está com dor ao urinar.",
+        "topic": "81. Dor ao urinar",
+        "followup": "Seu animal faz esforço ao urinar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "58",
+        "label": "84. Meu cão/gato está com dificuldade para comer.",
+        "topic": "84. Dificuldade para comer",
+        "followup": "Seu animal evita alimentos duros ou secos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Duros",
+          "Secos",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "59",
+        "label": "86. Meu cão/gato está com dificuldade para correr.",
+        "topic": "86. Dificuldade para correr",
+        "followup": "A dificuldade está presente desde filhote ou surgiu recentemente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Filhote",
+          "Recente",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "60",
+        "label": "88. Meu cão/gato está com aumento da frequência urinária.",
+        "topic": "88. Aumento da frequência urinária",
+        "followup": "Seu animal apresenta dor ou desconforto ao urinar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Dor",
+          "Desconforto",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "61",
+        "label": "90. Meu cão/gato está com falta de apetite.",
+        "topic": "90. Falta de apetite",
+        "followup": "A falta de apetite é acompanhada de vômitos ou diarreia?",
+        "options": [
+          "Sim",
+          "Não",
+          "Vômitos",
+          "Diarréia",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "62",
+        "label": "91. Meu animal está com temperatura corporal elevada.",
+        "topic": "91. Temperatura corporal elevada",
+        "followup": "Seu animal apresenta tremores ou calafrios?",
+        "options": [
+          "Sim",
+          "Não",
+          "Tremores",
+          "Calafrios",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "63",
+        "label": "93. Meu animal está com febre alta.",
+        "topic": "93. Febre alta",
+        "followup": "A febre é acompanhada de letargia ou falta de apetite?",
+        "options": [
+          "Sim",
+          "Não",
+          "Letargia",
+          "Falta Apetite",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "64",
+        "label": "96. Meu cão/gato está com dificuldade para respirar durante o sono.",
+        "topic": "96. Dificuldade para respirar durante o sono",
+        "followup": "Seu animal acorda frequentemente durante a noite devido à dificuldade respiratória?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "65",
+        "label": "98. Meu cão/gato está com falta de energia ao brincar.",
+        "topic": "98. Falta de energia ao brincar",
+        "followup": "Seu animal se cansa rapidamente durante as brincadeiras?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "66",
+        "label": "99. Meu animal está com aumento do volume abdominal.",
+        "topic": "99. Aumento do volume abdominal",
+        "followup": "O aumento do volume abdominal ocorre após as refeições ou é constante?",
+        "options": [
+          "Sim",
+          "Não",
+          "Após",
+          "Constante",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "67",
+        "label": "100. Meu cão/gato está com falta de ar ao fazer esforço.",
+        "topic": "100. Falta de ar ao fazer esforço",
+        "followup": "Seu animal apresenta tosse ou chiado ao fazer esforço físico?",
+        "options": [
+          "Sim",
+          "Não",
+          "Tosse",
+          "Chiado",
+          "Ambas",
+          "Não sei"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "Análise de Fluídos e Secreções",
+    "complaints": [
+      {
+        "id": "69",
+        "label": "1. Meu animal está vomitando.",
+        "topic": "1. Vômito",
+        "followup": "Qual é a frequência e a cor do vômito?",
+        "options": [
+          "Sim",
+          "Não",
+          "Diário",
+          "Semanal",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "70",
+        "label": "2. Meu cão/gato está com diarreia.",
+        "topic": "2. Diarreia",
+        "followup": "A diarreia está acompanhada de sangue ou muco?",
+        "options": [
+          "Sim",
+          "Não",
+          "Sangue",
+          "Muco",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "71",
+        "label": "4. Meu cão/gato está bebendo muita água.",
+        "topic": "4. Aumento de sede",
+        "followup": "A urina do seu animal está mais clara ou mais escura que o normal?",
+        "options": [
+          "Sim",
+          "Não",
+          "Clara",
+          "Escura",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "72",
+        "label": "5. Meu animal está urinando com frequência.",
+        "topic": "5. Urinação frequente",
+        "followup": "Seu animal está apresentando dor ao urinar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "73",
+        "label": "11. Meu animal está com secreção ocular.",
+        "topic": "11. Secreção ocular",
+        "followup": "A secreção ocular tem coloração ou odor incomum?",
+        "options": [
+          "Sim",
+          "Não",
+          "Coloração",
+          "Odor",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "74",
+        "label": "12. Meu cão/gato apresenta secreção nasal.",
+        "topic": "12. Secreção nasal",
+        "followup": "A secreção nasal está presente em uma ou ambas as narinas?",
+        "options": [
+          "Sim",
+          "Não",
+          "Uma",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "75",
+        "label": "21. Meu animal está babando muito.",
+        "topic": "21. Salivação excessiva",
+        "followup": "A salivação está associada a algum alimento ou situação?",
+        "options": [
+          "Sim",
+          "Não",
+          "Alimento",
+          "Situação",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "76",
+        "label": "26. Meu cão/gato apresenta secreção nos ouvidos.",
+        "topic": "26. Secreção nos ouvidos",
+        "followup": "Há presença de odor desagradável na secreção?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "77",
+        "label": "34. Meu cão/gato está com sangue na urina.",
+        "topic": "34. Sangue na urina",
+        "followup": "A urina tem presença de coágulos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "78",
+        "label": "35. Meu animal está com fezes com sangue.",
+        "topic": "35. Fezes com sangue",
+        "followup": "As fezes estão escuras ou com sangue vermelho vivo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Escura",
+          "Vermelho Vivo",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "79",
+        "label": "38. Meu cão/gato está com secreção na genitália.",
+        "topic": "38. Secreção na genitália",
+        "followup": "A secreção apresenta mau cheiro ou cor incomum?",
+        "options": [
+          "Sim",
+          "Não",
+          "Mau Cheiro",
+          "Cor incomum",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "80",
+        "label": "66. Meu cão/gato está com fezes escuras.",
+        "topic": "66. Fezes escuras",
+        "followup": "As fezes estão com odor forte ou diferente do usual?",
+        "options": [
+          "Sim",
+          "Não",
+          "Odor Forte",
+          "Incomum",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "81",
+        "label": "68. Meu cão/gato está com sangramento nasal.",
+        "topic": "68. Sangramento nasal",
+        "followup": "O sangramento nasal é frequente ou ocorre esporadicamente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Frequente",
+          "Esporadica",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "82",
+        "label": "79. Meu animal está com vômito com sangue.",
+        "topic": "79. Vômito com sangue",
+        "followup": "O vômito é frequente ou esporádico?",
+        "options": [
+          "Sim",
+          "Não",
+          "Frequente",
+          "Esporadica",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "83",
+        "label": "82. Meu cão/gato está com fezes aquosas.",
+        "topic": "82. Fezes aquosas",
+        "followup": "A diarreia é frequente ou esporádica?",
+        "options": [
+          "Sim",
+          "Não",
+          "Frequente",
+          "Esporadica",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "84",
+        "label": "87. Meu animal está com olhos inchados.",
+        "topic": "87. Olhos inchados",
+        "followup": "O inchaço é acompanhado de secreção ocular?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "85",
+        "label": "94. Meu cão/gato está com fezes moles.",
+        "topic": "94. Fezes moles",
+        "followup": "As fezes moles estão frequentes ou ocorrem esporadicamente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Frequente",
+          "Esporadica",
+          "Ambas",
+          "Não sei"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "Análise Comportamental",
+    "complaints": [
+      {
+        "id": "87",
+        "label": "17. Meu animal está apático.",
+        "topic": "17. Apático",
+        "followup": "Seu animal está menos interessado em brincar ou interagir com a família?",
+        "options": [
+          "Sim",
+          "Não",
+          "Menos",
+          "Interação",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "88",
+        "label": "18. Meu cão/gato está agressivo.",
+        "topic": "18. Agressivo",
+        "followup": "Houve algum evento recente que possa ter desencadeado esse comportamento?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "89",
+        "label": "32. Meu cão/gato está com alterações no comportamento.",
+        "topic": "32. Alterações no comportamento",
+        "followup": "Houve mudança no ambiente do seu animal recentemente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "90",
+        "label": "43. Meu animal está choramingando ou gemendo.",
+        "topic": "43. Choramingando ou gemendo",
+        "followup": "Seu animal está mais vocal em momentos específicos, como à noite ou durante o descanso?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "91",
+        "label": "50. Meu cão/gato está com comportamento compulsivo.",
+        "topic": "50. Comportamento compulsivo",
+        "followup": "Seu animal apresenta comportamentos repetitivos, como perseguir o próprio rabo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "92",
+        "label": "54. Meu cão/gato está com comportamento anormal.",
+        "topic": "54. Comportamento anormal",
+        "followup": "Seu animal está mais irritado ou agressivo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Irritado",
+          "Agressivo",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "93",
+        "label": "55. Meu animal está com alteração no sono.",
+        "topic": "55. Alteração no sono",
+        "followup": "Seu animal acorda durante a noite ou tem dificuldade para dormir?",
+        "options": [
+          "Sim",
+          "Não",
+          "Acorda",
+          "Dificultade",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "94",
+        "label": "58. Meu cão/gato está com comportamento agressivo.",
+        "topic": "58. Comportamento agressivo",
+        "followup": "Houve mudanças recentes no ambiente que possam ter causado estresse?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "95",
+        "label": "60. Meu cão/gato está com falta de energia.",
+        "topic": "60. Falta de energia",
+        "followup": "Seu animal está menos disposto a se exercitar ou brincar?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "96",
+        "label": "72. Meu cão/gato está com comportamento de isolamento.",
+        "topic": "72. Comportamento de isolamento",
+        "followup": "Seu animal evita interação com pessoas ou outros animais?",
+        "options": [
+          "Sim",
+          "Não",
+          "Pessoas",
+          "Animais",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "97",
+        "label": "76. Meu cão/gato está com comportamento de lamber objetos.",
+        "topic": "76. Comportamento de lamber objetos",
+        "followup": "Seu animal lambe objetos de forma compulsiva?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "98",
+        "label": "83. Meu animal está com falta de interesse em brincar.",
+        "topic": "83. Falta de interesse em brincar",
+        "followup": "Seu animal está menos ativo que o normal?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "99",
+        "label": "85. Meu animal está com comportamento anormal ao dormir.",
+        "topic": "85. Comportamento anormal ao dormir",
+        "followup": "Seu animal tem pesadelos ou acorda frequentemente?",
+        "options": [
+          "Sim",
+          "Não",
+          "Pesadelos",
+          "Acorda Freq",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "100",
+        "label": "89. Meu animal está com comportamento agressivo ao ser tocado.",
+        "topic": "89. Comportamento agressivo ao ser tocado",
+        "followup": "A agressividade é mais pronunciada em alguma parte do corpo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "101",
+        "label": "92. Meu cão/gato está com comportamento de esconder objetos.",
+        "topic": "92. Comportamento de esconder objetos",
+        "followup": "Seu animal está escondendo alimentos ou brinquedos?",
+        "options": [
+          "Sim",
+          "Não",
+          "Alimento",
+          "Brinquedos",
+          "Ambas",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "102",
+        "label": "95. Meu animal está com comportamento de roer móveis.",
+        "topic": "95. Comportamento de roer móveis",
+        "followup": "Seu animal apresenta comportamento destrutivo com frequência?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      },
+      {
+        "id": "103",
+        "label": "97. Meu animal está com comportamento de lamber as patas.",
+        "topic": "97. Comportamento de lamber as patas",
+        "followup": "Seu animal apresenta lesões ou irritações nas áreas que ele está lambendo?",
+        "options": [
+          "Sim",
+          "Não",
+          "Não sei"
+        ]
+      }
+    ]
+  }
+]

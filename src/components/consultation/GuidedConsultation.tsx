@@ -60,7 +60,7 @@ const GuidedConsultation: React.FC = () => {
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('soap_block, content, ai_suggestions, created_at')
+        .select('soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
@@ -75,6 +75,20 @@ const GuidedConsultation: React.FC = () => {
 
       if (!isMounted) return;
 
+      // Guided flow: single row with flat soap_s/o/a/p fields
+      const guidedRecord = (data ?? []).find((row: any) => row.source === 'guided');
+      if (guidedRecord) {
+        setSoapData({
+          S: (guidedRecord as any).soap_s ?? '',
+          O: (guidedRecord as any).soap_o ?? '',
+          A: (guidedRecord as any).soap_a ?? '',
+          P: (guidedRecord as any).soap_p ?? '',
+        });
+        setAiSuggestions('');
+        return;
+      }
+
+      // Legacy flow: one row per soap_block
       const nextSoapData = { S: '', O: '', A: '', P: '' };
       let nextAiSuggestions = '';
       const filledBlocks = new Set<string>();
