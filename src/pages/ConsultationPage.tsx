@@ -85,14 +85,14 @@ const ConsultationPage: React.FC = () => {
       transcription: session.transcription,
     });
 
-    const ok = await send(payload);
+    const { ok, error } = await send(payload);
 
     if (ok) {
       dispatch({ type: 'SUBMIT_SUCCESS' });
     } else {
       dispatch({
         type: 'SUBMIT_ERROR',
-        payload: 'Não foi possível enviar os dados para análise. Verifique sua conexão e tente novamente.',
+        payload: error ?? 'Não foi possível enviar os dados para análise. Verifique sua conexão e tente novamente.',
       });
     }
   }, [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send]);
