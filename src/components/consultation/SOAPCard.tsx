@@ -255,10 +255,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
           />
           {isProcessing && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70">
-              <div className="flex items-center gap-2 text-sm text-primary">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                IA está processando...
-              </div>
+              <span className="text-sm text-primary">Processando</span>
             </div>
           )}
           {/* Floating mic button */}
@@ -302,9 +299,8 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
           </div>
         </div>
         {isProcessing && (
-          <p className="flex items-center gap-1.5 text-xs text-primary">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            IA está processando o áudio...
+          <p className="text-xs text-primary">
+            Processando
           </p>
         )}
 
