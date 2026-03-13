@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Stethoscope, FlaskConical, Brain, Shield } from 'lucide-react';
 import predictlabLogo from '@/assets/predictlab-logo-v26.png';
+import predictlabLogoHero from '@/assets/predictlab-logo-hero.png';
 
 /* ── Floating badge component ── */
 function FloatingBadge({
@@ -135,23 +136,15 @@ const HeroSection = () => {
 
           {/* Logo */}
           <div className="mx-auto mb-10 pl-animate-fade-up-d1 flex justify-center">
-            <div
-              className="pl-animate-float rounded-2xl"
+            <img
+              src={predictlabLogoHero}
+              alt="PredictLab — IA Veterinária"
+              className="pl-animate-float h-16 sm:h-20 md:h-24 w-auto object-contain"
               style={{
-                background: 'hsla(0,0%,100%,0.96)',
-                padding: '18px 32px',
-                boxShadow:
-                  '0 24px 80px -12px hsla(221,73%,10%,0.6),' +
-                  '0 0 0 1px hsla(217,88%,57%,0.25),' +
-                  '0 0 48px -8px hsla(221,73%,45%,0.35)',
+                filter:
+                  'drop-shadow(0 0 24px hsla(221,73%,45%,0.4)) drop-shadow(0 8px 32px hsla(221,73%,10%,0.5))',
               }}
-            >
-              <img
-                src={predictlabLogo}
-                alt="PredictLab — IA Veterinária"
-                className="h-14 sm:h-16 md:h-20 w-auto object-contain"
-              />
-            </div>
+            />
           </div>
 
           {/* Headline */}
