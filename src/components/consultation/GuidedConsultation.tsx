@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { usePatient } from '@/contexts/PatientContext';
-import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle } from 'lucide-react';
+import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -200,6 +200,45 @@ const GuidedConsultation: React.FC = () => {
           SOAP
         </Badge>
       </div>
+
+      {/* ── Anamnese Guiada shortcut ─────────────────────────────────────── */}
+      <Link
+        to={selectedPatient ? `/anamnese/${selectedPatient.id}` : '/anamnese'}
+        className="group flex items-center justify-between gap-4 rounded-2xl px-5 py-4 transition-all pl-card-hover"
+        style={{
+          background: 'linear-gradient(135deg, hsl(221,73%,45%) 0%, hsl(269,55%,48%) 50%, hsl(352,76%,44%) 100%)',
+          boxShadow: '0 6px 28px -6px hsla(221,73%,45%,0.45), 0 2px 8px -2px hsla(352,76%,44%,0.25)',
+          textDecoration: 'none',
+        }}
+      >
+        <div className="flex items-center gap-3.5">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'hsla(0,0%,100%,0.15)', border: '1px solid hsla(0,0%,100%,0.25)' }}
+          >
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p
+              className="text-sm font-bold leading-tight"
+              style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
+            >
+              Iniciar Anamnese Guiada com IA
+            </p>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: 'hsla(213,100%,90%,0.7)', fontFamily: 'Nunito Sans, sans-serif' }}
+            >
+              Colete a queixa principal e histórico — a IA estrutura o SOAP automaticamente
+            </p>
+          </div>
+        </div>
+        <ArrowRight
+          className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1"
+          style={{ color: 'hsla(213,100%,95%,0.8)' }}
+        />
+      </Link>
+      {/* ─────────────────────────────────────────────────────────────────── */}
 
       {/* SOAP Cards */}
       <div className="grid gap-5">
