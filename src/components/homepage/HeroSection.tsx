@@ -134,19 +134,24 @@ const HeroSection = () => {
           </div>
 
           {/* Logo */}
-          <div
-            className="mx-auto mb-8 w-56 md:w-72 pl-animate-fade-up-d1 pl-animate-float rounded-2xl overflow-hidden"
-            style={{
-              background: 'hsla(0,0%,100%,0.92)',
-              padding: '16px 24px',
-              boxShadow: '0 20px 60px -12px hsla(221,73%,10%,0.5), 0 0 0 1px hsla(217,88%,57%,0.2)',
-            }}
-          >
-            <img
-              src={predictlabLogo}
-              alt="PredictLab — IA Veterinária"
-              className="w-full object-contain"
-            />
+          <div className="mx-auto mb-10 pl-animate-fade-up-d1 flex justify-center">
+            <div
+              className="pl-animate-float rounded-2xl"
+              style={{
+                background: 'hsla(0,0%,100%,0.96)',
+                padding: '18px 32px',
+                boxShadow:
+                  '0 24px 80px -12px hsla(221,73%,10%,0.6),' +
+                  '0 0 0 1px hsla(217,88%,57%,0.25),' +
+                  '0 0 48px -8px hsla(221,73%,45%,0.35)',
+              }}
+            >
+              <img
+                src={predictlabLogo}
+                alt="PredictLab — IA Veterinária"
+                className="h-14 sm:h-16 md:h-20 w-auto object-contain"
+              />
+            </div>
           </div>
 
           {/* Headline */}
