@@ -139,7 +139,7 @@ const HeroSection = () => {
             <img
               src={predictlabLogoHero}
               alt="PredictLab — IA Veterinária"
-              className="pl-animate-float h-16 sm:h-20 md:h-24 w-auto object-contain"
+              className="pl-animate-float w-64 sm:w-80 md:w-[420px] lg:w-[540px] h-auto object-contain"
               style={{
                 filter:
                   'drop-shadow(0 0 24px hsla(221,73%,45%,0.4)) drop-shadow(0 8px 32px hsla(221,73%,10%,0.5))',
