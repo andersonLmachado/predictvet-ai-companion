@@ -121,6 +121,16 @@ const App = () => (
               />
 
               <Route
+                path="/anamnese"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ConsultationPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/anamnese/:patientId"
                 element={
                   <ProtectedRoute>
