@@ -4,7 +4,7 @@ import HeroSection from '@/components/homepage/HeroSection';
 import FeaturesSection from '@/components/homepage/FeaturesSection';
 import WhyChooseSection from '@/components/homepage/WhyChooseSection';
 import HowItWorksSection from '@/components/homepage/HowItWorksSection';
-import TestimonialsSection from '@/components/homepage/TestimonialsSection';
+import FAQSection from '@/components/homepage/FAQSection';
 import CTASection from '@/components/homepage/CTASection';
 
 const Index = () => {
@@ -14,7 +14,7 @@ const Index = () => {
       <FeaturesSection />
       <WhyChooseSection />
       <HowItWorksSection />
-      <TestimonialsSection />
+      <FAQSection />
       <CTASection />
     </div>
   );

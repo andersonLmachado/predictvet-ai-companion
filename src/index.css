@@ -177,6 +177,11 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='rgba(90%2C151%2C245%2C0.07)' stroke-width='1'%3E%3Cpath d='M10 10h20v20H10zM50 10h20v20H50zM10 50h20v20H10zM50 50h20v20H50z'/%3E%3Cpath d='M30 20h20M20 30v20M60 30v20M30 60h20'/%3E%3Ccircle cx='10' cy='10' r='2' fill='rgba(90%2C151%2C245%2C0.12)'/%3E%3Ccircle cx='70' cy='10' r='2' fill='rgba(90%2C151%2C245%2C0.12)'/%3E%3Ccircle cx='10' cy='70' r='2' fill='rgba(90%2C151%2C245%2C0.12)'/%3E%3Ccircle cx='70' cy='70' r='2' fill='rgba(90%2C151%2C245%2C0.12)'/%3E%3Ccircle cx='40' cy='40' r='3' fill='rgba(224%2C82%2C32%2C0.18)'/%3E%3C/g%3E%3C/svg%3E");
 }
 
+/* ── FAQ Accordion ── */
+.pl-faq-item[data-state="open"] {
+  border-left: 4px solid hsl(221, 73%, 45%) !important;
+}
+
 /* ── Scrollbar ── */
 .scrollbar-thin::-webkit-scrollbar { width: 5px; }
 .scrollbar-thin::-webkit-scrollbar-track { background-color: transparent; }
