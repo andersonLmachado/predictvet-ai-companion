@@ -36,10 +36,12 @@ O fluxo evolui para **4 steps**, mantendo os 3 existentes intactos:
 |---|---|---|
 | 0 | `ComplaintSelector` | Sem alteração |
 | 1 | `FollowUpCard` | Sem alteração |
-| 2 | `NarrativeInput` | Relato truncado a 500 chars antes de qualquer processamento |
+| 2 | `NarrativeInput` | Relato passado integralmente para o step 3; truncamento ocorre apenas em `buildTruncatedPayload` |
 | 3 | `DynamicAnamnesisStep` *(novo)* | Perguntas dinâmicas conversacionais |
 
 O step 2 não mais dispara o webhook diretamente. O botão de confirmação do relato passa a disparar `ADVANCE_TO_DYNAMIC`, avançando para step 3. O webhook é chamado somente ao final do step 3.
+
+**Navegação:** o botão "Voltar" fica **oculto/desabilitado** no step 3. Re-navegar para o step 2 re-dispararia o fluxo assíncrono (OpenAI + Supabase), o que é indesejável. O vet pode usar "Pular" em todas as perguntas para avançar sem responder.
 
 ---
 
@@ -47,7 +49,7 @@ O step 2 não mais dispara o webhook diretamente. O botão de confirmação do r
 
 ### Abordagem escolhida: Hook separado (`useDynamicAnamnesis`)
 
-O `sessionReducer` permanece intacto. Um novo hook `useDynamicAnamnesis` encapsula toda a fase dinâmica e vive dentro do componente `DynamicAnamnesisStep`, que só monta quando `step === 3`.
+O `sessionReducer` permanece com seus **8 action types** intactos (as 17 são as contagens de testes em `consultationSession.test.ts`, não o número de actions). Um novo hook `useDynamicAnamnesis` encapsula toda a fase dinâmica e vive dentro do componente `DynamicAnamnesisStep`, que só monta quando `step === 3`.
 
 **Garantia:** `useDynamicAnamnesis` nunca é inicializado no mount do `ConsultationPage` — somente quando o vet confirma o relato e o componente entra no DOM.
 
@@ -60,25 +62,61 @@ O `sessionReducer` permanece intacto. Um novo hook `useDynamicAnamnesis` encapsu
 | Arquivo | Responsabilidade |
 |---|---|
 | `src/lib/openaiCategories.ts` | Função pura `parseOpenAICategories(text, validCategories?)` |
-| `src/hooks/useSupabaseQuestions.ts` | Hook que executa SELECT na `perguntas_anamnese` |
+| `src/hooks/useSupabaseQuestions.ts` | Hook que executa SELECT na `perguntas_anamnese` (cliente anon + RLS) |
 | `src/hooks/useDynamicAnamnesis.ts` | Hook de orquestração: OpenAI → Supabase → iteração |
 | `src/components/consultation/DynamicAnamnesisStep.tsx` | Componente da fase conversacional |
 | `src/tests/openaiCategories.test.ts` | Testes da função de parse |
 | `src/tests/useSupabaseQuestions.test.ts` | Testes do hook Supabase |
 | `src/tests/buildTruncatedPayload.test.ts` | Testes da função de truncamento |
+| `src/tests/useDynamicAnamnesis.test.ts` | Testes do hook de orquestração |
 
 ### Modificados
 
 | Arquivo | O que muda |
 |---|---|
-| `src/lib/consultationSession.ts` | Nova action `ADVANCE_TO_DYNAMIC` (step 2 → 3) |
-| `src/lib/anamnesisApi.ts` | Extrai/adiciona `buildTruncatedPayload()` com proteções |
-| `src/components/consultation/ConsultationPage.tsx` | Renderiza `<DynamicAnamnesisStep>` no step 3; botão do relato despacha `ADVANCE_TO_DYNAMIC` |
-| `src/components/consultation/ConsultationStepper.tsx` | Aceita `steps` dinâmico; exibe 4 passos quando `totalSteps === 4` |
+| `src/lib/consultationSession.ts` | Nova action `ADVANCE_TO_DYNAMIC` (step 2 → 3) e seu tipo no union `SessionAction` |
+| `src/lib/anamnesisApi.ts` | Adiciona `buildTruncatedPayload()` e `ExtendedAnamnesisPayload`; widena `sendAnamnesisPayload` para aceitar o tipo estendido |
+| `src/components/consultation/ConsultationPage.tsx` | Renderiza `<DynamicAnamnesisStep>` no step 3; botão do relato despacha `ADVANCE_TO_DYNAMIC`; armazena `dynamicAnswers` em `useState` local; oculta botão "Voltar" no step 3 |
+| `src/components/consultation/ConsultationPage.tsx` | Passa array de 4 steps ao `ConsultationStepper` quando `step >= 3` |
 
 ### Não modificados
 
-`ComplaintSelector`, `FollowUpCard`, `NarrativeInput`, `GuidedConsultation`, `anamnesis.json`, todos os testes existentes.
+`ComplaintSelector`, `FollowUpCard`, `NarrativeInput`, `GuidedConsultation`, `ConsultationStepper`, `anamnesis.json`, todos os testes existentes.
+
+> **Nota:** `ConsultationStepper` já aceita `steps: Step[]` como prop dinâmica. Nenhuma alteração no componente — apenas o `ConsultationPage` passa um array de 4 itens quando `step >= 3`.
+
+---
+
+## Tipos
+
+### Nova action em `consultationSession.ts`
+
+```ts
+// Adicionado ao union SessionAction:
+| { type: 'ADVANCE_TO_DYNAMIC' }
+
+// Reducer branch:
+case 'ADVANCE_TO_DYNAMIC':
+  return { ...state, step: 3 }
+```
+
+### `ExtendedAnamnesisPayload` em `anamnesisApi.ts`
+
+```ts
+export interface ExtendedAnamnesisPayload extends AnamnesisPayload {
+  respostas_truncadas?: true  // flag literal: apenas presente (true) quando truncamento ocorreu; omitida caso contrário
+}
+```
+
+`sendAnamnesisPayload` passa a aceitar `ExtendedAnamnesisPayload` em vez de `AnamnesisPayload`.
+
+### Storage de `dynamicAnswers` em `ConsultationPage`
+
+```ts
+const [dynamicAnswers, setDynamicAnswers] = useState<FollowUpAnswer[]>([])
+```
+
+Não entra no `sessionReducer`. Quando `DynamicAnamnesisStep` chama `onFinish(answers)`, o `ConsultationPage` armazena em `setDynamicAnswers(answers)` e dispara o webhook.
 
 ---
 
@@ -89,10 +127,11 @@ O `sessionReducer` permanece intacto. Um novo hook `useDynamicAnamnesis` encapsu
 ```ts
 interface Props {
   transcription: string
-  onComplete: (answers: FollowUpAnswer[]) => void
-  onSkipAll: () => void
+  onFinish: (answers: FollowUpAnswer[]) => void  // único callback — cobre sucesso, skip e erro
 }
 ```
+
+`onFinish([])` é chamado tanto em caso de erro/vazio quanto quando o vet pula todas as perguntas. O `ConsultationPage` trata ambos da mesma forma: envia o webhook com `dynamicAnswers: []`.
 
 **Fases internas (`phase`):**
 
@@ -100,19 +139,31 @@ interface Props {
 |---|---|
 | `'loading'` | Spinner: "Identificando categorias clínicas..." |
 | `'questions'` | Card com pergunta, botões Sim/Não/Não sei, campo de detalhe opcional, barra de progresso, botão Pular |
-| `'done'` | Dispara `onComplete(answers)` automaticamente |
-| erro / vazio | Dispara `onSkipAll()` automaticamente |
+| `'submitting'` | Breve mensagem "Finalizando anamnese..." antes de chamar `onFinish` |
+| `'done'` | (interno) — transita para `'submitting'` ao responder a última pergunta |
 
 **Barra de progresso:** "Pergunta X de Y" com barra visual.
 
 **Resposta acumulada:** botão selecionado + texto do campo concatenados como `"Sim — detalhe opcional"`, truncado a 300 chars antes de acumular.
 
-### Atualização do `ConsultationStepper`
+### Atualização do `ConsultationPage`
 
 ```tsx
+// Stepper dinâmico
 const steps = session.step >= 3
   ? [...STEPS_BASE, { label: 'Perguntas', description: 'Aprofundamento clínico' }]
   : STEPS_BASE
+
+// Renderização condicional do step 3
+{session.step === 3 && (
+  <DynamicAnamnesisStep
+    transcription={session.transcription}
+    onFinish={handleFinalSubmit}
+  />
+)}
+
+// Botão Voltar oculto no step 3
+{session.step < 3 && <BackButton />}
 ```
 
 ---
@@ -122,30 +173,32 @@ const steps = session.step >= 3
 ```
 mount (transcription disponível via prop)
   │
-  ├─ Chamada OpenAI
-  │    endpoint: POST https://api.openai.com/v1/chat/completions
-  │    model: gpt-3.5-turbo
-  │    max_tokens: 100, temperature: 0
-  │    prompt: inclui o relato e lista de categorias válidas
+  ├─ Chamada OpenAI (VITE_OPENAI_API_KEY — risco controlado, MVP, chave exposta no bundle)
+  │    POST https://api.openai.com/v1/chat/completions
+  │    model: gpt-3.5-turbo, max_tokens: 100, temperature: 0
+  │    system: "Você é um assistente veterinário clínico."
+  │    user: prompt com relato + lista de categorias válidas
+  │          instrução explícita: "Responda APENAS com array JSON puro, sem markdown, sem explicações"
   │    extrai: data.choices[0].message.content
-  │    parse: parseOpenAICategories(content)
+  │    pre-processa: strip de markdown fences antes do JSON.parse
+  │    parse: parseOpenAICategories(content) → string[]
   │
-  │    erro (rede, parse, JSON inválido) → categories = [] → onSkipAll()
+  │    erro (rede, HTTP, parse, JSON inválido) → onFinish([])
   │
-  ├─ categories.length === 0 → onSkipAll()
+  ├─ categories.length === 0 → onFinish([])
   │
-  ├─ Query Supabase
+  ├─ Query Supabase (cliente anon com RLS — contexto do usuário autenticado)
   │    SELECT pergunta, agrupamento
   │    FROM perguntas_anamnese
   │    WHERE agrupamento = ANY(categories) AND ativo = true
   │    ORDER BY agrupamento, id
   │    LIMIT 8
   │
-  │    erro / retorno vazio → onSkipAll()
+  │    erro / retorno vazio → onFinish([])
   │
   └─ questions carregadas → phase = 'questions'
        usuário responde uma a uma
-       ao final → onComplete(answers)
+       ao final → phase = 'submitting' → onFinish(answers)
 ```
 
 ---
@@ -159,9 +212,10 @@ function parseOpenAICategories(
 ): string[]
 ```
 
+- **Pre-processa:** remove markdown fences (`` ```json ... ``` `` e `` ``` ... ``` ``) antes do parse
 - Faz `JSON.parse(text)` — se falhar, retorna `[]`
 - Verifica se o resultado é um array — se não, retorna `[]`
-- Filtra apenas categorias presentes em `validCategories` (default: lista completa do prompt)
+- Filtra apenas categorias presentes em `validCategories` (default: lista completa abaixo)
 - Limita a no máximo **3 categorias**
 
 **Categorias válidas (lista completa):**
@@ -187,7 +241,7 @@ function buildTruncatedPayload(params: {
   followupAnswers: FollowUpAnswer[]
   transcription: string
   dynamicAnswers: FollowUpAnswer[]
-}): AnamnesisPayload & { respostas_truncadas?: true }
+}): ExtendedAnamnesisPayload
 ```
 
 **Proteções aplicadas em ordem:**
@@ -199,18 +253,39 @@ function buildTruncatedPayload(params: {
 
 ---
 
+## Supabase Schema — `perguntas_anamnese`
+
+Tabela já existente no projeto. Schema esperado:
+
+```sql
+perguntas_anamnese (
+  id          bigint primary key,
+  agrupamento text    not null,   -- categoria clínica (ex: "Trato Urinário")
+  pergunta    text    not null,   -- texto da pergunta
+  ativo       boolean not null default true
+)
+```
+
+O tipo TypeScript gerado pelo Supabase (`Database['public']['Tables']['perguntas_anamnese']['Row']`) deve ser usado em `useSupabaseQuestions` para garantir type safety.
+
+A query usa o **cliente anon** (`supabase` de `src/integrations/supabase/client.ts`) com RLS ativo — contexto do usuário autenticado.
+
+---
+
 ## Tratamento de Erros
 
-**Regra principal:** nenhum erro no step 3 bloqueia o fluxo. Se qualquer chamada falhar, `onSkipAll()` é chamado e o webhook é enviado com os dados já coletados (queixa + follow-up estático + relato).
+**Regra principal:** nenhum erro no step 3 bloqueia o fluxo. `onFinish([])` é chamado em qualquer falha e o webhook é enviado com os dados já coletados.
 
 | Cenário | Comportamento |
 |---|---|
-| OpenAI sem chave (`VITE_OPENAI_API_KEY` ausente) | `onSkipAll()` imediato |
-| OpenAI retorna erro HTTP | `onSkipAll()` |
-| OpenAI retorna JSON malformado | `parseOpenAICategories` retorna `[]` → `onSkipAll()` |
-| Supabase retorna vazio | `onSkipAll()` |
-| Supabase lança erro | `onSkipAll()` |
-| Vet clica "Pular" em todas as perguntas | `onComplete([])` |
+| `VITE_OPENAI_API_KEY` ausente | `onFinish([])` imediato |
+| OpenAI retorna erro HTTP | `onFinish([])` |
+| OpenAI retorna JSON malformado | `parseOpenAICategories` retorna `[]` → `onFinish([])` |
+| OpenAI retorna categorias todas inválidas | `parseOpenAICategories` retorna `[]` → `onFinish([])` |
+| Supabase retorna vazio | `onFinish([])` |
+| Supabase lança erro | `onFinish([])` |
+| Vet clica "Pular" em todas as perguntas | `onFinish([])` |
+| Vet responde normalmente | `onFinish(answers)` com respostas acumuladas |
 
 ---
 
@@ -240,21 +315,28 @@ function buildTruncatedPayload(params: {
 | Arquivo | Testes | Status |
 |---|---|---|
 | `anamnesisApi.test.ts` | 9 | Existente — sem alteração |
-| `consultationSession.test.ts` | 17 | Existente — sem alteração |
+| `consultationSession.test.ts` | 18 | Existente + 1 novo caso para `ADVANCE_TO_DYNAMIC` |
 | `openaiCategories.test.ts` | 6 | Novo |
 | `useSupabaseQuestions.test.ts` | 4 | Novo |
-| `buildTruncatedPayload.test.ts` | 7 | Novo |
-| **Total** | **~43** | |
+| `buildTruncatedPayload.test.ts` | 6 | Novo |
+| `useDynamicAnamnesis.test.ts` | 4 | Novo |
+| **Total** | **~47** | |
+
+### `consultationSession.test.ts` — 1 caso novo
+
+| Caso | Entrada | Esperado |
+|---|---|---|
+| `ADVANCE_TO_DYNAMIC` | step 2, complaint e transcription preenchidos | step avança para 3, todos os outros campos preservados |
 
 ### `openaiCategories.test.ts` — 6 casos
 
 | Caso | Entrada | Esperado |
 |---|---|---|
 | JSON válido | `'["Trato Urinário", "Cardiovascular"]'` | `["Trato Urinário", "Cardiovascular"]` |
-| JSON com markdown | `` '```json\n["Neurologia"]\n```' `` | `[]` |
+| JSON com markdown fence | `` '```json\n["Neurologia"]\n```' `` | `["Neurologia"]` (strip aplicado antes do parse) |
 | String vazia | `''` | `[]` |
 | JSON não-array | `'"Trato Urinário"'` | `[]` |
-| Mais de 3 categorias | `'["A","B","C","D"]'` (todas válidas) | `["A","B","C"]` |
+| Mais de 3 categorias | `'["A","B","C","D"]'` (todas válidas) | primeiras `["A","B","C"]` |
 | Categoria inválida | `'["Trato Urinário", "Categoria Inexistente"]'` | `["Trato Urinário"]` |
 
 ### `useSupabaseQuestions.test.ts` — 4 casos
@@ -264,7 +346,7 @@ function buildTruncatedPayload(params: {
 | Retorno normal | query retorna 5 perguntas | `{ questions: [...], loading: false, error: null }` |
 | Retorno vazio | query retorna `[]` | `{ questions: [], loading: false, error: null }` |
 | Erro do Supabase | query lança erro | `{ questions: [], loading: false, error: Error }` |
-| `categories` vazio | `[]` passado | não executa query, retorna `questions: []` imediatamente |
+| `categories` vazio | `[]` passado | `{ questions: [], loading: false, error: null }` sem executar query |
 
 ### `buildTruncatedPayload.test.ts` — 7 casos
 
@@ -276,25 +358,39 @@ function buildTruncatedPayload(params: {
 | followup_answers estoura 2000 chars | 10 respostas longas | remove últimas até caber, `respostas_truncadas: true`, `console.warn` |
 | dynamicAnswers merged | 1 followup + 2 dynamic | array final com 3 itens em ordem correta |
 | Arrays vazios | `followupAnswers: [], dynamicAnswers: []` | `followup_answers: []`, sem flag |
-| Answer concatenada | botão "Sim" + texto "detalhe" | `answer: "Sim — detalhe"` |
+
+### `useDynamicAnamnesis.test.ts` — 4 casos
+
+| Caso | Mock | Esperado |
+|---|---|---|
+| Happy path | OpenAI retorna categorias válidas, Supabase retorna 3 perguntas | `phase: 'questions'`, 3 perguntas carregadas |
+| OpenAI falha | fetch lança erro | `onFinish([])` chamado |
+| Supabase retorna vazio | query retorna `[]` | `onFinish([])` chamado |
+| categories vazio | OpenAI retorna `[]` | `onFinish([])` chamado sem chamar Supabase |
 
 ---
 
 ## Variáveis de Ambiente Necessárias
 
 ```env
-VITE_OPENAI_API_KEY=sk-...   # nova — chamada direta do frontend à OpenAI
-VITE_SUPABASE_URL=...         # já existe
-VITE_SUPABASE_PUBLISHABLE_KEY=... # já existe
+VITE_OPENAI_API_KEY=sk-...
+# ⚠️ VITE_ vars são expostas no bundle do browser. Risco controlado para MVP.
+# Em produção: considerar proxy via n8n ou Supabase Edge Function.
+
+VITE_SUPABASE_URL=...              # já existe
+VITE_SUPABASE_PUBLISHABLE_KEY=...  # já existe
 VITE_N8N_ANAMNESIS_WEBHOOK_URL=... # já existe
-VITE_N8N_WEBHOOK_SECRET=...   # já existe
+VITE_N8N_WEBHOOK_SECRET=...        # já existe
 ```
 
 ---
 
 ## Restrições e Decisões
 
-- A chamada à OpenAI é feita **diretamente do frontend** usando `VITE_OPENAI_API_KEY` — decisão de simplicidade para MVP. Em produção, considerar proxy via n8n ou Edge Function.
+- Chamada à OpenAI é feita **diretamente do frontend** — decisão consciente para MVP com risco controlado.
 - O `anamnesis.json` e todos os componentes estáticos existentes permanecem **sem modificação**.
-- `useDynamicAnamnesis` nunca é chamado no mount do `ConsultationPage` — só quando `DynamicAnamnesisStep` monta (step 3).
+- `useDynamicAnamnesis` nunca é chamado no mount do `ConsultationPage`.
+- O botão "Voltar" fica **oculto** no step 3 para evitar re-execução do fluxo assíncrono.
+- `dynamicAnswers` é armazenado em `useState` local no `ConsultationPage`, fora do `sessionReducer`.
+- `onFinish` é o único callback do `DynamicAnamnesisStep` — cobre sucesso, skip e erro com o mesmo tratamento.
 - `console.warn` é permitido para rastreabilidade durante testes; nenhum `console.log` de debug em produção.
