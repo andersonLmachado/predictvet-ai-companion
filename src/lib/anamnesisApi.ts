@@ -18,6 +18,10 @@ export interface SendResult {
   error: string | null;
 }
 
+export interface ExtendedAnamnesisPayload extends AnamnesisPayload {
+  respostas_truncadas?: true; // flag literal: apenas presente (true) quando truncamento ocorreu; omitida caso contrário
+}
+
 // ─── Payload builder ─────────────────────────────────────────────────────────
 
 export function buildAnamnesisPayload(params: {
@@ -34,6 +38,56 @@ export function buildAnamnesisPayload(params: {
     followup_answers: params.followupAnswers,
     transcription: params.transcription,
   };
+}
+
+// ─── Truncated payload builder ────────────────────────────────────────────────
+
+export function buildTruncatedPayload(params: {
+  consultationId: string;
+  patientId: string;
+  chiefComplaint: string;
+  followupAnswers: FollowUpAnswer[];
+  transcription: string;
+  dynamicAnswers: FollowUpAnswer[];
+}): ExtendedAnamnesisPayload {
+  let { transcription } = params;
+
+  if (transcription.length > 500) {
+    console.warn('[buildTruncatedPayload] transcription truncado de', transcription.length, 'para 500 chars');
+    transcription = transcription.slice(0, 500);
+  }
+
+  const truncateAnswer = (ans: FollowUpAnswer): FollowUpAnswer => {
+    if (ans.answer.length > 300) {
+      console.warn('[buildTruncatedPayload] answer truncado de', ans.answer.length, 'para 300 chars');
+      return { ...ans, answer: ans.answer.slice(0, 300) };
+    }
+    return ans;
+  };
+
+  let followup_answers: FollowUpAnswer[] = [
+    ...params.followupAnswers.map(truncateAnswer),
+    ...params.dynamicAnswers.map(truncateAnswer),
+  ];
+
+  const result: ExtendedAnamnesisPayload = {
+    consultation_id: params.consultationId,
+    patient_id: params.patientId,
+    chief_complaint: params.chiefComplaint,
+    followup_answers,
+    transcription,
+  };
+
+  if (JSON.stringify(followup_answers).length > 2000) {
+    while (followup_answers.length > 0 && JSON.stringify(followup_answers).length > 2000) {
+      followup_answers = followup_answers.slice(0, -1);
+    }
+    console.warn('[buildTruncatedPayload] followup_answers truncado para', followup_answers.length, 'itens');
+    result.followup_answers = followup_answers;
+    result.respostas_truncadas = true;
+  }
+
+  return result;
 }
 
 // ─── Pure fetch ──────────────────────────────────────────────────────────────
