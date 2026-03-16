@@ -60,7 +60,7 @@ const FeaturesSection = () => {
             className="text-3xl md:text-4xl font-bold mb-4"
             style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(222,77%,15%)' }}
           >
-            Tudo que sua clínica precisa
+            Sua decisão diagnóstica com inteligência de precisão
           </h2>
           <p
             className="text-lg max-w-2xl mx-auto"
