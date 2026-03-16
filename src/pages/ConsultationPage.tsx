@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertCircle,
+  ArrowRight,
   CheckCircle2,
   ChevronLeft,
   ClipboardList,
   PlusCircle,
   RotateCcw,
-  Send,
   Stethoscope,
 } from 'lucide-react';
 
 import { usePatient } from '@/contexts/PatientContext';
 import { useAnamnesisWebhook } from '@/hooks/useAnamnesisWebhook';
-import { buildAnamnesisPayload } from '@/lib/anamnesisApi';
+import { buildTruncatedPayload, type FollowUpAnswer } from '@/lib/anamnesisApi';
 import {
   sessionReducer,
   initialSession,
@@ -22,6 +22,7 @@ import ConsultationStepper from '@/components/consultation/ConsultationStepper';
 import ComplaintSelector, { type Complaint } from '@/components/consultation/ComplaintSelector';
 import FollowUpCard from '@/components/consultation/FollowUpCard';
 import NarrativeInput from '@/components/consultation/NarrativeInput';
+import DynamicAnamnesisStep from '@/components/consultation/DynamicAnamnesisStep';
 import {
   Select,
   SelectContent,
@@ -32,7 +33,7 @@ import {
 
 // ─── Stepper config ──────────────────────────────────────────────────────────
 
-const STEPS = [
+const STEPS_BASE = [
   { label: 'Queixa', description: 'Motivo da consulta' },
   { label: 'Detalhes', description: 'Perguntas clínicas' },
   { label: 'Relato', description: 'Histórico do tutor' },
@@ -45,6 +46,13 @@ const ConsultationPage: React.FC = () => {
   const { selectedPatient, setSelectedPatient, patients, patientsLoaded } = usePatient();
   const { send } = useAnamnesisWebhook();
   const [session, dispatch] = useReducer(sessionReducer, initialSession);
+  const [dynamicAnswers, setDynamicAnswers] = useState<FollowUpAnswer[]>([]);
+
+  // Dynamic steps — step 4 is added once we enter step 3
+  const steps =
+    session.step >= 3
+      ? [...STEPS_BASE, { label: 'Perguntas', description: 'Aprofundamento clínico' }]
+      : STEPS_BASE;
 
   // Pre-select patient from URL param once the list is loaded
   useEffect(() => {
@@ -72,30 +80,41 @@ const ConsultationPage: React.FC = () => {
     dispatch({ type: 'SET_TRANSCRIPTION', payload: value });
   }, []);
 
-  const handleSubmit = useCallback(async () => {
-    if (!selectedPatient || !session.complaint) return;
+  const handleAdvanceToDynamic = useCallback(() => {
+    dispatch({ type: 'ADVANCE_TO_DYNAMIC' });
+  }, []);
 
-    dispatch({ type: 'SUBMIT_START' });
+  const handleFinalSubmit = useCallback(
+    async (answers: FollowUpAnswer[]) => {
+      setDynamicAnswers(answers);
+      if (!selectedPatient || !session.complaint) return;
 
-    const payload = buildAnamnesisPayload({
-      consultationId: crypto.randomUUID(),
-      patientId: selectedPatient.id,
-      chiefComplaint: session.complaint.label,
-      followupAnswers: session.followupAnswers,
-      transcription: session.transcription,
-    });
+      dispatch({ type: 'SUBMIT_START' });
 
-    const { ok, error } = await send(payload);
-
-    if (ok) {
-      dispatch({ type: 'SUBMIT_SUCCESS' });
-    } else {
-      dispatch({
-        type: 'SUBMIT_ERROR',
-        payload: error ?? 'Não foi possível enviar os dados para análise. Verifique sua conexão e tente novamente.',
+      const payload = buildTruncatedPayload({
+        consultationId: crypto.randomUUID(),
+        patientId: selectedPatient.id,
+        chiefComplaint: session.complaint.label,
+        followupAnswers: session.followupAnswers,
+        transcription: session.transcription,
+        dynamicAnswers: answers,
       });
-    }
-  }, [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send]);
+
+      const { ok, error } = await send(payload);
+
+      if (ok) {
+        dispatch({ type: 'SUBMIT_SUCCESS' });
+      } else {
+        dispatch({
+          type: 'SUBMIT_ERROR',
+          payload:
+            error ??
+            'Não foi possível enviar os dados para análise. Verifique sua conexão e tente novamente.',
+        });
+      }
+    },
+    [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send]
+  );
 
   // ── Success screen ──────────────────────────────────────────────────────────
   if (session.submitStatus === 'success') {
@@ -146,14 +165,19 @@ const ConsultationPage: React.FC = () => {
             >
               Os dados foram encaminhados para análise clínica.{' '}
               {selectedPatient && (
-                <span>Paciente: <strong>{selectedPatient.name}</strong></span>
+                <span>
+                  Paciente: <strong>{selectedPatient.name}</strong>
+                </span>
               )}
             </p>
           </div>
 
           <div className="flex gap-3 flex-wrap justify-center">
             <button
-              onClick={() => dispatch({ type: 'RESET' })}
+              onClick={() => {
+                dispatch({ type: 'RESET' });
+                setDynamicAnswers([]);
+              }}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
               style={{
                 background: 'linear-gradient(135deg, hsl(221,73%,45%), hsl(217,88%,57%))',
@@ -285,6 +309,7 @@ const ConsultationPage: React.FC = () => {
                   onClick={() => {
                     setSelectedPatient(null);
                     dispatch({ type: 'RESET' });
+                    setDynamicAnswers([]);
                   }}
                   className="text-xs font-medium transition-all"
                   style={{
@@ -349,7 +374,7 @@ const ConsultationPage: React.FC = () => {
         </div>
 
         {/* Stepper */}
-        <ConsultationStepper currentStep={session.step} steps={STEPS} />
+        <ConsultationStepper currentStep={session.step} steps={steps} />
 
         {/* Step content */}
         <div
@@ -383,16 +408,56 @@ const ConsultationPage: React.FC = () => {
               />
             )}
 
-            {/* Step 2 — Narrative + submit */}
+            {/* Step 2 — Narrative + advance */}
             {session.step === 2 && (
               <div className="space-y-6">
                 <NarrativeInput
                   value={session.transcription}
                   onChange={handleTranscriptionChange}
-                  disabled={session.submitStatus === 'sending'}
                 />
 
-                {/* Error message */}
+                {/* Actions */}
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <button
+                    onClick={() => dispatch({ type: 'BACK' })}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      background: 'white',
+                      border: '1px solid hsl(217,50%,85%)',
+                      color: 'hsl(222,30%,50%)',
+                      fontFamily: 'Nunito Sans, sans-serif',
+                    }}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Voltar
+                  </button>
+
+                  <button
+                    onClick={handleAdvanceToDynamic}
+                    disabled={!selectedPatient}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                    style={{
+                      background: !selectedPatient
+                        ? 'hsl(217,50%,80%)'
+                        : 'linear-gradient(135deg, hsl(221,73%,45%), hsl(217,88%,57%))',
+                      boxShadow: !selectedPatient
+                        ? 'none'
+                        : '0 6px 24px -6px hsla(221,73%,45%,0.45)',
+                      fontFamily: 'Nunito Sans, sans-serif',
+                      cursor: !selectedPatient ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                    Avançar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3 — Dynamic anamnesis */}
+            {session.step === 3 && (
+              <div className="space-y-4">
+                {/* Webhook error banner */}
                 {session.submitStatus === 'error' && session.submitError && (
                   <div
                     className="flex items-start gap-3 rounded-xl p-4 text-sm"
@@ -408,59 +473,10 @@ const ConsultationPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex items-center justify-between gap-3 pt-2">
-                  <button
-                    onClick={() => dispatch({ type: 'BACK' })}
-                    disabled={session.submitStatus === 'sending'}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
-                    style={{
-                      background: 'white',
-                      border: '1px solid hsl(217,50%,85%)',
-                      color: 'hsl(222,30%,50%)',
-                      fontFamily: 'Nunito Sans, sans-serif',
-                      opacity: session.submitStatus === 'sending' ? 0.5 : 1,
-                    }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Voltar
-                  </button>
-
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!selectedPatient || session.submitStatus === 'sending'}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-                    style={{
-                      background:
-                        !selectedPatient || session.submitStatus === 'sending'
-                          ? 'hsl(217,50%,80%)'
-                          : 'linear-gradient(135deg, hsl(221,73%,45%), hsl(217,88%,57%))',
-                      boxShadow:
-                        !selectedPatient || session.submitStatus === 'sending'
-                          ? 'none'
-                          : '0 6px 24px -6px hsla(221,73%,45%,0.45)',
-                      fontFamily: 'Nunito Sans, sans-serif',
-                      cursor:
-                        !selectedPatient || session.submitStatus === 'sending'
-                          ? 'not-allowed'
-                          : 'pointer',
-                    }}
-                  >
-                    {session.submitStatus === 'sending' ? (
-                      <>
-                        <span
-                          className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
-                        />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Enviar para análise
-                      </>
-                    )}
-                  </button>
-                </div>
+                <DynamicAnamnesisStep
+                  transcription={session.transcription}
+                  onFinish={handleFinalSubmit}
+                />
               </div>
             )}
           </div>
