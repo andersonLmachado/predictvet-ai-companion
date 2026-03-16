@@ -232,3 +232,25 @@ describe('RESET', () => {
     expect(next).toEqual(initialSession);
   });
 });
+
+// ─── ADVANCE_TO_DYNAMIC ──────────────────────────────────────────────────────
+
+describe('ADVANCE_TO_DYNAMIC', () => {
+  it('avança step de 2 para 3 preservando complaint, followupAnswers e transcription', () => {
+    const atStep2: ConsultationSession = {
+      ...initialSession,
+      step: 2,
+      complaint: mockComplaint,
+      followupAnswers: [mockAnswer],
+      transcription: 'Animal apático desde ontem.',
+    };
+
+    const next = sessionReducer(atStep2, { type: 'ADVANCE_TO_DYNAMIC' });
+
+    expect(next.step).toBe(3);
+    expect(next.complaint).toEqual(mockComplaint);
+    expect(next.followupAnswers).toHaveLength(1);
+    expect(next.transcription).toBe('Animal apático desde ontem.');
+    expect(next.submitStatus).toBe('idle');
+  });
+});
