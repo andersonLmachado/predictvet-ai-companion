@@ -31,6 +31,7 @@ export type SessionAction =
   | { type: 'SUBMIT_START' }
   | { type: 'SUBMIT_SUCCESS' }
   | { type: 'SUBMIT_ERROR'; payload: string }
+  | { type: 'ADVANCE_TO_DYNAMIC' }
   | { type: 'RESET' };
 
 // ─── Reducer ─────────────────────────────────────────────────────────────────
@@ -50,6 +51,8 @@ export function sessionReducer(
       };
     case 'SET_TRANSCRIPTION':
       return { ...state, transcription: action.payload };
+    case 'ADVANCE_TO_DYNAMIC':
+      return { ...state, step: 3 };
     case 'BACK':
       return {
         ...state,
