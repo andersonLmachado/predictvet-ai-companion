@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check } from 'lucide-react';
 
 interface Step {
@@ -15,7 +14,7 @@ const ACTIVE_COLOR = 'hsl(221,73%,45%)';
 const DONE_COLOR = 'hsl(162,70%,38%)';
 const INACTIVE_COLOR = 'hsl(222,30%,75%)';
 
-const ConsultationStepper: React.FC<ConsultationStepperProps> = ({ currentStep, steps }) => {
+const ConsultationStepper = ({ currentStep, steps }: ConsultationStepperProps) => {
   return (
     <div className="flex items-center gap-0 w-full">
       {steps.map((step, idx) => {
@@ -24,7 +23,7 @@ const ConsultationStepper: React.FC<ConsultationStepperProps> = ({ currentStep, 
         const color = isDone ? DONE_COLOR : isActive ? ACTIVE_COLOR : INACTIVE_COLOR;
 
         return (
-          <React.Fragment key={idx}>
+          <div key={idx} className="contents">
             <div className="flex flex-col items-center gap-1 min-w-0">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all"
@@ -53,7 +52,7 @@ const ConsultationStepper: React.FC<ConsultationStepperProps> = ({ currentStep, 
                 style={{ background: idx < currentStep ? DONE_COLOR : 'hsl(217,50%,88%)' }}
               />
             )}
-          </React.Fragment>
+          </div>
         );
       })}
     </div>
