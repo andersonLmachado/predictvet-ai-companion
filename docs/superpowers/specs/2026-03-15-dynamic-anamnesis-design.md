@@ -318,9 +318,9 @@ A query usa o **cliente anon** (`supabase` de `src/integrations/supabase/client.
 | `consultationSession.test.ts` | 18 | Existente + 1 novo caso para `ADVANCE_TO_DYNAMIC` |
 | `openaiCategories.test.ts` | 6 | Novo |
 | `useSupabaseQuestions.test.ts` | 4 | Novo |
-| `buildTruncatedPayload.test.ts` | 6 | Novo |
+| `buildTruncatedPayload.test.ts` | 7 | Novo |
 | `useDynamicAnamnesis.test.ts` | 4 | Novo |
-| **Total** | **~47** | |
+| **Total** | **~48** | |
 
 ### `consultationSession.test.ts` — 1 caso novo
 
