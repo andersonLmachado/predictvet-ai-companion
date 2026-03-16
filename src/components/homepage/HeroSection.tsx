@@ -161,14 +161,7 @@ const HeroSection = () => {
             className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10 pl-animate-fade-up-d3"
             style={{ color: 'hsla(213,100%,88%,0.65)', fontFamily: 'Nunito Sans, sans-serif' }}
           >
-            Segurança para o seu diagnóstico, clareza para o tutor e tecnologia de ponta para o{' '}
-            <span
-              className="pl-text-gradient font-semibold"
-              style={{ fontFamily: 'Sora, sans-serif' }}
-            >
-              desfecho clínico
-            </span>
-            .
+            Segurança para o seu diagnóstico, clareza para o tutor e tecnologia de ponta para o desfecho clínico.
           </p>
 
           {/* CTAs */}
