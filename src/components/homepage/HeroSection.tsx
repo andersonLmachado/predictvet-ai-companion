@@ -200,7 +200,7 @@ const HeroSection = () => {
           <div className="flex flex-wrap items-center justify-center gap-6 mt-12 pl-animate-fade-up-d4">
             {[
               { icon: Shield, text: 'Dados protegidos com RLS' },
-              { icon: Brain,  text: 'Gemini AI integrado' },
+              { icon: Brain,  text: 'OpenAI integrado' },
               { icon: Stethoscope, text: 'Para médicos veterinários' },
             ].map(({ icon: I, text }) => (
               <div
@@ -231,7 +231,7 @@ const HeroSection = () => {
       />
       <FloatingBadge
         icon={Brain}
-        label="Gemini AI"
+        label="OpenAI"
         sub="Diagnóstico inteligente"
         style={{ bottom: '22%', left: '5%', animationDelay: '0.8s' }}
       />
