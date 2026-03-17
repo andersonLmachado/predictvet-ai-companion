@@ -43,16 +43,4 @@ describe('updateVetNotes', () => {
     await updateVetNotes('exam-004', 'Nota');
     expect(chain.eq).toHaveBeenCalledWith('id', 'exam-004');
   });
-
-  describe('pre-fill state initialization', () => {
-    it('uses existing vet_notes when record has a value', () => {
-      const exam = { id: 'exam-abc', vet_notes: 'Paciente estável.' };
-      expect(exam.vet_notes ?? '').toBe('Paciente estável.');
-    });
-
-    it('defaults to empty string when vet_notes is null', () => {
-      const exam = { id: 'exam-def', vet_notes: null };
-      expect(exam.vet_notes ?? '').toBe('');
-    });
-  });
 });
