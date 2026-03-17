@@ -301,7 +301,7 @@ const Exams = () => {
                 analysis_data={result.resultados}
                 patientData={patientData}
                 examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
-                // TODO: pass vet_notes after Task 6
+                vet_notes={vetNotes}
               />
               <Button
                 onClick={handleSaveExam}

@@ -175,12 +175,12 @@ const PatientExamsModal = ({
               </Button>
               {selectedExam && (
                 <div className="flex justify-end">
-                  {/* TODO: add vet_notes prop to ExamReport when Task 6 is implemented */}
                   <ExamReport
                     clinical_summary={selectedExam.clinical_summary}
                     analysis_data={selectedExam.analysis_data}
                     patientData={patientData}
                     examType={examTypeLabel[selectedExam.exam_type] ?? selectedExam.exam_type}
+                    vet_notes={vetNotes}
                   />
                 </div>
               )}
