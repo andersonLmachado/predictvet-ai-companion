@@ -58,7 +58,7 @@ const PetRegistrationForm = () => {
   };
 
   const validateForm = () => {
-    const requiredPetFields: (keyof PetData)[] = ['name', 'species', 'breed', 'birthDate', 'gender', 'weight'];
+    const requiredPetFields: (keyof PetData)[] = ['name', 'species', 'breed', 'gender'];
     const requiredTutorFields: (keyof TutorData)[] = ['name', 'phone', 'email'];
 
     for (const field of requiredPetFields) {
@@ -107,13 +107,17 @@ const PetRegistrationForm = () => {
     setIsLoading(true);
 
     try {
-      // birthDate -> age (idade em anos)
-      const birthDate = new Date(petData.birthDate);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+      // birthDate -> age (idade em anos, opcional)
+      let age: number | null = null;
+      if (petData.birthDate) {
+        const birthDate = new Date(petData.birthDate);
+        const today = new Date();
+        let years = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          years--;
+        }
+        age = years;
       }
 
       // Buscar usuário logado
@@ -135,7 +139,7 @@ const PetRegistrationForm = () => {
         breed: petData.breed,
         age,
         sex: petData.gender,
-        weight: parseFloat(petData.weight),
+        weight: petData.weight ? parseFloat(petData.weight) : null,
         owner_name: tutorData.name,
         owner_phone: tutorData.phone,
         owner_email: tutorData.email,
@@ -254,9 +258,6 @@ const PetRegistrationForm = () => {
                     <SelectContent>
                       <SelectItem value="canina">Canina</SelectItem>
                       <SelectItem value="felina">Felina</SelectItem>
-                      <SelectItem value="aves">Aves</SelectItem>
-                      <SelectItem value="repteis">Répteis</SelectItem>
-                      <SelectItem value="outros">Outros</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -273,18 +274,17 @@ const PetRegistrationForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Data de Nascimento *</Label>
+                  <Label htmlFor="birthDate">Data de Nascimento</Label>
                   <Input
                     id="birthDate"
                     type="date"
                     value={petData.birthDate}
                     onChange={(e) => handlePetChange('birthDate', e.target.value)}
-                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Peso (kg) *</Label>
+                  <Label htmlFor="weight">Peso (kg)</Label>
                   <Input
                     id="weight"
                     type="number"
@@ -292,7 +292,6 @@ const PetRegistrationForm = () => {
                     value={petData.weight}
                     onChange={(e) => handlePetChange('weight', e.target.value)}
                     placeholder="Ex: 5.5"
-                    required
                   />
                 </div>
 
