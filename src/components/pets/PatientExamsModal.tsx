@@ -65,6 +65,7 @@ const PatientExamsModal = ({
   useEffect(() => {
     if (!open || !patientId) return;
     setSelectedExam(null);
+    setVetNotes('');
     const fetchExams = async () => {
       setLoading(true);
       try {
@@ -86,7 +87,7 @@ const PatientExamsModal = ({
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setExams(sorted);
       } catch (error) {
-        console.error("Erro ao buscar exames:", error);
+        toast({ title: "Erro ao buscar exames", description: "Não foi possível carregar os exames do paciente.", variant: "destructive" });
         setExams([]);
       } finally {
         setLoading(false);
