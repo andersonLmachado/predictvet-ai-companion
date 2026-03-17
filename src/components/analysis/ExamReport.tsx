@@ -12,6 +12,14 @@ interface ExamReportProps {
   vet_notes?: string | null;
 }
 
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 const formatReference = (item: ExamResultItem) => {
   if (item.ref_min != null && item.ref_max != null) {
     return `${item.ref_min} - ${item.ref_max}`;
@@ -44,8 +52,8 @@ const generatePDF = (
   const summaryText = clinical_summary || "Nenhum resumo clínico informado.";
   const vetNotesHtml = vet_notes?.trim()
     ? `<section class="section">
-       <div class="section-title">Observações do Veterinário</div>
-       <p style="white-space: pre-wrap;">${vet_notes}</p>
+       <div class="section-title">Observações do veterinário</div>
+       <p style="white-space: pre-wrap;">${escapeHtml(vet_notes)}</p>
      </section>`
     : '';
   const patientName = patientData?.nome_animal ?? "Não informado";
