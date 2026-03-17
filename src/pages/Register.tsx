@@ -20,6 +20,7 @@ const Register = () => {
           full_name: fullName,
           crmv: crmv,
           clinic_name: clinicName,
+          onboarding_complete: false,
         },
       },
     });
