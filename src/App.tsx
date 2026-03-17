@@ -21,6 +21,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import DischargeSummary from "./pages/DischargeSummary";
 import ConsultationPage from "./pages/ConsultationPage";
+import ProfilePage from "./pages/ProfilePage";
 import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -136,6 +137,17 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <ConsultationPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ProfilePage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

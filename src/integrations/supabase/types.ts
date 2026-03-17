@@ -263,6 +263,35 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          crmv: string | null
+          clinic_name: string | null
+          specialty: string | null
+          avatar_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          crmv?: string | null
+          clinic_name?: string | null
+          specialty?: string | null
+          avatar_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          full_name?: string | null
+          crmv?: string | null
+          clinic_name?: string | null
+          specialty?: string | null
+          avatar_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       patient_complete_record: {

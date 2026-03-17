@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import predictlabIcon from '@/assets/predictlab-icon-new.png';
@@ -61,6 +62,8 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
     }
     return user?.email?.slice(0, 2).toUpperCase() ?? 'VT';
   })();
+
+  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
 
   return (
     <>
@@ -134,6 +137,7 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
               onMouseLeave={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.06)')}
             >
               <Avatar className="h-7 w-7">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={initials} className="object-cover" />}
                 <AvatarFallback
                   className="text-xs font-bold"
                   style={{
@@ -165,6 +169,15 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
                 {user?.user_metadata?.full_name ?? user?.email ?? 'Veterinário'}
               </p>
             </div>
+            <DropdownMenuSeparator style={{ background: 'hsla(217,88%,57%,0.15)' }} />
+            <DropdownMenuItem
+              onClick={() => navigate('/perfil')}
+              className="cursor-pointer flex items-center gap-2 text-sm"
+              style={{ color: 'hsl(213,100%,88%)', fontFamily: 'Nunito Sans, sans-serif' }}
+            >
+              <User className="w-4 h-4" />
+              <span>Meu Perfil</span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator style={{ background: 'hsla(217,88%,57%,0.15)' }} />
             <DropdownMenuItem
               onClick={handleLogout}
@@ -232,6 +245,14 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
               );
             })}
             <div style={{ borderTop: '1px solid hsla(217,88%,57%,0.15)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => { navigate('/perfil'); setMobileOpen(false); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full"
+                style={{ color: 'hsla(213,100%,90%,0.7)', fontFamily: 'Nunito Sans, sans-serif' }}
+              >
+                <User className="w-4 h-4" />
+                Meu Perfil
+              </button>
               <button
                 onClick={() => { handleLogout(); setMobileOpen(false); }}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full"
