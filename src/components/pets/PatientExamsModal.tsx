@@ -8,13 +8,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ChevronLeft, FileText } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Loader2, ChevronLeft, FileText, Save, NotebookPen } from "lucide-react";
 import AnalysisResults, {
   AnalysisResponse,
   CabecalhoExame,
   ExamResultItem,
 } from "@/components/analysis/AnalysisResults";
 import ExamReport from "@/components/analysis/ExamReport";
+import { useToast } from "@/hooks/use-toast";
+import { updateVetNotes } from "@/lib/vetNotes";
 
 const API_EXAMS_URL = "https://n8nvet.predictlab.com.br/webhook/buscar-exames";
 
@@ -25,6 +29,7 @@ export type ExamHistoryRecord = {
   clinical_summary: string;
   analysis_data: ExamResultItem[];
   created_at: string;
+  vet_notes: string | null;
 };
 
 type PatientExamsModalProps = {
@@ -53,10 +58,14 @@ const PatientExamsModal = ({
   const [exams, setExams] = useState<ExamHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedExam, setSelectedExam] = useState<ExamHistoryRecord | null>(null);
+  const { toast } = useToast();
+  const [vetNotes, setVetNotes] = useState<string>('');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
     if (!open || !patientId) return;
     setSelectedExam(null);
+    setVetNotes('');
     const fetchExams = async () => {
       setLoading(true);
       try {
@@ -73,11 +82,12 @@ const PatientExamsModal = ({
             clinical_summary: e.clinical_summary ?? e.resumo_clinico ?? "",
             analysis_data: Array.isArray(e.analysis_data) ? e.analysis_data : (Array.isArray(e.resultados) ? e.resultados : []),
             created_at: e.created_at ?? "",
+            vet_notes: e.vet_notes ?? null,
           }))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setExams(sorted);
       } catch (error) {
-        console.error("Erro ao buscar exames:", error);
+        toast({ title: "Erro ao buscar exames", description: "Não foi possível carregar os exames do paciente.", variant: "destructive" });
         setExams([]);
       } finally {
         setLoading(false);
@@ -87,8 +97,31 @@ const PatientExamsModal = ({
   }, [open, patientId]);
 
   const handleClose = (open: boolean) => {
-    if (!open) setSelectedExam(null);
+    if (!open) {
+      setSelectedExam(null);
+      setVetNotes('');
+    }
     onOpenChange(open);
+  };
+
+  const handleSelectExam = (exam: ExamHistoryRecord) => {
+    setSelectedExam(exam);
+    setVetNotes(exam.vet_notes ?? '');
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedExam) return;
+    setIsSavingNotes(true);
+    try {
+      await updateVetNotes(selectedExam.id, vetNotes);
+      setExams(prev => prev.map(e => e.id === selectedExam.id ? { ...e, vet_notes: vetNotes } : e));
+      setSelectedExam(prev => prev ? { ...prev, vet_notes: vetNotes } : null);
+      toast({ title: 'Observação salva', description: 'As observações clínicas foram atualizadas.' });
+    } catch {
+      toast({ title: 'Erro ao salvar observação', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsSavingNotes(false);
+    }
   };
 
   const patientData: CabecalhoExame = {
@@ -135,7 +168,7 @@ const PatientExamsModal = ({
                 variant="ghost"
                 size="sm"
                 className="w-fit"
-                onClick={() => setSelectedExam(null)}
+                onClick={() => { setSelectedExam(null); setVetNotes(''); }}
               >
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 Voltar à lista
@@ -147,12 +180,34 @@ const PatientExamsModal = ({
                     analysis_data={selectedExam.analysis_data}
                     patientData={patientData}
                     examType={examTypeLabel[selectedExam.exam_type] ?? selectedExam.exam_type}
+                    vet_notes={vetNotes}
                   />
                 </div>
               )}
               {syntheticResult && (
                 <AnalysisResults result={syntheticResult} patientData={patientData} />
               )}
+              {/* Observações Clínicas do Veterinário */}
+              <div className="space-y-2 pt-2 pb-4">
+                <Label htmlFor="modal-vet-notes" className="text-sm font-medium flex items-center gap-2">
+                  <NotebookPen className="h-4 w-4" />
+                  Observações clínicas
+                </Label>
+                <Textarea
+                  id="modal-vet-notes"
+                  placeholder="Registre ou edite suas observações clínicas sobre este exame..."
+                  value={vetNotes}
+                  onChange={(e) => setVetNotes(e.target.value)}
+                  rows={4}
+                  className="resize-y"
+                />
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveNotes} disabled={isSavingNotes} variant="secondary" size="sm">
+                    <Save className="mr-2 h-4 w-4" />
+                    {isSavingNotes ? 'Salvando...' : 'Salvar observação'}
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : exams.length === 0 ? (
             <div className="py-8 text-center space-y-4">
@@ -174,7 +229,7 @@ const PatientExamsModal = ({
                 <li key={exam.id}>
                   <Card
                     className="cursor-pointer transition-colors hover:bg-muted/50"
-                    onClick={() => setSelectedExam(exam)}
+                    onClick={() => handleSelectExam(exam)}
                   >
                     <CardHeader className="py-3">
                       <div className="flex items-center justify-between">

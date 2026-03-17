@@ -9,7 +9,16 @@ interface ExamReportProps {
   patientData?: CabecalhoExame;
   examType?: string;
   className?: string;
+  vet_notes?: string | null;
 }
+
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 const formatReference = (item: ExamResultItem) => {
   if (item.ref_min != null && item.ref_max != null) {
@@ -34,12 +43,19 @@ const generatePDF = (
   analysis_data: ExamResultItem[],
   patientData?: CabecalhoExame,
   examType?: string,
+  vet_notes?: string | null,
 ) => {
   const reportWindow = window.open("", "_blank");
   if (!reportWindow) return;
 
   const formattedDate = new Date().toLocaleString("pt-BR");
   const summaryText = clinical_summary || "Nenhum resumo clínico informado.";
+  const vetNotesHtml = vet_notes?.trim()
+    ? `<section class="section">
+       <div class="section-title">Observações do veterinário</div>
+       <p style="white-space: pre-wrap;">${escapeHtml(vet_notes)}</p>
+     </section>`
+    : '';
   const patientName = patientData?.nome_animal ?? "Não informado";
   const examTitle = examType ?? "Exame clínico";
 
@@ -200,6 +216,8 @@ const generatePDF = (
           <p>${summaryText}</p>
         </section>
 
+        ${vetNotesHtml}
+
         <section class="section">
           <div class="section-title">Resultados laboratoriais</div>
           <table>
@@ -244,13 +262,14 @@ const ExamReport: React.FC<ExamReportProps> = ({
   patientData,
   examType,
   className,
+  vet_notes,
 }) => {
   return (
     <Button
       type="button"
       variant="outline"
       className={className}
-      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType)}
+      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType, vet_notes)}
     >
       <FileText className="mr-2 h-4 w-4" />
       Gerar PDF
