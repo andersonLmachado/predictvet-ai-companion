@@ -179,6 +179,9 @@ const Exams = () => {
       const responseData = await response.json();
       const examId = responseData?.id ?? responseData?.exam_id ?? null;
       setSavedExamId(examId);
+      if (!examId) {
+        console.warn('[vetNotes] salvar-exame response did not return an exam ID — vet notes will be unavailable', responseData);
+      }
       toast({
         title: "Exame salvo",
         description: "O exame foi salvo com sucesso.",
