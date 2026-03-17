@@ -96,7 +96,10 @@ const PatientExamsModal = ({
   }, [open, patientId]);
 
   const handleClose = (open: boolean) => {
-    if (!open) setSelectedExam(null);
+    if (!open) {
+      setSelectedExam(null);
+      setVetNotes('');
+    }
     onOpenChange(open);
   };
 
