@@ -133,6 +133,7 @@ export type Database = {
           exam_type: string
           id: string
           patient_id: string
+          vet_notes: string | null
         }
         Insert: {
           analysis_data: Json
@@ -141,6 +142,7 @@ export type Database = {
           exam_type: string
           id?: string
           patient_id: string
+          vet_notes?: string | null
         }
         Update: {
           analysis_data?: Json
@@ -149,6 +151,7 @@ export type Database = {
           exam_type?: string
           id?: string
           patient_id?: string
+          vet_notes?: string | null
         }
         Relationships: [
           {
