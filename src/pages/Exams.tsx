@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch, RefreshCw, Save } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw, Save, NotebookPen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { updateVetNotes } from "@/lib/vetNotes";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
@@ -30,6 +32,9 @@ const Exams = () => {
 
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const [isSavingExam, setIsSavingExam] = useState(false);
+  const [savedExamId, setSavedExamId] = useState<string | null>(null);
+  const [vetNotes, setVetNotes] = useState<string>('');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   const fetchPatients = useCallback(async () => {
     if (!user?.id) return;
@@ -94,6 +99,8 @@ const Exams = () => {
     }
     setIsLoading(true);
     setResult(null);
+    setSavedExamId(null);
+    setVetNotes('');
 
     try {
       const formData = new FormData();
@@ -161,8 +168,6 @@ const Exams = () => {
       analysis_data: result.resultados,
     };
 
-    console.log("ID do Paciente:", patientId);
-
     setIsSavingExam(true);
     try {
       const response = await fetch("https://n8nvet.predictlab.com.br/webhook/salvar-exame", {
@@ -171,6 +176,9 @@ const Exams = () => {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error("Falha ao salvar exame");
+      const responseData = await response.json();
+      const examId = responseData?.id ?? responseData?.exam_id ?? null;
+      setSavedExamId(examId);
       toast({
         title: "Exame salvo",
         description: "O exame foi salvo com sucesso.",
@@ -184,6 +192,19 @@ const Exams = () => {
       });
     } finally {
       setIsSavingExam(false);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!savedExamId) return;
+    setIsSavingNotes(true);
+    try {
+      await updateVetNotes(savedExamId, vetNotes);
+      toast({ title: 'Observação salva', description: 'As observações clínicas foram registradas.' });
+    } catch {
+      toast({ title: 'Erro ao salvar observação', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsSavingNotes(false);
     }
   };
 
@@ -277,6 +298,7 @@ const Exams = () => {
                 analysis_data={result.resultados}
                 patientData={patientData}
                 examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
+                // TODO: pass vet_notes after Task 6
               />
               <Button
                 onClick={handleSaveExam}
@@ -287,6 +309,33 @@ const Exams = () => {
               </Button>
             </div>
             <AnalysisResults result={result} patientData={patientData} />
+
+            {/* Observações Clínicas do Veterinário */}
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
+                <NotebookPen className="h-4 w-4" />
+                Observações clínicas
+              </Label>
+              <Textarea
+                id="vet-notes"
+                placeholder="Ex: Dia 2 — melhorou apetite, porém ainda com febre..."
+                value={vetNotes}
+                onChange={(e) => setVetNotes(e.target.value)}
+                rows={4}
+                className="resize-y"
+              />
+              <div className="flex justify-end">
+                <Button onClick={handleSaveNotes} disabled={!savedExamId || isSavingNotes} variant="secondary">
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSavingNotes ? 'Salvando...' : 'Salvar observação'}
+                </Button>
+              </div>
+              {!savedExamId && (
+                <p className="text-xs text-muted-foreground text-right">
+                  Salve o exame primeiro para habilitar as observações.
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
