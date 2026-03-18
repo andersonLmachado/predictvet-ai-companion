@@ -2,6 +2,7 @@ import React from "react";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CabecalhoExame, ExamResultItem } from "./AnalysisResults";
+import { formatExamDate } from "@/lib/examDate";
 
 interface ExamReportProps {
   clinical_summary: string;
@@ -10,6 +11,7 @@ interface ExamReportProps {
   examType?: string;
   className?: string;
   vet_notes?: string | null;
+  exam_date?: string | null;
 }
 
 const escapeHtml = (text: string): string =>
@@ -44,11 +46,12 @@ const generatePDF = (
   patientData?: CabecalhoExame,
   examType?: string,
   vet_notes?: string | null,
+  exam_date?: string | null,
 ) => {
   const reportWindow = window.open("", "_blank");
   if (!reportWindow) return;
 
-  const formattedDate = new Date().toLocaleString("pt-BR");
+  const formattedDate = formatExamDate(exam_date ?? null);
   const summaryText = clinical_summary || "Nenhum resumo clínico informado.";
   const vetNotesHtml = vet_notes?.trim()
     ? `<section class="section">
@@ -263,13 +266,14 @@ const ExamReport: React.FC<ExamReportProps> = ({
   examType,
   className,
   vet_notes,
+  exam_date,
 }) => {
   return (
     <Button
       type="button"
       variant="outline"
       className={className}
-      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType, vet_notes)}
+      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType, vet_notes, exam_date)}
     >
       <FileText className="mr-2 h-4 w-4" />
       Gerar PDF
