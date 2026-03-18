@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, ChevronLeft, FileText, Save, NotebookPen } from "lucide-react";
+import { Loader2, ChevronLeft, FileText, Save, NotebookPen, Calendar } from "lucide-react";
 import AnalysisResults, {
   AnalysisResponse,
   CabecalhoExame,
@@ -19,6 +19,7 @@ import AnalysisResults, {
 import ExamReport from "@/components/analysis/ExamReport";
 import { useToast } from "@/hooks/use-toast";
 import { updateVetNotes } from "@/lib/vetNotes";
+import { updateExamDate, formatExamDate } from "@/lib/examDate";
 
 const API_EXAMS_URL = "https://n8nvet.predictlab.com.br/webhook/buscar-exames";
 
@@ -30,6 +31,7 @@ export type ExamHistoryRecord = {
   analysis_data: ExamResultItem[];
   created_at: string;
   vet_notes: string | null;
+  exam_date: string | null;
 };
 
 type PatientExamsModalProps = {
@@ -61,6 +63,9 @@ const PatientExamsModal = ({
   const { toast } = useToast();
   const [vetNotes, setVetNotes] = useState<string>('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [editingDateExamId, setEditingDateExamId] = useState<string | null>(null);
+  const [manualDate, setManualDate] = useState<string>('');
+  const [isSavingDate, setIsSavingDate] = useState(false);
 
   useEffect(() => {
     if (!open || !patientId) return;
@@ -83,6 +88,7 @@ const PatientExamsModal = ({
             analysis_data: Array.isArray(e.analysis_data) ? e.analysis_data : (Array.isArray(e.resultados) ? e.resultados : []),
             created_at: e.created_at ?? "",
             vet_notes: e.vet_notes ?? null,
+            exam_date: e.exam_date ?? null,
           }))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setExams(sorted);
@@ -121,6 +127,21 @@ const PatientExamsModal = ({
       toast({ title: 'Erro ao salvar observação', description: 'Tente novamente.', variant: 'destructive' });
     } finally {
       setIsSavingNotes(false);
+    }
+  };
+
+  const handleSaveManualDate = async (examId: string) => {
+    if (!manualDate) return;
+    setIsSavingDate(true);
+    try {
+      await updateExamDate(examId, manualDate);
+      setExams(prev => prev.map(e => e.id === examId ? { ...e, exam_date: manualDate } : e));
+      setEditingDateExamId(null);
+      toast({ title: 'Data salva', description: 'A data do exame foi atualizada.' });
+    } catch {
+      toast({ title: 'Erro ao salvar data', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsSavingDate(false);
     }
   };
 
@@ -181,6 +202,7 @@ const PatientExamsModal = ({
                     patientData={patientData}
                     examType={examTypeLabel[selectedExam.exam_type] ?? selectedExam.exam_type}
                     vet_notes={vetNotes}
+                    exam_date={selectedExam.exam_date}
                   />
                 </div>
               )}
@@ -250,6 +272,51 @@ const PatientExamsModal = ({
                             })
                             : "—"}
                         </span>
+                      </div>
+                      {/* Exam date row */}
+                      <div className="flex items-center gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
+                        <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        {exam.exam_date ? (
+                          <span className="text-sm text-muted-foreground">
+                            Data do exame: {formatExamDate(exam.exam_date)}
+                          </span>
+                        ) : editingDateExamId === exam.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="date"
+                              value={manualDate}
+                              onChange={(e) => setManualDate(e.target.value)}
+                              className="text-sm border rounded px-2 py-0.5 text-foreground bg-background"
+                            />
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="h-6 px-2 text-xs"
+                              onClick={() => handleSaveManualDate(exam.id)}
+                              disabled={isSavingDate || !manualDate}
+                            >
+                              {isSavingDate ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Salvar'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs"
+                              onClick={() => setEditingDateExamId(null)}
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        ) : (
+                          <button
+                            className="text-sm text-muted-foreground underline-offset-2 hover:underline"
+                            onClick={() => {
+                              setEditingDateExamId(exam.id);
+                              setManualDate('');
+                            }}
+                          >
+                            Data não identificada — informar
+                          </button>
+                        )}
                       </div>
                       {exam.clinical_summary && (
                         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
