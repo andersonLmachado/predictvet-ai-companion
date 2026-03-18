@@ -130,6 +130,7 @@ export type Database = {
           analysis_data: Json
           clinical_summary: string | null
           created_at: string | null
+          exam_date: string | null
           exam_type: string
           id: string
           patient_id: string
@@ -139,6 +140,7 @@ export type Database = {
           analysis_data: Json
           clinical_summary?: string | null
           created_at?: string | null
+          exam_date?: string | null
           exam_type: string
           id?: string
           patient_id: string
@@ -148,6 +150,7 @@ export type Database = {
           analysis_data?: Json
           clinical_summary?: string | null
           created_at?: string | null
+          exam_date?: string | null
           exam_type?: string
           id?: string
           patient_id?: string
