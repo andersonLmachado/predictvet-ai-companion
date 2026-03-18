@@ -52,6 +52,16 @@ describe('extractExamDate', () => {
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
   });
+
+  it('returns null and warns when webhook returns non-OK HTTP status', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+    const file = new File(['dummy'], 'exame.pdf', { type: 'application/pdf' });
+    const result = await extractExamDate(file);
+    expect(result).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith('[examDate] Webhook returned non-OK status:', 500);
+    warnSpy.mockRestore();
+  });
 });
 
 // ── updateExamDate ───────────────────────────────────────────────────────────
