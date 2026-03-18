@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // ── Mock fetch (used by extractExamDate) ────────────────────────────────────
 const mockFetch = vi.fn();
@@ -22,6 +22,7 @@ function makeUpdateChain(result: { error: { message: string } | null }) {
 // ── extractExamDate ──────────────────────────────────────────────────────────
 describe('extractExamDate', () => {
   beforeEach(() => vi.clearAllMocks());
+  afterEach(() => vi.unstubAllEnvs());
 
   it('returns ISO date string when n8n responds with valid date', async () => {
     mockFetch.mockResolvedValueOnce({
@@ -61,6 +62,35 @@ describe('extractExamDate', () => {
     expect(result).toBeNull();
     expect(warnSpy).toHaveBeenCalledWith('[examDate] Webhook returned non-OK status:', 500);
     warnSpy.mockRestore();
+  });
+
+  it('sends JSON body with file text and Authorization header from env', async () => {
+    vi.stubEnv('VITE_N8N_WEBHOOK_SECRET', 'test-secret-abc');
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ exam_date: '2024-09-10' }),
+    });
+    const file = new File(['conteúdo do exame'], 'exame.pdf', { type: 'application/pdf' });
+    await extractExamDate(file);
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toBe('https://n8nvet.predictlab.com.br/webhook/extrair-data-exame');
+    expect(options.method).toBe('POST');
+    expect(options.headers['Content-Type']).toBe('application/json');
+    expect(options.headers['Authorization']).toBe('Bearer test-secret-abc');
+    expect(JSON.parse(options.body)).toEqual({ text: 'conteúdo do exame' });
+  });
+
+  it('truncates file text to 2000 chars before sending', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ exam_date: null }),
+    });
+    const longText = 'x'.repeat(3000);
+    const file = new File([longText], 'exame.pdf', { type: 'application/pdf' });
+    await extractExamDate(file);
+    const [, options] = mockFetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.text).toHaveLength(2000);
   });
 });
 

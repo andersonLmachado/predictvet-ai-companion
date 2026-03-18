@@ -18,20 +18,23 @@ export function formatExamDate(date: string | null): string {
 }
 
 /**
- * Sends the exam file to the n8n date-extraction webhook.
+ * Sends the exam file text to the n8n date-extraction webhook.
+ * Reads the file as text, truncates to 2000 chars, and POSTs JSON.
  * Returns an ISO date string (YYYY-MM-DD) or null.
  * NEVER throws — always resolves (null on any failure).
- * The n8n workflow handles: truncation to 2000 chars, base64 encoding for
- * images, text extraction for PDFs, and OpenAI call (max_tokens: 50).
  */
 export async function extractExamDate(file: File): Promise<string | null> {
   try {
-    const formData = new FormData();
-    formData.append('data', file);
+    const rawText = await file.text();
+    const text = rawText.slice(0, 2000);
 
     const response = await fetch(EXTRACT_DATE_WEBHOOK, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_N8N_WEBHOOK_SECRET}`,
+      },
+      body: JSON.stringify({ text }),
     });
 
     if (!response.ok) {
