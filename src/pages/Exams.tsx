@@ -17,6 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateVetNotes } from "@/lib/vetNotes";
+import { extractExamDate, updateExamDate } from "@/lib/examDate";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
@@ -35,6 +36,7 @@ const Exams = () => {
   const [savedExamId, setSavedExamId] = useState<string | null>(null);
   const [vetNotes, setVetNotes] = useState<string>('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [extractedExamDate, setExtractedExamDate] = useState<string | null>(null);
 
   const fetchPatients = useCallback(async () => {
     if (!user?.id) return;
@@ -101,6 +103,7 @@ const Exams = () => {
     setResult(null);
     setSavedExamId(null);
     setVetNotes('');
+    setExtractedExamDate(null);
 
     try {
       const formData = new FormData();
@@ -119,6 +122,8 @@ const Exams = () => {
 
       const data: AnalysisResponse = await response.json();
       setResult(data);
+      // Extract exam date from document — non-blocking, never delays the analysis result
+      extractExamDate(file).then(setExtractedExamDate);
 
       toast({
         title: "Análise concluída",
@@ -183,6 +188,11 @@ const Exams = () => {
         title: "Exame salvo",
         description: "O exame foi salvo com sucesso.",
       });
+      if (examId && extractedExamDate) {
+        updateExamDate(examId, extractedExamDate).catch((err) =>
+          console.warn('[Exams] Could not persist exam_date:', err)
+        );
+      }
     } catch (error) {
       console.error("Erro ao salvar exame:", error);
       toast({
@@ -299,6 +309,7 @@ const Exams = () => {
                 patientData={patientData}
                 examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
                 vet_notes={vetNotes}
+                exam_date={extractedExamDate}
               />
               <Button
                 onClick={handleSaveExam}
