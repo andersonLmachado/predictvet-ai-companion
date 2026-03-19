@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { supabase } from '@/integrations/supabase/client';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const EXTRACT_DATE_WEBHOOK = 'https://n8nvet.predictlab.com.br/webhook/extrair-data-exame';
 
