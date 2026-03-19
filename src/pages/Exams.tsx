@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch, RefreshCw, Save, NotebookPen, Calendar } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw, Save, NotebookPen, Calendar, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
@@ -310,10 +310,21 @@ const Exams = () => {
           <div className="space-y-4">
             <div className="space-y-3">
               {extractedExamDate && (
-                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  Data do exame: {formatExamDate(extractedExamDate)}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    Data do exame: {formatExamDate(extractedExamDate)}
+                  </span>
+                  {laboratory && (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg"
+                      style={{ background: 'hsl(217,100%,95%)', color: 'hsl(221,73%,45%)' }}
+                    >
+                      <Home className="h-3.5 w-3.5" />
+                      {laboratory}
+                    </span>
+                  )}
+                </div>
               )}
               <div className="flex items-center gap-3">
                 <ExamReport
