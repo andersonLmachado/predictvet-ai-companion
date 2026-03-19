@@ -47,15 +47,15 @@ describe('extractExamDate', () => {
   afterEach(() => vi.unstubAllEnvs());
 
   // PDF path — pdfjs-dist extracts text
-  it('returns ISO date string when n8n responds with valid date (PDF)', async () => {
+  it('returns ExamExtraction with exam_date when n8n responds (PDF)', async () => {
     vi.mocked(pdfjsLib.getDocument).mockReturnValueOnce(makePdfPromise('Resultado 10/09/2024') as any);
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ exam_date: '2024-09-10' }),
+      json: async () => ({ exam_date: '2024-09-10', laboratory: 'LabCenter Vet' }),
     });
     const file = new File(['pdf binary'], 'exame.pdf', { type: 'application/pdf' });
     const result = await extractExamDate(file);
-    expect(result).toBe('2024-09-10');
+    expect(result).toEqual({ exam_date: '2024-09-10', laboratory: 'LabCenter Vet' });
   });
 
   it('sends pdfjs-extracted text (not raw binary) in request body', async () => {
@@ -63,7 +63,7 @@ describe('extractExamDate', () => {
     vi.mocked(pdfjsLib.getDocument).mockReturnValueOnce(makePdfPromise(pdfText) as any);
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ exam_date: null }),
+      json: async () => ({ exam_date: null, laboratory: null }),
     });
     const file = new File(['%PDF-1.4 binary garbage'], 'exame.pdf', { type: 'application/pdf' });
     await extractExamDate(file);
@@ -72,33 +72,33 @@ describe('extractExamDate', () => {
   });
 
   // Image path — file.text() fallback (pdfjs NOT called)
-  it('returns null when n8n responds with null (image fallback)', async () => {
+  it('returns { exam_date: null, laboratory: null } when n8n returns nulls (image)', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ exam_date: null }),
+      json: async () => ({ exam_date: null, laboratory: null }),
     });
     const file = new File(['dummy'], 'exame.jpg', { type: 'image/jpeg' });
     const result = await extractExamDate(file);
-    expect(result).toBeNull();
+    expect(result).toEqual({ exam_date: null, laboratory: null });
     expect(vi.mocked(pdfjsLib.getDocument)).not.toHaveBeenCalled();
   });
 
-  it('returns null and warns on network error (never throws)', async () => {
+  it('returns { exam_date: null, laboratory: null } and warns on network error (never throws)', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     mockFetch.mockRejectedValueOnce(new Error('Network failure'));
     const file = new File(['dummy'], 'exame.jpg', { type: 'image/jpeg' });
     const result = await extractExamDate(file);
-    expect(result).toBeNull();
+    expect(result).toEqual({ exam_date: null, laboratory: null });
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
   });
 
-  it('returns null and warns when webhook returns non-OK HTTP status', async () => {
+  it('returns { exam_date: null, laboratory: null } when webhook returns non-OK HTTP status', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
     const file = new File(['dummy'], 'exame.jpg', { type: 'image/jpeg' });
     const result = await extractExamDate(file);
-    expect(result).toBeNull();
+    expect(result).toEqual({ exam_date: null, laboratory: null });
     expect(warnSpy).toHaveBeenCalledWith('[examDate] Webhook returned non-OK status:', 500);
     warnSpy.mockRestore();
   });
@@ -107,7 +107,7 @@ describe('extractExamDate', () => {
     vi.stubEnv('VITE_N8N_WEBHOOK_SECRET', 'test-secret-abc');
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ exam_date: '2024-09-10' }),
+      json: async () => ({ exam_date: '2024-09-10', laboratory: null }),
     });
     const file = new File(['conteúdo do exame'], 'exame.jpg', { type: 'image/jpeg' });
     await extractExamDate(file);
@@ -122,7 +122,7 @@ describe('extractExamDate', () => {
   it('truncates text to 2000 chars before sending', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ exam_date: null }),
+      json: async () => ({ exam_date: null, laboratory: null }),
     });
     const file = new File(['x'.repeat(3000)], 'exame.jpg', { type: 'image/jpeg' });
     await extractExamDate(file);

@@ -6,6 +6,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const EXTRACT_DATE_WEBHOOK = 'https://n8nvet.predictlab.com.br/webhook/extrair-data-exame';
 
+export interface ExamExtraction {
+  exam_date: string | null;
+  laboratory: string | null;
+}
+
 /**
  * Formats an ISO date string (YYYY-MM-DD) as DD/MM/YYYY for display.
  * Returns "Data não informada" when date is null.
@@ -48,10 +53,10 @@ async function extractTextFromPDF(file: File): Promise<string> {
 /**
  * Sends extracted exam text to the n8n date-extraction webhook.
  * Uses pdfjs-dist for PDFs; falls back to file.text() for images.
- * Returns an ISO date string (YYYY-MM-DD) or null.
- * NEVER throws — always resolves (null on any failure).
+ * Returns an ExamExtraction with exam_date (ISO YYYY-MM-DD or null) and laboratory (string or null).
+ * NEVER throws — always resolves ({ exam_date: null, laboratory: null } on any failure).
  */
-export async function extractExamDate(file: File): Promise<string | null> {
+export async function extractExamDate(file: File): Promise<ExamExtraction> {
   try {
     let text = '';
 
@@ -63,7 +68,7 @@ export async function extractExamDate(file: File): Promise<string | null> {
 
     if (!text.trim()) {
       console.warn('[examDate] texto vazio após extração, abortando');
-      return null;
+      return { exam_date: null, laboratory: null };
     }
 
     const response = await fetch(EXTRACT_DATE_WEBHOOK, {
@@ -77,21 +82,20 @@ export async function extractExamDate(file: File): Promise<string | null> {
 
     if (!response.ok) {
       console.warn('[examDate] Webhook returned non-OK status:', response.status);
-      return null;
+      return { exam_date: null, laboratory: null };
     }
 
     const json = await response.json();
     const date = json?.exam_date ?? null;
+    const lab = typeof json?.laboratory === 'string' ? json.laboratory : null;
 
-    // Validate ISO format before trusting the response
-    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return date;
-    }
+    const validDate =
+      typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
 
-    return null;
+    return { exam_date: validDate, laboratory: lab };
   } catch (err) {
     console.warn('[examDate] Failed to extract exam date:', err);
-    return null;
+    return { exam_date: null, laboratory: null };
   }
 }
 
