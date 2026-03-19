@@ -12,6 +12,7 @@ interface ExamReportProps {
   className?: string;
   vet_notes?: string | null;
   exam_date?: string | null;
+  laboratory?: string | null;
 }
 
 const escapeHtml = (text: string): string =>
@@ -47,11 +48,15 @@ const generatePDF = (
   examType?: string,
   vet_notes?: string | null,
   exam_date?: string | null,
+  laboratory?: string | null,
 ) => {
   const reportWindow = window.open("", "_blank");
   if (!reportWindow) return;
 
   const formattedDate = formatExamDate(exam_date ?? null);
+  const laboratoryLine = laboratory?.trim()
+    ? `<div>Laboratório: ${escapeHtml(laboratory)}</div>`
+    : '';
   const summaryText = clinical_summary || "Nenhum resumo clínico informado.";
   const vetNotesHtml = vet_notes?.trim()
     ? `<section class="section">
@@ -200,6 +205,7 @@ const generatePDF = (
           <div class="meta">
             <div>${examTitle}</div>
             <div>${formattedDate}</div>
+            ${laboratoryLine}
           </div>
         </header>
 
@@ -267,13 +273,14 @@ const ExamReport: React.FC<ExamReportProps> = ({
   className,
   vet_notes,
   exam_date,
+  laboratory,
 }) => {
   return (
     <Button
       type="button"
       variant="outline"
       className={className}
-      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType, vet_notes, exam_date)}
+      onClick={() => generatePDF(clinical_summary, analysis_data, patientData, examType, vet_notes, exam_date, laboratory)}
     >
       <FileText className="mr-2 h-4 w-4" />
       Gerar PDF
