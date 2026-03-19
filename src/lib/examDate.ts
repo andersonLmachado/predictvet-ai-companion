@@ -52,18 +52,12 @@ async function extractTextFromPDF(file: File): Promise<string> {
  * NEVER throws — always resolves (null on any failure).
  */
 export async function extractExamDate(file: File): Promise<string | null> {
-  console.log('[examDate] iniciando, tipo:', file.type, 'tamanho:', file.size);
-
   try {
     let text = '';
 
     if (file.type === 'application/pdf') {
-      console.log('[examDate] extraindo texto do PDF via pdfjs...');
       text = await extractTextFromPDF(file);
-      console.log('[examDate] texto extraído:', text.length, 'chars');
-      console.log('[examDate] preview:', text.slice(0, 200));
     } else {
-      console.log('[examDate] arquivo de imagem, usando file.text()');
       text = (await file.text()).slice(0, 2000);
     }
 
@@ -72,7 +66,6 @@ export async function extractExamDate(file: File): Promise<string | null> {
       return null;
     }
 
-    console.log('[examDate] enviando ao webhook...');
     const response = await fetch(EXTRACT_DATE_WEBHOOK, {
       method: 'POST',
       headers: {
