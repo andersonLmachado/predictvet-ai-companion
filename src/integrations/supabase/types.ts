@@ -133,6 +133,7 @@ export type Database = {
           exam_date: string | null
           exam_type: string
           id: string
+          laboratory: string | null
           patient_id: string
           vet_notes: string | null
         }
@@ -143,6 +144,7 @@ export type Database = {
           exam_date?: string | null
           exam_type: string
           id?: string
+          laboratory?: string | null
           patient_id: string
           vet_notes?: string | null
         }
@@ -153,6 +155,7 @@ export type Database = {
           exam_date?: string | null
           exam_type?: string
           id?: string
+          laboratory?: string | null
           patient_id?: string
           vet_notes?: string | null
         }
