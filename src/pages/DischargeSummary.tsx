@@ -40,14 +40,16 @@ interface ExamHistoryDetailed {
   id: string;
   examType: string;
   createdAt: string | null;
+  examDate: string | null;
   clinicalSummary: string | null;
   analysisData: ExamHistoryParam[];
 }
 
 const formatExamLabel = (exam: ExamEvolutionExam | null) => {
   if (!exam) return '—';
-  const dateText = exam.createdAt
-    ? new Date(exam.createdAt).toLocaleDateString('pt-BR')
+  const effectiveDate = exam.examDate ?? exam.createdAt;
+  const dateText = effectiveDate
+    ? new Date(effectiveDate).toLocaleDateString('pt-BR')
     : 'Data indefinida';
   return `${exam.examType || 'Exame'} (${dateText})`;
 };
@@ -105,7 +107,7 @@ const DischargeSummary = () => {
         supabase.from('medical_consultations').select('*').eq('patient_id', id).order('created_at', { ascending: false }),
         supabase
           .from('exams_history')
-          .select('id, exam_type, created_at, clinical_summary, analysis_data')
+          .select('id, exam_type, created_at, exam_date, clinical_summary, analysis_data')
           .eq('patient_id', id)
           .order('created_at', { ascending: false }),
       ]);
@@ -133,7 +135,7 @@ const DischargeSummary = () => {
         return {
           id: item.id,
           examName: item.exam_type || 'Exame sem nome',
-          examDate: item.created_at,
+          examDate: item.exam_date ?? item.created_at,
           status: hasSummary || hasAnalysisData ? 'Analisado' : 'Não analisado',
         };
       });
@@ -141,6 +143,7 @@ const DischargeSummary = () => {
         id: item.id,
         examType: item.exam_type || 'Exame sem nome',
         createdAt: item.created_at,
+        examDate: item.exam_date ?? null,
         clinicalSummary: item.clinical_summary,
         analysisData: Array.isArray(item.analysis_data)
           ? (item.analysis_data as unknown as ExamHistoryParam[])
@@ -176,6 +179,7 @@ const DischargeSummary = () => {
           id: exam.id,
           examType: exam.examType,
           createdAt: exam.createdAt,
+          examDate: exam.examDate,
           analysisData: exam.analysisData,
         }))
       ),
@@ -296,7 +300,9 @@ const DischargeSummary = () => {
                         <p><strong>Exame:</strong> {exam.examType}</p>
                         <p>
                           <strong>Data:</strong>{' '}
-                          {exam.createdAt ? new Date(exam.createdAt).toLocaleString('pt-BR') : '—'}
+                          {(exam.examDate ?? exam.createdAt)
+                            ? new Date((exam.examDate ?? exam.createdAt)!).toLocaleString('pt-BR')
+                            : '—'}
                         </p>
                         <p><strong>Indicadores:</strong> {exam.analysisData.length}</p>
                       </div>
