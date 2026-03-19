@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch, RefreshCw, Save, NotebookPen } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw, Save, NotebookPen, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
@@ -17,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateVetNotes } from "@/lib/vetNotes";
-import { extractExamDate, updateExamDate } from "@/lib/examDate";
+import { extractExamDate, updateExamDate, formatExamDate } from "@/lib/examDate";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
@@ -311,6 +311,12 @@ const Exams = () => {
                 vet_notes={vetNotes}
                 exam_date={extractedExamDate}
               />
+              {extractedExamDate && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  Data do exame: {formatExamDate(extractedExamDate)}
+                </span>
+              )}
               <Button
                 onClick={handleSaveExam}
                 disabled={isSavingExam}
