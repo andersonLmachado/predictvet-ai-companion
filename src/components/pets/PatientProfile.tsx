@@ -153,7 +153,7 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
   const trendsByParam = useMemo(() => {
     const map = new Map<string, { data: TrendDataPoint[]; unidade: string; refMin: number; refMax: number }>();
     history.forEach((exam) => {
-      const dateStr = exam.created_at ?? '';
+      const dateStr = exam.exam_date ?? exam.created_at ?? '';
       exam.analysis_data.forEach((p) => {
         const val = typeof p.valor_encontrado === 'number' ? p.valor_encontrado : parseFloat(String(p.valor_encontrado));
         if (isNaN(val)) return;
