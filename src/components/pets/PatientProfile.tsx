@@ -107,6 +107,7 @@ interface ExamParam {
 interface ExamHistoryRow {
   id: string;
   created_at: string | null;
+  exam_date: string | null;
   exam_type: string;
   clinical_summary: string | null;
   analysis_data: ExamParam[];
@@ -119,8 +120,9 @@ const PRIORITY_PARAMS = [
 
 const formatExamLabel = (exam: ExamEvolutionExam | null) => {
   if (!exam) return '—';
-  const dateText = exam.createdAt
-    ? new Date(exam.createdAt).toLocaleDateString('pt-BR')
+  const effectiveDate = exam.examDate ?? exam.createdAt;
+  const dateText = effectiveDate
+    ? new Date(effectiveDate).toLocaleDateString('pt-BR')
     : 'Data indefinida';
   return `${exam.examType || 'Exame'} (${dateText})`;
 };
@@ -178,6 +180,7 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
           id: exam.id,
           examType: exam.exam_type,
           createdAt: exam.created_at,
+          examDate: exam.exam_date ?? null,
           analysisData: exam.analysis_data,
         }))
       ),
