@@ -86,8 +86,9 @@ export async function extractExamDate(file: File): Promise<ExamExtraction> {
     }
 
     const json = await response.json();
-    const date = json?.exam_date ?? null;
-    const lab = typeof json?.laboratory === 'string' ? json.laboratory : null;
+    const raw = Array.isArray(json) ? json[0] : json;
+    const date = raw?.exam_date ?? null;
+    const lab = typeof raw?.laboratory === 'string' ? raw.laboratory : null;
 
     const validDate =
       typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
