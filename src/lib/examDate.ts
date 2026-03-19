@@ -86,7 +86,6 @@ export async function extractExamDate(file: File): Promise<ExamExtraction> {
     }
 
     const json = await response.json();
-    console.log('[examDate] raw webhook response:', JSON.stringify(json));
     const raw = Array.isArray(json) ? json[0] : json;
     const date = raw?.exam_date ?? null;
     const lab = typeof raw?.laboratory === 'string' ? raw.laboratory : null;
@@ -94,7 +93,6 @@ export async function extractExamDate(file: File): Promise<ExamExtraction> {
     const validDate =
       typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
 
-    console.log('[examDate] resultado parsed:', { exam_date: validDate, laboratory: lab });
     return { exam_date: validDate, laboratory: lab };
   } catch (err) {
     console.warn('[examDate] Failed to extract exam date:', err);

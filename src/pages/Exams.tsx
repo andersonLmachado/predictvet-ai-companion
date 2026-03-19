@@ -127,14 +127,8 @@ const Exams = () => {
       setResult(data);
       // Extract exam date from document — non-blocking, never delays the analysis result
       extractExamDate(file).then((extraction: ExamExtraction) => {
-        console.log('[Exams] extractExamDate retornou:', extraction);
         setExtractedExamDate(extraction.exam_date);
-        if (extraction.laboratory) {
-          setLaboratory(extraction.laboratory);
-          console.log('[state] laboratory definido como:', extraction.laboratory);
-        } else {
-          console.warn('[state] laboratory NÃO definido — valor recebido:', extraction.laboratory);
-        }
+        if (extraction.laboratory) setLaboratory(extraction.laboratory);
       });
 
       toast({
