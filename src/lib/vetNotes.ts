@@ -11,3 +11,16 @@ export async function updateVetNotes(examId: string, notes: string): Promise<voi
 
   if (error) throw new Error(error.message);
 }
+
+export async function updateVetNotesAndLaboratory(
+  examId: string,
+  notes: string,
+  laboratory: string | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from('exams_history')
+    .update({ vet_notes: notes, laboratory })
+    .eq('id', examId);
+
+  if (error) throw new Error(error.message);
+}
