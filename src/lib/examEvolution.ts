@@ -11,6 +11,7 @@ export interface ExamEvolutionExam {
   id: string;
   examType: string;
   createdAt: string | null;
+  examDate: string | null;
   analysisData: ExamEvolutionParam[];
 }
 
@@ -66,8 +67,8 @@ export const buildExamEvolutionComparison = (exams: ExamEvolutionExam[]): ExamEv
     .filter((exam) => Array.isArray(exam.analysisData) && exam.analysisData.length > 0)
     .slice()
     .sort((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const aTime = new Date(a.examDate ?? a.createdAt ?? 0).getTime();
+      const bTime = new Date(b.examDate ?? b.createdAt ?? 0).getTime();
       return bTime - aTime;
     });
 
