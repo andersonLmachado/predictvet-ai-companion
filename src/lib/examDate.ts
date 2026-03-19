@@ -1,4 +1,8 @@
+import * as pdfjsLib from 'pdfjs-dist';
 import { supabase } from '@/integrations/supabase/client';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const EXTRACT_DATE_WEBHOOK = 'https://n8nvet.predictlab.com.br/webhook/extrair-data-exame';
 
@@ -18,15 +22,40 @@ export function formatExamDate(date: string | null): string {
 }
 
 /**
- * Sends the exam file text to the n8n date-extraction webhook.
- * Reads the file as text, truncates to 2000 chars, and POSTs JSON.
+ * Extracts plain text from a PDF file using pdfjs-dist.
+ * Reads up to 3 pages — sufficient to find a date in most exam documents.
+ * Returns at most 2000 chars.
+ */
+async function extractTextFromPDF(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  let fullText = '';
+  const pagesToRead = Math.min(pdf.numPages, 3);
+
+  for (let i = 1; i <= pagesToRead; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item: any) => item.str)
+      .join(' ');
+    fullText += pageText + '\n';
+  }
+
+  return fullText.slice(0, 2000);
+}
+
+/**
+ * Sends extracted exam text to the n8n date-extraction webhook.
+ * Uses pdfjs-dist for PDFs; falls back to file.text() for images.
  * Returns an ISO date string (YYYY-MM-DD) or null.
  * NEVER throws — always resolves (null on any failure).
  */
 export async function extractExamDate(file: File): Promise<string | null> {
   try {
-    const rawText = await file.text();
-    const text = rawText.slice(0, 2000);
+    const text = file.type === 'application/pdf'
+      ? await extractTextFromPDF(file)
+      : (await file.text()).slice(0, 2000);
 
     const response = await fetch(EXTRACT_DATE_WEBHOOK, {
       method: 'POST',
