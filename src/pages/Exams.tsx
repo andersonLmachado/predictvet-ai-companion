@@ -302,14 +302,14 @@ const Exams = () => {
 
         {result && (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="space-y-3">
               {extractedExamDate && (
                 <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   Data do exame: {formatExamDate(extractedExamDate)}
                 </span>
               )}
-              <div className="ml-auto flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <ExamReport
                   clinical_summary={result.resumo_clinico}
                   analysis_data={result.resultados}
