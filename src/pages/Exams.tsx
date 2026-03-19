@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { updateVetNotes } from "@/lib/vetNotes";
-import { extractExamDate, updateExamDate, formatExamDate } from "@/lib/examDate";
+import { updateVetNotesAndLaboratory } from "@/lib/vetNotes";
+import { extractExamDate, updateExamDate, formatExamDate, type ExamExtraction } from "@/lib/examDate";
+import { Input } from "@/components/ui/input";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 
 type ExamType = "sangue" | "urina";
@@ -37,6 +38,7 @@ const Exams = () => {
   const [vetNotes, setVetNotes] = useState<string>('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [extractedExamDate, setExtractedExamDate] = useState<string | null>(null);
+  const [laboratory, setLaboratory] = useState<string>('');
 
   const fetchPatients = useCallback(async () => {
     if (!user?.id) return;
@@ -104,6 +106,7 @@ const Exams = () => {
     setSavedExamId(null);
     setVetNotes('');
     setExtractedExamDate(null);
+    setLaboratory('');
 
     try {
       const formData = new FormData();
@@ -123,7 +126,10 @@ const Exams = () => {
       const data: AnalysisResponse = await response.json();
       setResult(data);
       // Extract exam date from document — non-blocking, never delays the analysis result
-      extractExamDate(file).then(setExtractedExamDate);
+      extractExamDate(file).then((extraction: ExamExtraction) => {
+        setExtractedExamDate(extraction.exam_date);
+        if (extraction.laboratory) setLaboratory(extraction.laboratory);
+      });
 
       toast({
         title: "Análise concluída",
@@ -209,7 +215,7 @@ const Exams = () => {
     if (!savedExamId) return;
     setIsSavingNotes(true);
     try {
-      await updateVetNotes(savedExamId, vetNotes);
+      await updateVetNotesAndLaboratory(savedExamId, vetNotes, laboratory || null);
       toast({ title: 'Observação salva', description: 'As observações clínicas foram registradas.' });
     } catch {
       toast({ title: 'Erro ao salvar observação', description: 'Tente novamente.', variant: 'destructive' });
@@ -317,6 +323,7 @@ const Exams = () => {
                   examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
                   vet_notes={vetNotes}
                   exam_date={extractedExamDate}
+                  laboratory={laboratory || null}
                 />
                 <Button
                   onClick={handleSaveExam}
@@ -330,30 +337,45 @@ const Exams = () => {
             <AnalysisResults result={result} patientData={patientData} />
 
             {/* Observações Clínicas do Veterinário */}
-            <div className="space-y-2 pt-2">
-              <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
-                <NotebookPen className="h-4 w-4" />
-                Observações clínicas
-              </Label>
-              <Textarea
-                id="vet-notes"
-                placeholder="Ex: Dia 2 — melhorou apetite, porém ainda com febre..."
-                value={vetNotes}
-                onChange={(e) => setVetNotes(e.target.value)}
-                rows={4}
-                className="resize-y"
-              />
-              <div className="flex justify-end">
-                <Button onClick={handleSaveNotes} disabled={!savedExamId || isSavingNotes} variant="secondary">
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSavingNotes ? 'Salvando...' : 'Salvar observação'}
-                </Button>
+            <div className="space-y-4 pt-2">
+              {/* Laboratório */}
+              <div className="space-y-2">
+                <Label htmlFor="laboratory" className="text-sm font-medium">
+                  Laboratório
+                </Label>
+                <Input
+                  id="laboratory"
+                  placeholder="Ex: Centro Vet Canoas, LabCenter Vet..."
+                  value={laboratory}
+                  onChange={(e) => setLaboratory(e.target.value)}
+                />
               </div>
-              {!savedExamId && (
-                <p className="text-xs text-muted-foreground text-right">
-                  Salve o exame primeiro para habilitar as observações.
-                </p>
-              )}
+              {/* Observações clínicas */}
+              <div className="space-y-2">
+                <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
+                  <NotebookPen className="h-4 w-4" />
+                  Observações clínicas
+                </Label>
+                <Textarea
+                  id="vet-notes"
+                  placeholder="Ex: Dia 2 — melhorou apetite, porém ainda com febre..."
+                  value={vetNotes}
+                  onChange={(e) => setVetNotes(e.target.value)}
+                  rows={4}
+                  className="resize-y"
+                />
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveNotes} disabled={!savedExamId || isSavingNotes} variant="secondary">
+                    <Save className="mr-2 h-4 w-4" />
+                    {isSavingNotes ? 'Salvando...' : 'Salvar observação'}
+                  </Button>
+                </div>
+                {!savedExamId && (
+                  <p className="text-xs text-muted-foreground text-right">
+                    Salve o exame primeiro para habilitar as observações.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
