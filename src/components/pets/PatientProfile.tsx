@@ -140,10 +140,16 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
         .eq('patient_id', patientId)
         .order('created_at', { ascending: true });
       if (!error && data) {
-        setHistory(data.map((row: any) => ({
+        const mapped = data.map((row: any) => ({
           ...row,
           analysis_data: Array.isArray(row.analysis_data) ? row.analysis_data : [],
-        })));
+        }));
+        mapped.sort((a: ExamHistoryRow, b: ExamHistoryRow) => {
+          const aTime = new Date(a.exam_date ?? a.created_at ?? 0).getTime();
+          const bTime = new Date(b.exam_date ?? b.created_at ?? 0).getTime();
+          return aTime - bTime;
+        });
+        setHistory(mapped);
       }
       setLoading(false);
     };
