@@ -20,6 +20,7 @@ interface ExamParam {
 interface ExamHistoryRow {
   id: string;
   created_at: string | null;
+  exam_date: string | null;
   exam_type: string;
   clinical_summary: string | null;
   analysis_data: ExamParam[];
@@ -58,12 +59,16 @@ const Dashboard = () => {
         .order('created_at', { ascending: true });
 
       if (!error && data) {
-        setHistory(
-          data.map((row: any) => ({
-            ...row,
-            analysis_data: Array.isArray(row.analysis_data) ? row.analysis_data : [],
-          }))
-        );
+        const mapped = data.map((row: any) => ({
+          ...row,
+          analysis_data: Array.isArray(row.analysis_data) ? row.analysis_data : [],
+        }));
+        mapped.sort((a: ExamHistoryRow, b: ExamHistoryRow) => {
+          const aTime = new Date(a.exam_date ?? a.created_at ?? 0).getTime();
+          const bTime = new Date(b.exam_date ?? b.created_at ?? 0).getTime();
+          return aTime - bTime;
+        });
+        setHistory(mapped);
       } else {
         setHistory([]);
       }
@@ -80,7 +85,7 @@ const Dashboard = () => {
     >();
 
     history.forEach((exam) => {
-      const dateStr = exam.created_at ?? '';
+      const dateStr = exam.exam_date ?? exam.created_at ?? '';
       exam.analysis_data.forEach((p) => {
         const val = typeof p.valor_encontrado === 'number' ? p.valor_encontrado : parseFloat(String(p.valor_encontrado));
         if (isNaN(val)) return;
