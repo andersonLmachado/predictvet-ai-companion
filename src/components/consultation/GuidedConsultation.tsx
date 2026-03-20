@@ -137,7 +137,7 @@ const GuidedConsultation: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto p-4 pb-8">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto p-4 pb-8">
       {/* Patient header */}
       <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -241,7 +241,7 @@ const GuidedConsultation: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────────── */}
 
       {/* SOAP Cards */}
-      <div className="grid gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SOAPCard
           letter="S"
           title="Subjetivo — Anamnese"
