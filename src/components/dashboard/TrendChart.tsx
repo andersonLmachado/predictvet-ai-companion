@@ -108,12 +108,6 @@ const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMi
       <CardContent className="pb-2">
         <ChartContainer config={chartConfig} className="h-[180px] w-full">
           <AreaChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-            <defs>
-              <linearGradient id={`grad-${parametro}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted/40" />
             <XAxis
               dataKey="date"
@@ -133,7 +127,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMi
               dataKey="value"
               stroke="hsl(var(--primary))"
               strokeWidth={2}
-              fill={`url(#grad-${parametro})`}
+              fill="transparent"
               dot={<CustomDot />}
               activeDot={{ r: 6 }}
             />
