@@ -5,7 +5,6 @@ import { Loader2, Activity } from 'lucide-react';
 import PatientCombobox from '@/components/dashboard/PatientCombobox';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
-import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 
 interface ExamParam {
@@ -195,12 +194,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Clinical signs */}
-      {selectedPatient && (
-        <div className="max-w-2xl">
-          <ClinicalSignsSection patientId={selectedPatient.id} />
-        </div>
-      )}
     </div>
   );
 };

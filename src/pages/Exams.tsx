@@ -20,6 +20,7 @@ import { updateVetNotesAndLaboratory } from "@/lib/vetNotes";
 import { extractExamDate, updateExamDate, formatExamDate, type ExamExtraction } from "@/lib/examDate";
 import { Input } from "@/components/ui/input";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
+import ClinicalSignsSection from "@/components/dashboard/ClinicalSignsSection";
 
 type ExamType = "sangue" | "urina";
 
@@ -346,6 +347,9 @@ const Exams = () => {
               </div>
             </div>
             <AnalysisResults result={result} patientData={patientData} />
+
+            {/* Sinais Clínicos do Dia */}
+            <ClinicalSignsSection patientId={selectedPatientId || null} />
 
             {/* Observações Clínicas do Veterinário */}
             <div className="space-y-4 pt-2">
