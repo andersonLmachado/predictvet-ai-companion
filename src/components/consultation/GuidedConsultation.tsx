@@ -41,6 +41,7 @@ const GuidedConsultation: React.FC = () => {
   });
 
   const [aiSuggestions, setAiSuggestions] = useState('');
+  const [vitalSigns, setVitalSigns] = useState({ weightKg: '', temperatureC: '' });
 
   const updateField = (field: keyof typeof soapData) => (value: string) => {
     setSoapData((prev) => ({ ...prev, [field]: value }));
@@ -54,13 +55,14 @@ const GuidedConsultation: React.FC = () => {
         if (isMounted) {
           setSoapData({ S: '', O: '', A: '', P: '' });
           setAiSuggestions('');
+          setVitalSigns({ weightKg: '', temperatureC: '' });
         }
         return;
       }
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p')
+        .select('soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
@@ -85,29 +87,35 @@ const GuidedConsultation: React.FC = () => {
           P: (guidedRecord as any).soap_p ?? '',
         });
         setAiSuggestions('');
-        return;
-      }
+      } else {
+        // Legacy flow: one row per soap_block
+        const nextSoapData = { S: '', O: '', A: '', P: '' };
+        let nextAiSuggestions = '';
+        const filledBlocks = new Set<string>();
 
-      // Legacy flow: one row per soap_block
-      const nextSoapData = { S: '', O: '', A: '', P: '' };
-      let nextAiSuggestions = '';
-      const filledBlocks = new Set<string>();
+        for (const row of data ?? []) {
+          const block = row.soap_block;
+          if (!block || !['S', 'O', 'A', 'P'].includes(block) || filledBlocks.has(block)) continue;
 
-      for (const row of data ?? []) {
-        const block = row.soap_block;
-        if (!block || !['S', 'O', 'A', 'P'].includes(block) || filledBlocks.has(block)) continue;
+          nextSoapData[block as keyof typeof nextSoapData] = row.content ?? '';
+          if (block === 'P') {
+            nextAiSuggestions = row.ai_suggestions ?? '';
+          }
+          filledBlocks.add(block);
 
-        nextSoapData[block as keyof typeof nextSoapData] = row.content ?? '';
-        if (block === 'P') {
-          nextAiSuggestions = row.ai_suggestions ?? '';
+          if (filledBlocks.size === 4) break;
         }
-        filledBlocks.add(block);
 
-        if (filledBlocks.size === 4) break;
+        setSoapData(nextSoapData);
+        setAiSuggestions(nextAiSuggestions);
       }
 
-      setSoapData(nextSoapData);
-      setAiSuggestions(nextAiSuggestions);
+      // Load vital signs from the O block row (works for both guided and legacy flows)
+      const oRow = (data ?? []).find((row: any) => row.soap_block === 'O');
+      setVitalSigns({
+        weightKg: (oRow as any)?.weight_kg != null ? String((oRow as any).weight_kg) : '',
+        temperatureC: (oRow as any)?.temperature_c != null ? String((oRow as any).temperature_c) : '',
+      });
     };
 
     loadConsultationData();
@@ -264,6 +272,10 @@ const GuidedConsultation: React.FC = () => {
           accentColor="hsl(160, 60%, 40%)"
           icon={<Eye className="h-5 w-5" />}
           patientId={selectedPatient?.id}
+          weightKg={vitalSigns.weightKg}
+          temperatureC={vitalSigns.temperatureC}
+          onWeightChange={(v) => setVitalSigns((prev) => ({ ...prev, weightKg: v }))}
+          onTemperatureChange={(v) => setVitalSigns((prev) => ({ ...prev, temperatureC: v }))}
         />
 
         <SOAPCard

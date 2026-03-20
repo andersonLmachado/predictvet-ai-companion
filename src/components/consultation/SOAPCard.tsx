@@ -26,6 +26,10 @@ interface SOAPCardProps {
   patientId?: string;
   aiSuggestions?: string;
   onAiSuggestionsChange?: (value: string) => void;
+  weightKg?: string;
+  temperatureC?: string;
+  onWeightChange?: (v: string) => void;
+  onTemperatureChange?: (v: string) => void;
 }
 
 const SOAPCard: React.FC<SOAPCardProps> = ({
@@ -40,12 +44,18 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   patientId,
   aiSuggestions,
   onAiSuggestionsChange,
+  weightKg: weightKgProp = '',
+  temperatureC: temperatureCProp = '',
+  onWeightChange,
+  onTemperatureChange,
 }) => {
   const { refreshPatientState } = usePatient();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState(value);
+  const [weightKg, setWeightKg] = useState(weightKgProp);
+  const [temperatureC, setTemperatureC] = useState(temperatureCProp);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
@@ -53,7 +63,26 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     setContent(value);
   }, [value]);
 
+  useEffect(() => {
+    setWeightKg(weightKgProp);
+  }, [weightKgProp]);
+
+  useEffect(() => {
+    setTemperatureC(temperatureCProp);
+  }, [temperatureCProp]);
+
   const normalizeAiText = (text: string) => text.replace(/\*\*/g, '').trim();
+
+  const validateVitals = (weight: string, temp: string) => {
+    const w = parseFloat(weight);
+    const t = parseFloat(temp);
+    if (weight && !isNaN(w) && (w < 0.1 || w > 200)) {
+      toast.warning('Peso fora do intervalo esperado (0,1 – 200 kg)');
+    }
+    if (temp && !isNaN(t) && (t < 35.0 || t > 42.0)) {
+      toast.warning('Temperatura fora do intervalo esperado (35,0 – 42,0 °C)');
+    }
+  };
 
   const startRecording = useCallback(async () => {
     try {
@@ -190,8 +219,15 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       return;
     }
 
+    if (letter === 'O') {
+      validateVitals(weightKg, temperatureC);
+    }
+
     setIsSaving(true);
     try {
+      const weightVal = letter === 'O' && weightKg.trim() ? parseFloat(weightKg) : null;
+      const tempVal = letter === 'O' && temperatureC.trim() ? parseFloat(temperatureC) : null;
+
       const { error } = await supabase
         .from('medical_consultations')
         .upsert(
@@ -200,7 +236,8 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             soap_block: letter,
             content: content.trim(),
             ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
-          },
+            ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
+          } as any,
           { onConflict: 'patient_id,soap_block' }
         );
 
@@ -241,6 +278,81 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="relative space-y-3">
+        {/* Vital signs quick-fill — O block only */}
+        {letter === 'O' && (
+          <div className="flex gap-3">
+            {/* Peso */}
+            <div className="flex flex-col gap-1">
+              <label
+                className="text-xs font-semibold uppercase tracking-wide"
+                style={{ color: 'hsl(222,30%,45%)', fontFamily: 'Nunito Sans, sans-serif' }}
+              >
+                Peso (kg)
+              </label>
+              <div
+                className="flex items-center h-9 rounded-xl overflow-hidden"
+                style={{ border: '1px solid hsl(217,50%,85%)', background: 'hsl(213,100%,99%)' }}
+              >
+                <input
+                  type="number"
+                  min="0.1"
+                  max="200"
+                  step="0.1"
+                  value={weightKg}
+                  onChange={(e) => {
+                    setWeightKg(e.target.value);
+                    onWeightChange?.(e.target.value);
+                  }}
+                  onBlur={() => validateVitals(weightKg, temperatureC)}
+                  placeholder="ex: 4.5"
+                  className="w-20 h-full px-2.5 text-sm bg-transparent outline-none"
+                  style={{ fontFamily: 'Nunito Sans, sans-serif' }}
+                />
+                <span
+                  className="pr-2.5 text-xs"
+                  style={{ color: 'hsl(222,30%,55%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                >
+                  kg
+                </span>
+              </div>
+            </div>
+            {/* Temperatura */}
+            <div className="flex flex-col gap-1">
+              <label
+                className="text-xs font-semibold uppercase tracking-wide"
+                style={{ color: 'hsl(222,30%,45%)', fontFamily: 'Nunito Sans, sans-serif' }}
+              >
+                Temp. (°C)
+              </label>
+              <div
+                className="flex items-center h-9 rounded-xl overflow-hidden"
+                style={{ border: '1px solid hsl(217,50%,85%)', background: 'hsl(213,100%,99%)' }}
+              >
+                <input
+                  type="number"
+                  min="35"
+                  max="42"
+                  step="0.1"
+                  value={temperatureC}
+                  onChange={(e) => {
+                    setTemperatureC(e.target.value);
+                    onTemperatureChange?.(e.target.value);
+                  }}
+                  onBlur={() => validateVitals(weightKg, temperatureC)}
+                  placeholder="ex: 38.5"
+                  className="w-20 h-full px-2.5 text-sm bg-transparent outline-none"
+                  style={{ fontFamily: 'Nunito Sans, sans-serif' }}
+                />
+                <span
+                  className="pr-2.5 text-xs"
+                  style={{ color: 'hsl(222,30%,55%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                >
+                  °C
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="relative">
           <Textarea
             value={content}
