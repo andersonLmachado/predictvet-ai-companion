@@ -5,7 +5,7 @@ const services = [
   {
     icon: FlaskConical,
     title: 'Análise de Exames',
-    description: 'Upload de hemogramas e urinálises com interpretação automática por IA, identificando valores fora da referência.',
+    description: 'Upload de hemogramas, painéis bioquímicos completos e urinálises com interpretação automática por IA. O sistema identifica desvios laboratoriais e correlaciona biomarcadores para detectar padrões silenciosos antes dos sintomas clínicos.',
     accent: 'hsl(221,73%,45%)',
     tag: 'Laboratorial',
   },
