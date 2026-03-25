@@ -21,6 +21,7 @@ import {
   formatReferenceRange,
   type ExamEvolutionExam,
 } from '@/lib/examEvolution';
+import { buildPrintableHtml } from '@/lib/ultrasoundReportGenerator';
 
 // --- Tab: Histórico SOAP ---
 const SOAPHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
@@ -440,6 +441,96 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
   );
 };
 
+// --- Tab: Laudos Ultrassonográficos ---
+const UltrasoundHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('ultrasound_reports')
+        .select('id, created_at, species, sex, generated_report')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+      if (!error && data) setReports(data);
+      setLoading(false);
+    };
+    fetchReports();
+  }, [patientId]);
+
+  const SEX_LABEL: Record<string, string> = {
+    female: 'Fêmea inteira', female_castrated: 'Fêmea castrada',
+    male: 'Macho inteiro', male_castrated: 'Macho castrado',
+  };
+
+  const handleViewPdf = (report: any) => {
+    if (!report.generated_report) return;
+    const html = buildPrintableHtml(
+      report.generated_report,
+      { name: '', species: report.species, owner_name: '', age: null },
+      new Date(report.created_at).toLocaleDateString('pt-BR'),
+    );
+    const w = window.open('', '_blank', 'noopener,noreferrer');
+    if (!w) return;
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 300);
+  };
+
+  if (loading) return (
+    <div className="space-y-2">
+      <Skeleton className="h-16 w-full" />
+      <Skeleton className="h-16 w-full" />
+    </div>
+  );
+
+  if (reports.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <Activity className="h-16 w-16 text-muted-foreground/30 mb-4" />
+      <p className="text-muted-foreground mb-4">Nenhum laudo ultrassonográfico registrado.</p>
+      <Button variant="outline" onClick={() => navigate(`/patient/${patientId}/ultrasound`)}>
+        Criar Laudo US
+      </Button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {reports.map((r) => (
+        <Card key={r.id} className="border-l-4 border-l-primary/50">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">
+                {r.species === 'canis' ? 'Cão' : 'Gato'} — {SEX_LABEL[r.sex] ?? r.sex}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {r.created_at
+                  ? new Date(r.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })
+                  : '—'}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleViewPdf(r)}
+              disabled={!r.generated_report}
+            >
+              Ver PDF
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 // --- Main Component ---
 const PatientProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -550,6 +641,10 @@ const PatientProfile = () => {
             <ClipboardList className="h-4 w-4" />
             Histórico SOAP
           </TabsTrigger>
+          <TabsTrigger value="ultrasound" className="gap-1.5">
+            <Scan className="h-4 w-4" />
+            Laudos US
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">
@@ -562,6 +657,10 @@ const PatientProfile = () => {
 
         <TabsContent value="soap">
           <SOAPHistoryTab patientId={id} />
+        </TabsContent>
+
+        <TabsContent value="ultrasound">
+          <UltrasoundHistoryTab patientId={id} />
         </TabsContent>
       </Tabs>
     </div>
