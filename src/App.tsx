@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import DischargeSummary from "./pages/DischargeSummary";
 import ConsultationPage from "./pages/ConsultationPage";
 import ProfilePage from "./pages/ProfilePage";
+import UltrasoundPage from './pages/UltrasoundPage';
 import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -137,6 +138,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <ConsultationPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient/:id/ultrasound"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UltrasoundPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

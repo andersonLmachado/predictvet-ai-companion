@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, Stethoscope } from 'lucide-react';
+import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, Stethoscope, Scan } from 'lucide-react';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
@@ -521,6 +521,10 @@ const PatientProfile = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate(`/patient/${id}/ultrasound`)}>
+            <Scan className="h-4 w-4 mr-1.5" />
+            Novo Laudo US
+          </Button>
           <Button variant="outline" onClick={() => navigate(`/anamnese/${id}`)}>
             <Stethoscope className="h-4 w-4 mr-1.5" />
             Nova Anamnese
