@@ -238,12 +238,12 @@ const UltrasoundForm: React.FC<Props> = ({ patient }) => {
     };
     const reportText = savedReport ?? generateReport(data);
     const html = buildPrintableHtml(reportText, patient, new Date().toLocaleDateString('pt-BR'));
-    const w = window.open('', '_blank', 'noopener,noreferrer');
+    const w = window.open('', '_blank');
     if (!w) { toast.error('Pop-up bloqueado. Permita pop-ups para exportar PDF.'); return; }
     w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 300);
+    setTimeout(() => w.print(), 500);
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────

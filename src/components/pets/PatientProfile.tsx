@@ -473,12 +473,12 @@ const UltrasoundHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) =>
       { name: '', species: report.species, owner_name: '', age: null },
       new Date(report.created_at).toLocaleDateString('pt-BR'),
     );
-    const w = window.open('', '_blank', 'noopener,noreferrer');
+    const w = window.open('', '_blank');
     if (!w) return;
     w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 300);
+    setTimeout(() => w.print(), 500);
   };
 
   if (loading) return (
