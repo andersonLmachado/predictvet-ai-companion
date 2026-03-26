@@ -442,7 +442,7 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
 };
 
 // --- Tab: Laudos Ultrassonográficos ---
-const UltrasoundHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) => {
+const UltrasoundHistoryTab: React.FC<{ patientId: string; patientName: string; ownerName: string }> = ({ patientId, patientName, ownerName }) => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -470,7 +470,7 @@ const UltrasoundHistoryTab: React.FC<{ patientId: string }> = ({ patientId }) =>
     if (!report.generated_report) return;
     const html = buildPrintableHtml(
       report.generated_report,
-      { name: '', species: report.species, owner_name: '', age: null },
+      { name: patientName, species: report.species, owner_name: ownerName, age: null },
       new Date(report.created_at).toLocaleDateString('pt-BR'),
     );
     const w = window.open('', '_blank');
@@ -660,7 +660,7 @@ const PatientProfile = () => {
         </TabsContent>
 
         <TabsContent value="ultrasound">
-          <UltrasoundHistoryTab patientId={id} />
+          <UltrasoundHistoryTab patientId={id} patientName={patient.name} ownerName={patient.owner_name} />
         </TabsContent>
       </Tabs>
     </div>
