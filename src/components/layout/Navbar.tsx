@@ -21,6 +21,7 @@ import {
   X,
   ChevronDown,
   User,
+  ScanLine,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import predictlabIcon from '@/assets/predictlab-icon-new.png';
@@ -36,6 +37,7 @@ const NAV_ITEMS = [
   { label: 'Cadastrar Pet',    icon: UserPlus,       path: '/register-pet' },
   { label: 'Meus Pacientes',   icon: Users,          path: '/patients' },
   { label: 'Exames',           icon: FileText,       path: '/exams' },
+  { label: 'Laudo US',         icon: ScanLine,        path: '/ultrasound' },
   { label: 'Dashboard',        icon: LayoutDashboard, path: '/dashboard' },
 ];
 
