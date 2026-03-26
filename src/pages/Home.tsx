@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Activity,
   Sparkles,
+  ScanLine,
 } from 'lucide-react';
 import {
   PieChart,
@@ -262,6 +263,13 @@ const Home = () => {
       description: 'Upload e interpretação por IA',
       path: '/exams',
       gradient: 'linear-gradient(135deg, hsl(352,76%,40%), hsl(18,76%,50%))',
+    },
+    {
+      label: 'Laudo US',
+      icon: ScanLine,
+      description: 'Laudo ultrassonográfico por IA',
+      path: '/ultrasound',
+      gradient: 'linear-gradient(135deg, hsl(199,85%,38%), hsl(217,88%,57%))',
     },
   ];
 

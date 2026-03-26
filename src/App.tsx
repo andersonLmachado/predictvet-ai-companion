@@ -143,6 +143,16 @@ const App = () => (
                 }
               />
               <Route
+                path="/ultrasound"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UltrasoundPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/patient/:id/ultrasound"
                 element={
                   <ProtectedRoute>
