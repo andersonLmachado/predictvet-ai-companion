@@ -120,33 +120,136 @@ export function buildPrintableHtml(
   patient: { name: string; species: string; owner_name: string; age: string | null },
   date: string,
 ): string {
-  const ageLine = patient.age
-    ? `&nbsp;|&nbsp;<strong>Idade:</strong> ${escHtml(patient.age)}`
+  const speciesLabel =
+    patient.species === 'canis' ? 'Cão' :
+    patient.species === 'felis' ? 'Gato' :
+    escHtml(patient.species);
+
+  const ageField = patient.age
+    ? `<div class="pf"><div class="pl">Idade</div><div class="pv">${escHtml(patient.age)}</div></div>`
     : '';
+
+  // Split report into blocks and extract sections, impression, footer
+  const blocks = reportText.split('\n\n').filter(Boolean);
+  const sepIdx = blocks.findIndex((b) => b.trim() === '---');
+  const contentBlocks = sepIdx >= 0 ? blocks.slice(0, sepIdx) : blocks;
+  const footerRaw = sepIdx >= 0 ? blocks.slice(sepIdx + 1).join('\n') : '';
+
+  let impressionHtml = '';
+  const sectionHtmlParts: string[] = [];
+
+  for (const block of contentBlocks) {
+    const headerMatch = block.match(/^([A-ZÁÀÃÂÉÊÍÓÔÕÚÜÇ\s()—-]+):\s*([\s\S]*)/);
+    if (block.startsWith('IMPRESSÃO DIAGNÓSTICA')) {
+      const text = block.replace(/^IMPRESSÃO DIAGNÓSTICA:\n?/, '').trim();
+      impressionHtml = `
+        <div class="impression">
+          <div class="imp-label">Impressão Diagnóstica</div>
+          <div class="imp-body">${escHtml(text).replace(/\n/g, '<br>')}</div>
+        </div>`;
+    } else if (headerMatch) {
+      const title = headerMatch[1].trim();
+      const body = headerMatch[2].trim();
+      sectionHtmlParts.push(`
+        <div class="section">
+          <div class="sec-hdr">
+            <span class="sec-dot"></span>
+            <span class="sec-title">${escHtml(title)}</span>
+          </div>
+          <div class="sec-body">${escHtml(body).replace(/\n/g, '<br>')}</div>
+        </div>`);
+    } else {
+      sectionHtmlParts.push(`
+        <div class="section">
+          <div class="sec-body">${escHtml(block).replace(/\n/g, '<br>')}</div>
+        </div>`);
+    }
+  }
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laudo Ultrassonográfico — ${escHtml(patient.name)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; font-size: 12px; margin: 40px; color: #111; }
-    h1 { font-size: 16px; margin-bottom: 4px; }
-    .meta { font-size: 11px; color: #555; margin-bottom: 24px; }
-    pre { font-family: monospace; font-size: 11px; white-space: pre-wrap; line-height: 1.6; }
-    .footer { margin-top: 40px; font-size: 10px; color: #888; border-top: 1px solid #ccc; padding-top: 8px; }
-    @media print { body { margin: 20px; } }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Nunito Sans',Arial,sans-serif;background:#fff;color:#0a1e51;font-size:11px;line-height:1.65}
+
+    /* ── Header ── */
+    .hdr{background:linear-gradient(135deg,#071640 0%,#0d2460 60%,#1a3a80 100%);padding:22px 40px;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .brand-pill{display:inline-block;background:rgba(255,255,255,.93);border-radius:10px;padding:5px 13px;margin-bottom:12px}
+    .brand-name{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:#1a52cc;line-height:1.2}
+    .brand-tag{font-size:8px;color:#2a6fec;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+    .doc-title{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:3px}
+    .doc-date{font-size:9px;color:rgba(180,210,255,.7)}
+
+    /* ── Patient bar ── */
+    .pbar{background:#f0f7ff;border-bottom:2px solid #dce8f8;padding:11px 40px;display:flex;gap:28px;flex-wrap:wrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .pf{display:flex;flex-direction:column;gap:1px}
+    .pl{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#3d5a99}
+    .pv{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:#071640}
+
+    /* ── Content ── */
+    .content{padding:24px 40px}
+    .section{margin-bottom:13px}
+    .sec-hdr{display:flex;align-items:center;gap:6px;border-bottom:1px solid #dce8f8;padding-bottom:4px;margin-bottom:6px}
+    .sec-dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#1a52cc,#df5220);flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sec-title{font-family:'Sora',sans-serif;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#1a52cc}
+    .sec-body{font-size:10.5px;color:#1a2e5a;line-height:1.7;padding-left:13px}
+
+    /* ── Impression ── */
+    .impression{background:#f0f7ff;border-left:3px solid #1a52cc;border-radius:0 8px 8px 0;padding:11px 15px;margin-top:18px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .imp-label{font-family:'Sora',sans-serif;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1a52cc;margin-bottom:5px}
+    .imp-body{font-size:11px;color:#0a1e51;line-height:1.7}
+
+    /* ── Footer ── */
+    .footer{border-top:1px solid #dce8f8;padding:14px 40px 18px;background:#f8fbff;margin-top:18px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .footer-disc{font-size:9px;color:#3d5a99;line-height:1.65}
+    .footer-disc p{margin-bottom:3px}
+    .footer-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #dce8f8}
+    .footer-brand{font-family:'Sora',sans-serif;font-size:9px;font-weight:700;color:#1a52cc}
+    .footer-gen{font-size:9px;color:#7a9acc}
+
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .hdr,.pbar,.impression,.footer{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    }
   </style>
 </head>
 <body>
-  <h1>Laudo Ultrassonográfico</h1>
-  <div class="meta">
-    <strong>Paciente:</strong> ${escHtml(patient.name)} &nbsp;|&nbsp;
-    <strong>Espécie:</strong> ${escHtml(patient.species)} &nbsp;|&nbsp;
-    <strong>Tutor:</strong> ${escHtml(patient.owner_name)}${ageLine}
+  <div class="hdr">
+    <div class="brand-pill">
+      <div class="brand-name">PredictLab</div>
+      <div class="brand-tag">Inteligência Veterinária</div>
+    </div>
+    <div class="doc-title">Laudo Ultrassonográfico</div>
+    <div class="doc-date">Emitido em ${escHtml(date)}</div>
   </div>
-  <pre>${escHtml(reportText)}</pre>
-  <div class="footer">Gerado em ${escHtml(date)} — PredictLab</div>
+
+  <div class="pbar">
+    <div class="pf"><div class="pl">Paciente</div><div class="pv">${escHtml(patient.name)}</div></div>
+    <div class="pf"><div class="pl">Espécie</div><div class="pv">${speciesLabel}</div></div>
+    <div class="pf"><div class="pl">Tutor</div><div class="pv">${escHtml(patient.owner_name)}</div></div>
+    ${ageField}
+  </div>
+
+  <div class="content">
+    ${sectionHtmlParts.join('\n')}
+    ${impressionHtml}
+  </div>
+
+  <div class="footer">
+    <div class="footer-disc">
+      ${footerRaw.split('\n').filter(Boolean).map((l) => `<p>${escHtml(l)}</p>`).join('\n      ')}
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">PredictLab — Inteligência Veterinária</div>
+      <div class="footer-gen">Gerado em ${escHtml(date)}</div>
+    </div>
+  </div>
 </body>
 </html>`;
 }
