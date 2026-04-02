@@ -32,6 +32,8 @@ describe('classifyParams', () => {
     const compared = makeExam([{ parametro: 'EOSINÓFILOS', valor: 15, status: 'alto' }]);
     const result = classifyParams(base as any, compared as any);
     expect(result.worsening).toContain('EOSINÓFILOS');
+    expect(result.improving).not.toContain('EOSINÓFILOS');
+    expect(result.stable).not.toContain('EOSINÓFILOS');
   });
 
   it('classifica como stable quando variação <= 2%', () => {
@@ -62,6 +64,13 @@ describe('classifyParams', () => {
     const compared = makeExam([{ parametro: 'X', valor: 10, status: 'alto' }]);
     // Força string em um deles
     (compared.analysis_data[0] as any).valor_encontrado = 'positivo';
+    const result = classifyParams(base as any, compared as any);
+    expect(result.improving.length + result.worsening.length + result.stable.length).toBe(0);
+  });
+
+  it('ignora parâmetro com valor base igual a zero (divisão por zero)', () => {
+    const base     = makeExam([{ parametro: 'PROTEÍNA', valor: 0, status: 'baixo' }]);
+    const compared = makeExam([{ parametro: 'PROTEÍNA', valor: 5, status: 'normal' }]);
     const result = classifyParams(base as any, compared as any);
     expect(result.improving.length + result.worsening.length + result.stable.length).toBe(0);
   });

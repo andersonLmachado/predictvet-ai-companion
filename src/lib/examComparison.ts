@@ -1,13 +1,13 @@
-interface ExamParam {
+export interface ExamParam {
   parametro: string;
   valor_encontrado: number | string | null;
   ref_min: number;
   ref_max: number;
   unidade: string;
-  status: string;
+  status: string | null;
 }
 
-interface ExamHistoryRow {
+export interface ExamHistoryRow {
   id: string;
   created_at: string | null;
   exam_date: string | null;
@@ -46,9 +46,9 @@ export function classifyParams(
     }
 
     // pct > 2: check status transition
-    if (cmpParam.status === 'normal' && baseParam.status !== 'normal') {
+    if (cmpParam.status === 'normal' && baseParam.status !== 'normal' && baseParam.status !== null) {
       improving.push(cmpParam.parametro);
-    } else if (cmpParam.status !== 'normal' && baseParam.status === 'normal') {
+    } else if (cmpParam.status !== 'normal' && cmpParam.status !== null && baseParam.status === 'normal') {
       worsening.push(cmpParam.parametro);
     } else {
       stable.push(cmpParam.parametro);
