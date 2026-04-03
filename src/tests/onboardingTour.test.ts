@@ -52,7 +52,6 @@ describe('onboardingTour', () => {
 vi.mock('driver.js/dist/driver.css', () => ({}))
 
 const mockDestroy = vi.fn()
-const mockDrive   = vi.fn()
 vi.mock('driver.js', () => ({
   driver: vi.fn().mockImplementation((config: any) => {
     return {
@@ -60,6 +59,7 @@ vi.mock('driver.js', () => ({
       drive: vi.fn().mockImplementation(() => {
         // simulate the tour ending (calls onDestroyStarted callback)
         config.onDestroyStarted?.()
+        config.onDestroyed?.()
       }),
       destroy: mockDestroy,
     }
