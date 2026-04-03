@@ -189,7 +189,7 @@ const Home = () => {
       const timer = setTimeout(startTour, 800);
       return () => clearTimeout(timer);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [startTour]);
 
   const greeting = (() => {
     const h = new Date().getHours();

@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
+vi.mock('react', async () => {
+  const actual = await vi.importActual('react')
+  return {
+    ...actual,
+    useCallback: (fn: any) => fn,
+  }
+})
+
 // ── Mock localStorage (env: node não tem localStorage) ──
 const store: Record<string, string> = {}
 const localStorageMock = {

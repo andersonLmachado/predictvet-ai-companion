@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
 import { tourSteps } from '@/lib/tourSteps'
@@ -6,7 +7,7 @@ import { markTourCompleted } from '@/lib/onboardingTour'
 let activeTour: ReturnType<typeof driver> | null = null
 
 export function useTour() {
-  const startTour = () => {
+  const startTour = useCallback(() => {
     if (activeTour?.isActive()) return
     const driverObj = driver({
       showProgress: true,
@@ -22,7 +23,7 @@ export function useTour() {
     })
     activeTour = driverObj
     driverObj.drive()
-  }
+  }, [])
 
   return { startTour }
 }
