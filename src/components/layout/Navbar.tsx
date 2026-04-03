@@ -32,13 +32,13 @@ interface NavbarProps {
 }
 
 const NAV_ITEMS = [
-  { label: 'Home',             icon: Home,          path: '/home' },
-  { label: 'Consulta Guiada',  icon: ClipboardList, path: '/chat' },
-  { label: 'Cadastrar Pet',    icon: UserPlus,       path: '/register-pet' },
+  { label: 'Home',             icon: Home,           path: '/home' },
+  { label: 'Consulta Guiada',  icon: ClipboardList,  path: '/chat',         tourId: 'nav-chat' },
+  { label: 'Cadastrar Pet',    icon: UserPlus,       path: '/register-pet', tourId: 'nav-register-pet' },
   { label: 'Meus Pacientes',   icon: Users,          path: '/patients' },
-  { label: 'Exames',           icon: FileText,       path: '/exams' },
-  { label: 'Laudo US',         icon: ScanLine,        path: '/ultrasound' },
-  { label: 'Comparativo',      icon: LayoutDashboard, path: '/dashboard' },
+  { label: 'Exames',           icon: FileText,       path: '/exams',        tourId: 'nav-exams' },
+  { label: 'Laudo US',         icon: ScanLine,       path: '/ultrasound',   tourId: 'nav-ultrasound' },
+  { label: 'Comparativo',      icon: LayoutDashboard, path: '/dashboard',    tourId: 'nav-dashboard' },
 ];
 
 const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
@@ -95,11 +95,12 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
 
         {/* Nav Links */}
         <div className="flex items-center gap-0.5">
-          {NAV_ITEMS.map(({ label, icon: Icon, path }) => {
+          {NAV_ITEMS.map(({ label, icon: Icon, path, tourId }) => {
             const active = location.pathname === path;
             return (
               <Link key={path} to={path}>
                 <button
+                  {...(tourId ? { 'data-tour': tourId } : {})}
                   className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
                   style={{
                     fontFamily: 'Nunito Sans, sans-serif',
@@ -228,11 +229,12 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
             className="border-t py-3 px-4 space-y-1"
             style={{ borderColor: 'hsla(217,88%,57%,0.15)', background: 'hsl(222,77%,13%)' }}
           >
-            {NAV_ITEMS.map(({ label, icon: Icon, path }) => {
+            {NAV_ITEMS.map(({ label, icon: Icon, path, tourId }) => {
               const active = location.pathname === path;
               return (
                 <Link key={path} to={path} onClick={() => setMobileOpen(false)}>
                   <div
+                    {...(tourId ? { 'data-tour': `${tourId}-mobile` } : {})}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
                     style={{
                       color: active ? 'hsl(217,90%,72%)' : 'hsla(213,100%,90%,0.7)',
