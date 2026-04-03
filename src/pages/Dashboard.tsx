@@ -139,7 +139,10 @@ const Dashboard = () => {
   const highlightedDates = useMemo<[string, string] | undefined>(() => {
     if (!baseExam || !comparedExam) return undefined;
     const toISO = (exam: ExamHistoryRow) => exam.exam_date ?? exam.created_at ?? '';
-    return [toISO(baseExam), toISO(comparedExam)];
+    const baseDate = toISO(baseExam);
+    const cmpDate  = toISO(comparedExam);
+    if (!baseDate || !cmpDate) return undefined;
+    return [baseDate, cmpDate];
   }, [baseExam, comparedExam]);
 
   // Variation badge per parameter (comparing baseExam vs comparedExam)
@@ -160,6 +163,8 @@ const Dashboard = () => {
 
       let color: 'green' | 'red' | 'gray';
       if (absPct <= 2) {
+        color = 'gray';
+      } else if (cmpParam.status === null) {
         color = 'gray';
       } else if (cmpParam.status === 'normal') {
         color = 'green';
