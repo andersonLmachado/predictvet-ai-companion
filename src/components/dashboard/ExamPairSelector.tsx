@@ -29,8 +29,19 @@ const ExamPairSelector: React.FC<ExamPairSelectorProps> = ({
   onBaseChange,
   onComparedChange,
 }) => {
-  const displayDate = (exam: ExamOption) =>
-    formatExamDate(exam.exam_date ?? exam.created_at ?? null);
+  const displayDate = (exam: ExamOption): string => {
+    if (exam.exam_date) return formatExamDate(exam.exam_date);
+    if (exam.created_at) {
+      try {
+        return new Date(exam.created_at).toLocaleDateString('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+        });
+      } catch {
+        return 'Data não informada';
+      }
+    }
+    return 'Data não informada';
+  };
 
   return (
     <div className="flex items-end gap-3 flex-wrap">
