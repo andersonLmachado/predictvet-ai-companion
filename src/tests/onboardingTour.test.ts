@@ -47,3 +47,38 @@ describe('onboardingTour', () => {
     expect(hasTourBeenCompleted()).toBe(false)
   })
 })
+
+// ── useTour ───────────────────────────────────────────────────────────────────
+vi.mock('driver.js/dist/driver.css', () => ({}))
+vi.mock('driver.js', () => ({
+  driver: vi.fn().mockReturnValue({
+    drive:   vi.fn(),
+    destroy: vi.fn(),
+  }),
+}))
+
+import { useTour } from '../hooks/useTour'
+
+describe('useTour', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    localStorageMock.clear()
+  })
+
+  it('retorna função startTour', () => {
+    const { startTour } = useTour()
+    expect(typeof startTour).toBe('function')
+  })
+
+  it('startTour instancia driver e chama drive()', async () => {
+    const { driver } = await import('driver.js')
+    const mockDrive = vi.fn()
+    vi.mocked(driver).mockReturnValue({ drive: mockDrive, destroy: vi.fn() } as any)
+
+    const { startTour } = useTour()
+    startTour()
+
+    expect(driver).toHaveBeenCalled()
+    expect(mockDrive).toHaveBeenCalled()
+  })
+})
