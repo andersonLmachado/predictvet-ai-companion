@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useTour } from '@/hooks/useTour';
+import { hasTourBeenCompleted } from '@/lib/onboardingTour';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   PawPrint,
@@ -173,6 +175,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { startTour } = useTour();
   const [loading, setLoading] = useState(true);
   const [totalPatients, setTotalPatients] = useState(0);
   const [totalExams, setTotalExams] = useState(0);
@@ -180,6 +183,13 @@ const Home = () => {
   const [newPatientsMonth, setNewPatientsMonth] = useState(0);
   const [speciesData, setSpeciesData] = useState<{ name: string; value: number }[]>([]);
   const [recentPatients, setRecentPatients] = useState<PatientRow[]>([]);
+
+  useEffect(() => {
+    if (!hasTourBeenCompleted()) {
+      const timer = setTimeout(startTour, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const greeting = (() => {
     const h = new Date().getHours();
