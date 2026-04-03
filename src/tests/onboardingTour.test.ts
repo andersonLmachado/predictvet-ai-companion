@@ -50,10 +50,19 @@ describe('onboardingTour', () => {
 
 // ── useTour ───────────────────────────────────────────────────────────────────
 vi.mock('driver.js/dist/driver.css', () => ({}))
+
+const mockDestroy = vi.fn()
+const mockDrive   = vi.fn()
 vi.mock('driver.js', () => ({
-  driver: vi.fn().mockReturnValue({
-    drive:   vi.fn(),
-    destroy: vi.fn(),
+  driver: vi.fn().mockImplementation((config: any) => {
+    return {
+      isActive: vi.fn().mockReturnValue(false),
+      drive: vi.fn().mockImplementation(() => {
+        // simulate the tour ending (calls onDestroyStarted callback)
+        config.onDestroyStarted?.()
+      }),
+      destroy: mockDestroy,
+    }
   }),
 }))
 
@@ -70,15 +79,17 @@ describe('useTour', () => {
     expect(typeof startTour).toBe('function')
   })
 
-  it('startTour instancia driver e chama drive()', async () => {
-    const { driver } = await import('driver.js')
-    const mockDrive = vi.fn()
-    vi.mocked(driver).mockReturnValue({ drive: mockDrive, destroy: vi.fn() } as any)
-
+  it('startTour instancia driver e chama drive()', () => {
     const { startTour } = useTour()
     startTour()
+    // mockDestroy is called by onDestroyStarted, confirming driver was instantiated and drive() ran
+    expect(mockDestroy).toHaveBeenCalled()
+  })
 
-    expect(driver).toHaveBeenCalled()
-    expect(mockDrive).toHaveBeenCalled()
+  it('markTourCompleted é chamado quando o tour é encerrado', () => {
+    const { startTour } = useTour()
+    startTour()
+    // drive() mock calls onDestroyStarted, which calls markTourCompleted()
+    expect(hasTourBeenCompleted()).toBe(true)
   })
 })
