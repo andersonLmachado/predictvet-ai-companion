@@ -12,10 +12,6 @@ export function useTour() {
     const driverObj = driver({
       showProgress: true,
       steps: tourSteps,
-      onDestroyStarted: () => {
-        markTourCompleted()
-        driverObj.destroy()
-      },
       onDestroyed: () => {
         markTourCompleted()
         activeTour = null
