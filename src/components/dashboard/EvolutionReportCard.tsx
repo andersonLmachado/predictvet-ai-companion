@@ -4,13 +4,17 @@ import { Brain, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { TrendDataPoint } from './TrendChart';
+import EvolutionParecerColumns from './EvolutionParecerColumns';
+import { ExamHistoryRow } from '@/lib/examComparison';
 
 interface EvolutionReportCardProps {
   trendsByParam: Map<string, { data: TrendDataPoint[]; unidade: string; refMin: number; refMax: number }>;
   patientId?: string;
+  baseExam?: ExamHistoryRow | null;
+  comparedExam?: ExamHistoryRow | null;
 }
 
-const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam, patientId }) => {
+const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam, patientId, baseExam, comparedExam }) => {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -92,22 +96,39 @@ const EvolutionReportCard: React.FC<EvolutionReportCardProps> = ({ trendsByParam
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Painel 3 colunas — apenas quando ambos os exames estão disponíveis */}
+        {baseExam && comparedExam && (
+          <EvolutionParecerColumns baseExam={baseExam} comparedExam={comparedExam} />
+        )}
+
         {loading ? (
           <div className="space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
           </div>
         ) : aiSummary ? (
-          <p className="text-sm text-foreground whitespace-pre-line">{aiSummary}</p>
+          <p
+            className="whitespace-pre-line"
+            style={{ fontSize: '11px', color: 'hsl(222,30%,50%)', fontFamily: 'Nunito Sans, sans-serif' }}
+          >
+            {aiSummary}
+          </p>
         ) : !patientId ? (
-          <p className="text-sm text-muted-foreground italic">Selecione um paciente para gerar a análise de evolução</p>
+          <p className="text-sm text-muted-foreground italic">
+            Selecione um paciente para gerar a análise de evolução
+          </p>
         ) : localReport ? (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground">{localReport.summary}</p>
+          <div className="space-y-2">
+            <p
+              className="font-medium"
+              style={{ fontSize: '11px', color: 'hsl(222,30%,30%)', fontFamily: 'Nunito Sans, sans-serif' }}
+            >
+              {localReport.summary}
+            </p>
             {localReport.insights.length > 0 && (
               <ul className="space-y-1">
                 {localReport.insights.map((insight, i) => (
-                  <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                  <li key={i} className="flex items-start gap-1.5" style={{ fontSize: '11px', color: 'hsl(222,30%,50%)' }}>
                     <span className="text-primary mt-0.5">•</span>
                     {insight}
                   </li>

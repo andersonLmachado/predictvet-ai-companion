@@ -38,7 +38,7 @@ const NAV_ITEMS = [
   { label: 'Meus Pacientes',   icon: Users,          path: '/patients' },
   { label: 'Exames',           icon: FileText,       path: '/exams' },
   { label: 'Laudo US',         icon: ScanLine,        path: '/ultrasound' },
-  { label: 'Dashboard',        icon: LayoutDashboard, path: '/dashboard' },
+  { label: 'Comparativo',      icon: LayoutDashboard, path: '/dashboard' },
 ];
 
 const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {

@@ -18,6 +18,8 @@ interface TrendChartProps {
   data: TrendDataPoint[];
   refMin: number;
   refMax: number;
+  highlightedDates?: [string, string];
+  variationBadge?: { pct: number; color: 'green' | 'red' | 'gray' };
 }
 
 const getStatusColor = (status: string) => {
@@ -27,13 +29,24 @@ const getStatusColor = (status: string) => {
 };
 
 const CustomDot = (props: any) => {
-  const { cx, cy, payload } = props;
+  const { cx, cy, payload, highlightedDates } = props;
   if (!cx || !cy) return null;
   const color = getStatusColor(payload.status);
+
+  const isSelected =
+    !highlightedDates ||
+    highlightedDates.some((d: string) => (payload.date as string).startsWith(d));
+  const opacity = isSelected ? 1 : 0.2;
+  const isActive =
+    highlightedDates?.some((d: string) => (payload.date as string).startsWith(d));
+
   return (
-    <g>
+    <g opacity={opacity}>
+      {isActive && (
+        <circle cx={cx} cy={cy} r={9} fill="none" stroke={color} strokeWidth={1.5} strokeOpacity={0.45} />
+      )}
       <circle cx={cx} cy={cy} r={5} fill={color} stroke="white" strokeWidth={2} />
-      <text x={cx} y={cy - 12} textAnchor="middle" fontSize={11} fontWeight={600} fill={color}>
+      <text x={cx} y={cy - 14} textAnchor="middle" fontSize={11} fontWeight={600} fill={color}>
         {payload.value}
       </text>
     </g>
@@ -78,7 +91,7 @@ const generateInsight = (data: TrendDataPoint[], parametro: string): string | nu
   return `${parametro} ${direction} ${abs}% (de ${prev.value} para ${last.value})${context}`;
 };
 
-const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMin, refMax }) => {
+const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMin, refMax, highlightedDates, variationBadge }) => {
   const insight = generateInsight(data, parametro);
   const lastPoint = data[data.length - 1];
   const prevPoint = data.length >= 2 ? data[data.length - 2] : null;
@@ -94,12 +107,42 @@ const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMi
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold">{parametro}</CardTitle>
           <div className="flex items-center gap-1.5">
-            {trend > 0 ? (
-              <TrendingUp className="h-4 w-4 text-destructive" />
-            ) : trend < 0 ? (
-              <TrendingDown className="h-4 w-4" style={{ color: '#800020' }} />
+            {variationBadge ? (
+              <span
+                className="text-xs font-bold px-1.5 py-0.5 rounded-md"
+                style={{
+                  background:
+                    variationBadge.color === 'green'
+                      ? 'hsl(162,60%,92%)'
+                      : variationBadge.color === 'red'
+                      ? 'hsl(352,76%,95%)'
+                      : 'hsl(220,14%,93%)',
+                  color:
+                    variationBadge.color === 'green'
+                      ? 'hsl(162,60%,28%)'
+                      : variationBadge.color === 'red'
+                      ? 'hsl(352,76%,35%)'
+                      : 'hsl(222,30%,45%)',
+                  fontFamily: 'Nunito Sans, sans-serif',
+                }}
+              >
+                {variationBadge.color === 'gray'
+                  ? '→'
+                  : variationBadge.pct > 0
+                  ? '↑'
+                  : '↓'}{' '}
+                {Math.abs(variationBadge.pct).toFixed(1)}%
+              </span>
             ) : (
-              <Minus className="h-4 w-4 text-muted-foreground" />
+              <>
+                {trend > 0 ? (
+                  <TrendingUp className="h-4 w-4 text-destructive" />
+                ) : trend < 0 ? (
+                  <TrendingDown className="h-4 w-4" style={{ color: '#800020' }} />
+                ) : (
+                  <Minus className="h-4 w-4 text-muted-foreground" />
+                )}
+              </>
             )}
             <span className="text-xs text-muted-foreground">{unidade}</span>
           </div>
@@ -128,7 +171,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ parametro, unidade, data, refMi
               stroke="hsl(var(--primary))"
               strokeWidth={2}
               fill="transparent"
-              dot={<CustomDot />}
+              dot={(dotProps: any) => <CustomDot {...dotProps} highlightedDates={highlightedDates} />}
               activeDot={{ r: 6 }}
             />
           </AreaChart>
