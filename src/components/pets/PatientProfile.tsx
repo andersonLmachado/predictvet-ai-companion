@@ -194,6 +194,55 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
     [history]
   );
 
+  // ExamHistoryRow correspondentes para EvolutionReportCard (painel de 3 colunas)
+  const baseHistoryRow = useMemo(
+    () => history.find(e => e.id === evolutionComparison.previousExam?.id) ?? null,
+    [history, evolutionComparison]
+  );
+  const comparedHistoryRow = useMemo(
+    () => history.find(e => e.id === evolutionComparison.latestExam?.id) ?? null,
+    [history, evolutionComparison]
+  );
+
+  // Datas destacadas para os dots dos TrendCharts (espelha comportamento do Dashboard)
+  const highlightedDates = useMemo<[string, string] | undefined>(() => {
+    const { latestExam, previousExam } = evolutionComparison;
+    if (!latestExam || !previousExam) return undefined;
+    const baseDate = previousExam.examDate ?? previousExam.createdAt ?? '';
+    const cmpDate  = latestExam.examDate  ?? latestExam.createdAt  ?? '';
+    if (!baseDate || !cmpDate) return undefined;
+    return [baseDate, cmpDate];
+  }, [evolutionComparison]);
+
+  // Badges de variação por parâmetro (mesma lógica do Dashboard)
+  const badgesByParam = useMemo(() => {
+    const map = new Map<string, { pct: number; color: 'green' | 'red' | 'gray' }>();
+    if (!baseHistoryRow || !comparedHistoryRow) return map;
+    for (const cmpParam of comparedHistoryRow.analysis_data) {
+      const baseParam = baseHistoryRow.analysis_data.find(p => p.parametro === cmpParam.parametro);
+      if (!baseParam) continue;
+      const baseVal = typeof baseParam.valor_encontrado === 'number' ? baseParam.valor_encontrado : null;
+      const cmpVal  = typeof cmpParam.valor_encontrado  === 'number' ? cmpParam.valor_encontrado  : null;
+      if (baseVal === null || cmpVal === null || baseVal === 0) continue;
+      const pct    = ((cmpVal - baseVal) / baseVal) * 100;
+      const absPct = Math.abs(pct);
+      let color: 'green' | 'red' | 'gray';
+      if (absPct <= 2)              color = 'gray';
+      else if (cmpParam.status === null)   color = 'gray';
+      else if (cmpParam.status === 'normal') color = 'green';
+      else                          color = 'red';
+      map.set(cmpParam.parametro, { pct, color });
+    }
+    return map;
+  }, [baseHistoryRow, comparedHistoryRow]);
+
+  // Formata data curta para cabeçalho das colunas da tabela
+  const formatColHeader = (exam: ExamEvolutionExam | null): string => {
+    if (!exam) return '—';
+    const d = exam.examDate ?? exam.createdAt;
+    return d ? new Date(d).toLocaleDateString('pt-BR') : 'Data indef.';
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -215,59 +264,150 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Evolução Comparativa</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Tabela comparativa */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: 'white',
+          border: '1px solid hsl(217,50%,90%)',
+          boxShadow: '0 2px 12px -4px hsla(221,73%,30%,0.1)',
+        }}
+      >
+        <div className="h-1" style={{ background: 'linear-gradient(90deg, hsl(221,73%,45%), hsl(217,88%,57%))' }} />
+        <div
+          className="px-5 py-4 border-b flex items-center gap-2"
+          style={{ borderColor: 'hsl(217,50%,93%)' }}
+        >
+          <div
+            className="w-2 h-2 rounded-full"
+            style={{ background: 'linear-gradient(135deg, hsl(221,73%,45%), hsl(18,76%,50%))' }}
+          />
+          <h2
+            className="text-sm font-semibold"
+            style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(222,77%,15%)' }}
+          >
+            Evolução Comparativa
+          </h2>
+        </div>
+        <div className="p-5">
           {evolutionComparison.mode === 'none' ? (
-            <p className="text-sm text-muted-foreground">Nenhum exame analisado encontrado para comparação.</p>
+            <p className="text-sm" style={{ color: 'hsl(222,30%,55%)', fontFamily: 'Nunito Sans, sans-serif' }}>
+              Nenhum exame analisado encontrado para comparação.
+            </p>
           ) : (
             <div className="space-y-3">
               {evolutionComparison.mode === 'comparison' && (
-                <p className="text-xs text-muted-foreground">
-                  Exame X: {formatExamLabel(evolutionComparison.latestExam)} | Exame Y: {formatExamLabel(evolutionComparison.previousExam)}
-                </p>
+                <div
+                  className="flex items-center gap-3 text-xs rounded-lg px-3 py-2"
+                  style={{
+                    background: 'hsl(217,100%,97%)',
+                    border: '1px solid hsl(217,50%,88%)',
+                    fontFamily: 'Nunito Sans, sans-serif',
+                    color: 'hsl(222,30%,45%)',
+                  }}
+                >
+                  <span>
+                    <span className="font-semibold" style={{ color: 'hsl(222,30%,45%)' }}>Anterior:</span>{' '}
+                    {formatExamLabel(evolutionComparison.previousExam)}
+                  </span>
+                  <span style={{ color: 'hsl(221,73%,55%)' }}>→</span>
+                  <span>
+                    <span className="font-semibold" style={{ color: 'hsl(221,73%,40%)' }}>Mais recente:</span>{' '}
+                    {formatExamLabel(evolutionComparison.latestExam)}
+                  </span>
+                </div>
               )}
               {evolutionComparison.mode === 'single' && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs" style={{ color: 'hsl(222,30%,50%)', fontFamily: 'Nunito Sans, sans-serif' }}>
                   Extrato do exame: {formatExamLabel(evolutionComparison.singleExam)}
                 </p>
               )}
-              <div className="overflow-x-auto rounded-md border">
+              <div className="overflow-x-auto rounded-xl border" style={{ borderColor: 'hsl(217,50%,90%)' }}>
                 <table className="w-full border-collapse text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="border p-2 text-left">Campo</th>
-                      <th className="border p-2 text-left">Exame X</th>
+                  <thead>
+                    <tr style={{ background: 'hsl(217,50%,96%)' }}>
+                      <th
+                        className="border p-2.5 text-left font-semibold"
+                        style={{ borderColor: 'hsl(217,50%,90%)', color: 'hsl(222,77%,15%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                      >
+                        Parâmetro
+                      </th>
+                      <th
+                        className="border p-2.5 text-left font-semibold"
+                        style={{ borderColor: 'hsl(217,50%,90%)', color: 'hsl(221,73%,35%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                      >
+                        {formatColHeader(evolutionComparison.latestExam)}
+                        <span className="ml-1 text-xs font-normal" style={{ color: 'hsl(222,30%,55%)' }}>(atual)</span>
+                      </th>
                       {evolutionComparison.mode === 'comparison' && (
-                        <th className="border p-2 text-left">Exame Y</th>
+                        <th
+                          className="border p-2.5 text-left font-semibold"
+                          style={{ borderColor: 'hsl(217,50%,90%)', color: 'hsl(222,30%,45%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                        >
+                          {formatColHeader(evolutionComparison.previousExam)}
+                          <span className="ml-1 text-xs font-normal" style={{ color: 'hsl(222,30%,55%)' }}>(anterior)</span>
+                        </th>
                       )}
-                      <th className="border p-2 text-left">Referência</th>
+                      <th
+                        className="border p-2.5 text-left font-semibold"
+                        style={{ borderColor: 'hsl(217,50%,90%)', color: 'hsl(222,77%,15%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                      >
+                        Referência
+                      </th>
                       {evolutionComparison.mode === 'comparison' && (
-                        <th className="border p-2 text-left">Alteração</th>
+                        <th
+                          className="border p-2.5 text-left font-semibold"
+                          style={{ borderColor: 'hsl(217,50%,90%)', color: 'hsl(222,77%,15%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                        >
+                          Alteração
+                        </th>
                       )}
                     </tr>
                   </thead>
                   <tbody>
                     {evolutionComparison.rows.map((row, index) => (
                       <tr key={`${row.parameter}-${index}`}>
-                        <td className="border p-2 font-medium">{row.parameter}</td>
-                        <td className="border p-2">{formatCellValue(row.examXValue, row.unit)}</td>
-                        {evolutionComparison.mode === 'comparison' && (
-                          <td className="border p-2">{formatCellValue(row.examYValue, row.unit)}</td>
-                        )}
-                        <td className="border p-2">{formatReferenceRange(row.refMin, row.refMax)}</td>
+                        <td
+                          className="border p-2.5 font-medium"
+                          style={{ borderColor: 'hsl(217,50%,92%)', fontFamily: 'Nunito Sans, sans-serif', color: 'hsl(222,77%,15%)' }}
+                        >
+                          {row.parameter}
+                        </td>
+                        <td
+                          className="border p-2.5"
+                          style={{ borderColor: 'hsl(217,50%,92%)', fontFamily: 'Nunito Sans, sans-serif' }}
+                        >
+                          {formatCellValue(row.examXValue, row.unit)}
+                        </td>
                         {evolutionComparison.mode === 'comparison' && (
                           <td
-                            className={`border p-2 ${row.changeDirection === 'up'
-                                ? 'text-red-600'
-                                : row.changeDirection === 'down'
-                                  ? 'text-blue-600'
+                            className="border p-2.5"
+                            style={{ borderColor: 'hsl(217,50%,92%)', fontFamily: 'Nunito Sans, sans-serif', color: 'hsl(222,30%,50%)' }}
+                          >
+                            {formatCellValue(row.examYValue, row.unit)}
+                          </td>
+                        )}
+                        <td
+                          className="border p-2.5"
+                          style={{ borderColor: 'hsl(217,50%,92%)', fontFamily: 'Nunito Sans, sans-serif', color: 'hsl(222,30%,50%)' }}
+                        >
+                          {formatReferenceRange(row.refMin, row.refMax)}
+                        </td>
+                        {evolutionComparison.mode === 'comparison' && (
+                          <td
+                            className="border p-2.5 font-medium"
+                            style={{
+                              borderColor: 'hsl(217,50%,92%)',
+                              fontFamily: 'Nunito Sans, sans-serif',
+                              color:
+                                row.changeDirection === 'up'
+                                  ? 'hsl(352,76%,38%)'
+                                  : row.changeDirection === 'down'
+                                  ? 'hsl(221,73%,40%)'
                                   : row.changeDirection === 'same'
-                                    ? 'text-slate-600'
-                                    : 'text-muted-foreground'
-                              }`}
+                                  ? 'hsl(222,30%,45%)'
+                                  : 'hsl(222,30%,60%)',
+                            }}
                           >
                             {row.changeText}
                           </td>
@@ -279,15 +419,32 @@ const EvolutionTab: React.FC<{ patientId: string }> = ({ patientId }) => {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <EvolutionReportCard trendsByParam={trendsByParam} patientId={patientId} />
+      <EvolutionReportCard
+        trendsByParam={trendsByParam}
+        patientId={patientId}
+        baseExam={baseHistoryRow}
+        comparedExam={comparedHistoryRow}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {sortedParams.map((param) => {
-          const info = trendsByParam.get(param)!;
-          return <TrendChart key={param} parametro={param} unidade={info.unidade} data={info.data} refMin={info.refMin} refMax={info.refMax} />;
+          const info  = trendsByParam.get(param)!;
+          const badge = badgesByParam.get(param);
+          return (
+            <TrendChart
+              key={param}
+              parametro={param}
+              unidade={info.unidade}
+              data={info.data}
+              refMin={info.refMin}
+              refMax={info.refMax}
+              highlightedDates={highlightedDates}
+              variationBadge={badge}
+            />
+          );
         })}
       </div>
       <div className="max-w-2xl">
