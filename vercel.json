@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://predictvet.app/$1",
+      "permanent": true
+    }
+  ]
+}
