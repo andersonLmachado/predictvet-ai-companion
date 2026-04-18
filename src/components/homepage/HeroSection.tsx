@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Stethoscope, FlaskConical, Brain, Shield } from 'lucide-react';
-import predictlabLogoHero from '@/assets/predictvet-logo.png';
+import predictlabLogoHero from '@/assets/predictvet-logo-r.png';
 
 /* ── Floating badge component ── */
 function FloatingBadge({
