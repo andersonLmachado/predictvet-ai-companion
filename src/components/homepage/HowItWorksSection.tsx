@@ -72,7 +72,7 @@ const steps: Step[] = [
     icon: Building2,
     title: 'Envio para laboratório',
     description:
-      'Encaminhe para laboratório interno ou externo. O PredictLab registra o laboratório responsável para rastreabilidade.',
+      'Encaminhe para laboratório interno ou externo. O PredictVet registra o laboratório responsável para rastreabilidade.',
     color: 'hsl(217, 88%, 52%)',
     bgColor: 'hsla(217, 88%, 52%, 0.10)',
     borderColor: 'hsla(217, 88%, 52%, 0.30)',
@@ -94,7 +94,7 @@ const steps: Step[] = [
     icon: Microscope,
     title: 'Análise do laudo pela IA',
     description:
-      'O PredictLab analisa o laudo, extrai data e laboratório automaticamente, e gera insights clínicos.',
+      'O PredictVet analisa o laudo, extrai data e laboratório automaticamente, e gera insights clínicos.',
     color: 'hsl(162, 70%, 38%)',
     bgColor: 'hsla(162, 70%, 38%, 0.10)',
     borderColor: 'hsla(162, 70%, 38%, 0.30)',

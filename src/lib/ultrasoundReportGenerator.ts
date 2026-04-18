@@ -222,7 +222,7 @@ export function buildPrintableHtml(
 <body>
   <div class="hdr">
     <div class="brand-pill">
-      <div class="brand-name">PredictLab</div>
+      <div class="brand-name">PredictVet</div>
       <div class="brand-tag">Inteligência Veterinária</div>
     </div>
     <div class="doc-title">Laudo Ultrassonográfico</div>
@@ -246,7 +246,7 @@ export function buildPrintableHtml(
       ${footerRaw.split('\n').filter(Boolean).map((l) => `<p>${escHtml(l)}</p>`).join('\n      ')}
     </div>
     <div class="footer-bottom">
-      <div class="footer-brand">PredictLab — Inteligência Veterinária</div>
+      <div class="footer-brand">PredictVet — Inteligência Veterinária</div>
       <div class="footer-gen">Gerado em ${escHtml(date)}</div>
     </div>
   </div>

@@ -27,7 +27,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     setIsLoading(true);
     try {
       await onLogin(email, password);
-      toast({ title: 'Bem-vindo ao PredictLab!', description: 'Login realizado com sucesso.' });
+      toast({ title: 'Bem-vindo ao PredictVet!', description: 'Login realizado com sucesso.' });
     } catch {
       toast({ title: 'Erro no login', description: 'Verifique suas credenciais e tente novamente.', variant: 'destructive' });
     } finally {
@@ -59,7 +59,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             className="px-6 py-3 rounded-2xl"
             style={{ background: 'hsl(213,100%,98%)', border: '1px solid hsl(217,50%,90%)' }}
           >
-            <img src={predictlabLogo} alt="PredictLab" className="h-10 object-contain" />
+            <img src={predictlabLogo} alt="PredictVet" className="h-10 object-contain" />
           </div>
         </div>
 

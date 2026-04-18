@@ -15,9 +15,9 @@ const faqs = [
   },
   {
     id: 'q2',
-    question: 'O que é o motor PredictLab e como ele foi treinado?',
+    question: 'O que é o motor PredictVet e como ele foi treinado?',
     answer:
-      'O PredictLab é nossa tecnologia proprietária de inteligência artificial. Ele foi treinado com milhares de bases de dados clínicos e laboratoriais, utilizando modelos de aprendizado de máquina (Machine Learning) para identificar padrões não lineares entre biomarcadores hematológicos, bioquímicos e sinais clínicos que costumam passar despercebidos na análise humana isolada.',
+      'O PredictVet é nossa tecnologia proprietária de inteligência artificial. Ele foi treinado com milhares de bases de dados clínicos e laboratoriais, utilizando modelos de aprendizado de máquina (Machine Learning) para identificar padrões não lineares entre biomarcadores hematológicos, bioquímicos e sinais clínicos que costumam passar despercebidos na análise humana isolada.',
   },
   {
     id: 'q3',
@@ -65,7 +65,7 @@ const faqs = [
     id: 'q8',
     question: 'O Tutor/Responsável pelo Pet terá essas informações?',
     answer:
-      'O PredictLab é um Ecossistema que permite uma comunicação rápida, segura e direta de como está a saúde do seu Pet.',
+      'O PredictVet é um Ecossistema que permite uma comunicação rápida, segura e direta de como está a saúde do seu Pet.',
   },
 ];
 
@@ -100,7 +100,7 @@ const FAQSection = () => {
             className="text-base"
             style={{ fontFamily: 'Nunito Sans, sans-serif', color: 'hsl(222,30%,55%)' }}
           >
-            Tudo o que você precisa saber sobre o PredictLab
+            Tudo o que você precisa saber sobre o PredictVet
           </p>
         </div>
 

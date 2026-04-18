@@ -145,7 +145,7 @@ const ProfileDataCard = ({
         >
           <Info className="w-4 h-4 mt-0.5 shrink-0" style={{ color: 'hsl(38,88%,45%)' }} />
           <p className="text-sm" style={{ color: 'hsl(38,60%,30%)', fontFamily: 'Nunito Sans, sans-serif' }}>
-            Bem-vindo ao PredictLab! Complete seus dados profissionais para personalizar sua experiência.
+            Bem-vindo ao PredictVet! Complete seus dados profissionais para personalizar sua experiência.
           </p>
         </div>
       )}

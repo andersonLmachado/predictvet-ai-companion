@@ -82,7 +82,7 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
             className="px-6 py-3 rounded-2xl"
             style={{ background: 'hsl(213,100%,98%)', border: '1px solid hsl(217,50%,90%)' }}
           >
-            <img src={predictlabLogo} alt="PredictLab" className="h-9 object-contain" />
+            <img src={predictlabLogo} alt="PredictVet" className="h-9 object-contain" />
           </div>
         </div>
 
@@ -98,7 +98,7 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
             className="text-sm mt-1"
             style={{ color: 'hsl(222,30%,55%)', fontFamily: 'Nunito Sans, sans-serif' }}
           >
-            Registre-se e comece a usar o PredictLab
+            Registre-se e comece a usar o PredictVet
           </p>
         </div>
 

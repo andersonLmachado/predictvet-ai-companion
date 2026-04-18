@@ -84,11 +84,11 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
             className="text-lg font-bold tracking-tight"
             style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
           >
-            PredictLab
+            PredictVet
           </span>
           <img
             src={predictlabIcon}
-            alt="PredictLab"
+            alt="PredictVet"
             className="w-8 h-8 object-contain"
           />
         </Link>
@@ -209,9 +209,9 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
               className="text-base font-bold"
               style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
             >
-              PredictLab
+              PredictVet
             </span>
-            <img src={predictlabIcon} alt="PredictLab" className="w-7 h-7 object-contain" />
+            <img src={predictlabIcon} alt="PredictVet" className="w-7 h-7 object-contain" />
           </Link>
 
           <button

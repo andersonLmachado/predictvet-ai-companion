@@ -22,7 +22,7 @@ const CTASection = () => {
           className="text-lg"
           style={{ color: 'hsla(213,100%,88%,0.65)', fontFamily: 'Nunito Sans, sans-serif' }}
         >
-          O PredictLab está em fase de desenvolvimento, em breve mais novidades vão surgir.
+          O PredictVet está em fase de desenvolvimento, em breve mais novidades vão surgir.
         </p>
         <Link to="/register">
           <button

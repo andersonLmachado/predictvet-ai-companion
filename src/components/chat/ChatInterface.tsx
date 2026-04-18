@@ -26,7 +26,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: `Olá! 🐾 Sou o **PredictLab**, seu assistente veterinário com IA.\n\nComo posso ajudá-lo hoje? Você pode me enviar sintomas, perguntas sobre diagnósticos ou qualquer dúvida veterinária.${selectedPatient ? `\n\n📋 Paciente selecionado: **${selectedPatient.name}**` : ''}`,
+      text: `Olá! 🐾 Sou o **PredictVet**, seu assistente veterinário com IA.\n\nComo posso ajudá-lo hoje? Você pode me enviar sintomas, perguntas sobre diagnósticos ou qualquer dúvida veterinária.${selectedPatient ? `\n\n📋 Paciente selecionado: **${selectedPatient.name}**` : ''}`,
       isUser: false,
       timestamp: new Date(),
     }
@@ -67,7 +67,7 @@ const ChatInterface = () => {
           patient_id: selectedPatient?.id ?? null,
           patient_name: selectedPatient?.name ?? null,
           timestamp: new Date().toISOString(),
-          source: 'PredictLab Chat',
+          source: 'PredictVet Chat',
         }),
       });
 
@@ -294,7 +294,7 @@ const ChatInterface = () => {
               <div className="rounded-2xl rounded-bl-md px-4 py-3 bg-muted border border-border">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">PredictLab está analisando...</span>
+                  <span className="text-sm text-muted-foreground">PredictVet está analisando...</span>
                 </div>
               </div>
             </div>

@@ -7,7 +7,7 @@ const TestimonialsSection = () => {
     {
       name: 'Dra. Marina Silva',
       role: 'Clínica Pet Care',
-      content: 'O PredictLab revolucionou minha prática clínica. A IA me ajuda a considerar diagnósticos que passariam despercebidos.',
+      content: 'O PredictVet revolucionou minha prática clínica. A IA me ajuda a considerar diagnósticos que passariam despercebidos.',
     },
     {
       name: 'Dr. Carlos Mendes',

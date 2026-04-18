@@ -80,7 +80,7 @@ const HeroSection = () => {
             className="px-3 py-1.5 rounded-xl"
             style={{ background: 'hsla(0,0%,100%,0.95)', boxShadow: '0 2px 12px -4px hsla(221,73%,20%,0.3)' }}
           >
-            <img src={predictlabLogo} alt="PredictLab" className="h-8 object-contain" />
+            <img src={predictlabLogo} alt="PredictVet" className="h-8 object-contain" />
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -138,7 +138,7 @@ const HeroSection = () => {
           <div className="mx-auto mb-10 pl-animate-fade-up-d1 flex justify-center">
             <img
               src={predictlabLogoHero}
-              alt="PredictLab — IA Veterinária"
+              alt="PredictVet — IA Veterinária"
               className="pl-animate-float w-64 sm:w-80 md:w-[420px] lg:w-[540px] h-auto object-contain"
               style={{
                 filter:

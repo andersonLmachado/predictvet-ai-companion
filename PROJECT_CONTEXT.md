@@ -26,7 +26,7 @@ A arquitetura de backend é **híbrida**:
 
 2.  **Webhooks (n8n/Backend API):**
     -   Utilizado para lógica de negócios complexa e integrações de IA.
-    -   Base URL: `https://vet-api.predictlab.com.br/webhook`
+    -   Base URL: `https://vet-api.predictvet.app/webhook`
 
 ## 3. Estrutura de Diretórios (`src/`)
 

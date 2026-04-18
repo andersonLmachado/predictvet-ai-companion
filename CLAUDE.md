@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**PredictLab** is a SaaS and BaaS platform focused on intelligence and automation for the veterinary sector (clinics, 24h hospitals, and laboratories).
+**PredictVet** is a SaaS and BaaS platform focused on intelligence and automation for the veterinary sector (clinics, 24h hospitals, and laboratories).
 
 Goal: eliminate friction during consultations, standardize unstructured medical data, and translate technical jargon for pet owners.
 
@@ -10,7 +10,7 @@ Goal: eliminate friction during consultations, standardize unstructured medical 
 - **Intelligent Guided Anamnesis:** Dynamic clinical decision flows.
 - **SOAP Structuring:** Audio/text ingestion → AI categorization (Subjective, Objective, Assessment, Plan).
 - **B2C Translation:** Technical reports → comprehensible messages for pet owners (future WhatsApp integration).
-- **PredictLab Headless (Post-MVP):** Intelligence via API for third-party veterinary ERPs.
+- **PredictVet Headless (Post-MVP):** Intelligence via API for third-party veterinary ERPs.
 
 ## Team
 - **Anderson** — Tech Lead, Cloud Architect, Infrastructure, n8n AI flows, Frontend (React), UI/UX.
@@ -22,10 +22,10 @@ Goal: eliminate friction during consultations, standardize unstructured medical 
 
 ## Frontend Design System
 
-All frontend work MUST follow the PredictLab Design System skill. Before writing any JSX, component, or styling:
+All frontend work MUST follow the PredictVet Design System skill. Before writing any JSX, component, or styling:
 
 ```
-Use Skill: predictlab-design-system
+Use Skill: predictvet-design-system
 ```
 
 Key references inside the skill:
