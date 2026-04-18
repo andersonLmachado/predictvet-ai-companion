@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
-import predictlabLogo from '@/assets/predictlab-logo-v26.png';
+import predictvetLogo from '@/assets/predictvet-logo.png';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => void;
@@ -55,12 +55,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="px-8 pt-8 pb-10">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div
-            className="px-6 py-3 rounded-2xl"
-            style={{ background: 'hsl(213,100%,98%)', border: '1px solid hsl(217,50%,90%)' }}
-          >
-            <img src={predictlabLogo} alt="PredictVet" className="h-10 object-contain" />
-          </div>
+          <img src={predictvetLogo} alt="PredictVet" className="h-14 w-auto object-contain" />
         </div>
 
         {/* Heading */}

@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Stethoscope, FlaskConical, Brain, Shield } from 'lucide-react';
-import predictlabLogo from '@/assets/predictlab-logo-v26.png';
-import predictlabLogoHero from '@/assets/predictlab-logo-hero.png';
+import predictlabLogoHero from '@/assets/predictvet-logo.png';
 
 /* ── Floating badge component ── */
 function FloatingBadge({
@@ -74,15 +73,7 @@ const HeroSection = () => {
 
       {/* ── Navbar ── */}
       <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-5">
-        <div className="flex items-center gap-3">
-          {/* White pill container so the logo shows on dark bg */}
-          <div
-            className="px-3 py-1.5 rounded-xl"
-            style={{ background: 'hsla(0,0%,100%,0.95)', boxShadow: '0 2px 12px -4px hsla(221,73%,20%,0.3)' }}
-          >
-            <img src={predictlabLogo} alt="PredictVet" className="h-8 object-contain" />
-          </div>
-        </div>
+        <div className="flex items-center gap-3" />
         <div className="flex items-center gap-3">
           <Link to="/login">
             <button
