@@ -121,7 +121,7 @@ const HeroSection = () => {
               className="text-xs font-semibold uppercase tracking-widest"
               style={{ color: 'hsl(217,90%,78%)', fontFamily: 'Nunito Sans, sans-serif' }}
             >
-              IA de Suporte à Decisão Diagnóstica Veterinária
+              Para médicos veterinários
             </span>
           </div>
 
@@ -143,8 +143,9 @@ const HeroSection = () => {
             className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 pl-animate-fade-up-d2"
             style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
           >
-            Inteligência Artificial a Serviço do{' '}
-            <span className="pl-text-gradient">Diagnóstico Veterinário</span>
+            O prontuário inteligente que{' '}
+            <span className="pl-text-gradient">pensa com você</span>{' '}
+            durante a consulta
           </h1>
 
           {/* Subheading */}
@@ -152,7 +153,7 @@ const HeroSection = () => {
             className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10 pl-animate-fade-up-d3"
             style={{ color: 'hsla(213,100%,88%,0.65)', fontFamily: 'Nunito Sans, sans-serif' }}
           >
-            Segurança para o seu diagnóstico, clareza para o tutor e tecnologia de ponta para o desfecho clínico.
+            O PredictLab estrutura a anamnese, gera o SOAP automaticamente, analisa exames laboratoriais e acompanha a evolução clínica do paciente — tudo em um só lugar.
           </p>
 
           {/* CTAs */}
@@ -166,11 +167,11 @@ const HeroSection = () => {
                   fontFamily: 'Nunito Sans, sans-serif',
                 }}
               >
-                Começar Gratuitamente
+                Começar gratuitamente
                 <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
-            <Link to="/login">
+            <a href="#features">
               <button
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold transition-all duration-200"
                 style={{
@@ -182,9 +183,9 @@ const HeroSection = () => {
                 onMouseEnter={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.12)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.07)')}
               >
-                Já tenho conta
+                Ver demonstração →
               </button>
-            </Link>
+            </a>
           </div>
 
           {/* Trust badges */}
