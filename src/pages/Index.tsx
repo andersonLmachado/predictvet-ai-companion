@@ -1,21 +1,22 @@
-
 import React from 'react';
 import HeroSection from '@/components/homepage/HeroSection';
+import ProblemSection from '@/components/homepage/ProblemSection';
 import FeaturesSection from '@/components/homepage/FeaturesSection';
-import WhyChooseSection from '@/components/homepage/WhyChooseSection';
 import HowItWorksSection from '@/components/homepage/HowItWorksSection';
-import FAQSection from '@/components/homepage/FAQSection';
-import CTASection from '@/components/homepage/CTASection';
+import ClinicalIntelligenceSection from '@/components/homepage/ClinicalIntelligenceSection';
+import MetricsSection from '@/components/homepage/MetricsSection';
+import HowToStartSection from '@/components/homepage/HowToStartSection';
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <HeroSection />
+      <ProblemSection />
       <FeaturesSection />
-      <WhyChooseSection />
       <HowItWorksSection />
-      <FAQSection />
-      <CTASection />
+      <ClinicalIntelligenceSection />
+      <MetricsSection />
+      <HowToStartSection />
     </div>
   );
 };
