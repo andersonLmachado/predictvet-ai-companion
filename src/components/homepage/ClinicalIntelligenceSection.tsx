@@ -69,7 +69,7 @@ const ClinicalIntelligenceSection = () => {
 
         {/* Título */}
         <h2
-          className="text-2xl md:text-3xl font-semibold mb-4"
+          className="text-2xl md:text-3xl font-bold mb-4"
           style={{
             fontFamily: 'Sora, sans-serif',
             color: 'hsl(213,100%,97%)',
@@ -207,7 +207,7 @@ const ClinicalIntelligenceSection = () => {
           style={{
             color: 'hsla(213,100%,88%,0.45)',
             background: 'hsla(0,0%,100%,0.04)',
-            borderLeft: '3px solid #1D9E75',
+            borderLeft: '3px solid hsl(162,70%,38%)',
             fontFamily: 'Nunito Sans, sans-serif',
           }}
         >

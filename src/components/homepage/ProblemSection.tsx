@@ -14,7 +14,7 @@ const comparisons = [
     before: 'Laudo US manual',
     after: 'Roteiro guiado por voz/texto',
   },
-];
+] as const;
 
 const ProblemSection = () => {
   return (
@@ -25,7 +25,7 @@ const ProblemSection = () => {
           <div
             className="text-xs font-semibold uppercase mb-3"
             style={{
-              color: '#0F6E56',
+              color: 'hsl(162,70%,38%)',
               fontFamily: 'Nunito Sans, sans-serif',
               letterSpacing: '0.1em',
             }}
@@ -84,7 +84,7 @@ const ProblemSection = () => {
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: 'hsla(162,70%,38%,0.1)' }}
                 >
-                  <Check className="w-3.5 h-3.5" style={{ color: '#0F6E56' }} />
+                  <Check className="w-3.5 h-3.5" style={{ color: 'hsl(162,70%,38%)' }} />
                 </div>
                 <span
                   className="text-sm font-semibold"

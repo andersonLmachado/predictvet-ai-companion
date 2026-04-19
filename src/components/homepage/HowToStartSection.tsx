@@ -30,7 +30,7 @@ const HowToStartSection = () => {
         <div
           className="text-xs font-semibold uppercase mb-3"
           style={{
-            color: '#0F6E56',
+            color: 'hsl(162,70%,38%)',
             fontFamily: 'Nunito Sans, sans-serif',
             letterSpacing: '0.1em',
           }}
@@ -59,7 +59,7 @@ const HowToStartSection = () => {
             >
               <div
                 className="text-xl font-semibold flex-shrink-0 w-8 pt-0.5"
-                style={{ color: '#1D9E75', fontFamily: 'Sora, sans-serif' }}
+                style={{ color: 'hsl(162,70%,38%)', fontFamily: 'Sora, sans-serif' }}
               >
                 {num}
               </div>
