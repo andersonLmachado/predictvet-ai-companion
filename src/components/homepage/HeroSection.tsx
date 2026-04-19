@@ -171,20 +171,21 @@ const HeroSection = () => {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
-            <a href="#features">
-              <button
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold transition-all duration-200"
-                style={{
-                  background: 'hsla(0,0%,100%,0.07)',
-                  border: '1px solid hsla(217,88%,57%,0.3)',
-                  color: 'hsl(213,100%,90%)',
-                  fontFamily: 'Nunito Sans, sans-serif',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.12)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.07)')}
-              >
-                Ver demonstração →
-              </button>
+            <a
+              href="#features"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 flex items-center justify-center"
+              style={{
+                background: 'hsla(0,0%,100%,0.07)',
+                border: '1px solid hsla(217,88%,57%,0.3)',
+                color: 'hsl(213,100%,90%)',
+                fontFamily: 'Nunito Sans, sans-serif',
+                textDecoration: 'none',
+                display: 'inline-flex',
+              }}
+              onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = 'hsla(0,0%,100%,0.12)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = 'hsla(0,0%,100%,0.07)')}
+            >
+              Ver demonstração →
             </a>
           </div>
 
