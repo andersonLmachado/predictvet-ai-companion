@@ -20,7 +20,7 @@ export function buildPatientUpdatePayload(form: EditForm): PatientUpdatePayload 
     owner_name: form.owner_name,
     species: form.species,
     breed: form.breed,
-    age: form.age !== '' ? Number(form.age) : null,
+    age: form.age !== '' && !isNaN(Number(form.age)) ? Number(form.age) : null,
   };
 }
 

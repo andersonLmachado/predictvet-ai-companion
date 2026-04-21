@@ -42,6 +42,17 @@ describe('buildPatientUpdatePayload', () => {
       age: 3,
     });
   });
+
+  it('converte age string não numérica para null', () => {
+    const result = buildPatientUpdatePayload({
+      name: 'Thor',
+      owner_name: 'João',
+      species: 'canina',
+      breed: 'Lab',
+      age: 'abc',
+    });
+    expect(result.age).toBeNull();
+  });
 });
 
 // ─── validatePatientEdit ─────────────────────────────────────────────────────
@@ -63,5 +74,10 @@ describe('validatePatientEdit', () => {
 
   it('age vazia é permitida (campo opcional)', () => {
     expect(validatePatientEdit({ name: 'Thor', owner_name: 'João', species: 'canina', breed: 'Lab', age: '' })).toBeNull();
+  });
+
+  it('retorna mensagem de erro quando name contém apenas espaços', () => {
+    const result = validatePatientEdit({ name: '   ', owner_name: 'João', species: 'canina', breed: 'Lab', age: '3' });
+    expect(result).toBe('O nome do animal é obrigatório.');
   });
 });
