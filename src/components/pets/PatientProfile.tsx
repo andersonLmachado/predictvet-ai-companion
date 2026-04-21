@@ -778,14 +778,16 @@ const PatientProfile = () => {
         setSelectedPatient({ ...selectedPatient, ...payload, age: payload.age ?? undefined });
       }
 
-      // Recarregar lista global
+      // Recarregar lista global FIRST
       await loadPatients();
 
-      toast({ title: 'Dados salvos!', description: `${payload.name} foi atualizado com sucesso.` });
+      // THEN exit edit mode and show success toast (context is now fresh)
       setIsEditing(false);
       setEditForm(null);
-    } catch (err: any) {
-      toast({ title: 'Erro ao salvar', description: err.message ?? 'Tente novamente.', variant: 'destructive' });
+      toast({ title: 'Dados salvos!', description: `${payload.name} foi atualizado com sucesso.` });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Tente novamente.';
+      toast({ title: 'Erro ao salvar', description: message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
