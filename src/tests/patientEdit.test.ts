@@ -80,4 +80,9 @@ describe('validatePatientEdit', () => {
     const result = validatePatientEdit({ name: '   ', owner_name: 'João', species: 'canina', breed: 'Lab', age: '3' });
     expect(result).toBe('O nome do animal é obrigatório.');
   });
+
+  it('retorna mensagem de erro quando age é negativa', () => {
+    const result = validatePatientEdit({ name: 'Thor', owner_name: 'João', species: 'canina', breed: 'Lab', age: '-1' });
+    expect(result).toBe('A idade não pode ser negativa.');
+  });
 });

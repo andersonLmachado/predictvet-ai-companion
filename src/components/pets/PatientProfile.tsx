@@ -828,8 +828,9 @@ const PatientProfile = () => {
             /* ── Modo edição ── */
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Nome do animal *</label>
+                <label htmlFor="edit-patient-name" className="text-xs text-muted-foreground">Nome do animal *</label>
                 <Input
+                  id="edit-patient-name"
                   value={editForm.name}
                   onChange={(e) => setEditForm((f) => f ? { ...f, name: e.target.value } : f)}
                   placeholder="Nome do animal"
@@ -837,23 +838,29 @@ const PatientProfile = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Espécie</label>
+                <label htmlFor="edit-patient-species" className="text-xs text-muted-foreground">Espécie</label>
                 <Select
                   value={editForm.species}
                   onValueChange={(v) => setEditForm((f) => f ? { ...f, species: v } : f)}
                 >
-                  <SelectTrigger className="h-8 text-sm">
+                  <SelectTrigger id="edit-patient-species" className="h-8 text-sm">
                     <SelectValue placeholder="Espécie" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="canina">Canina</SelectItem>
                     <SelectItem value="felina">Felina</SelectItem>
+                    {editForm.species !== '' && editForm.species !== 'canina' && editForm.species !== 'felina' && (
+                      <SelectItem value={editForm.species} disabled>
+                        {editForm.species} (atual)
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Raça</label>
+                <label htmlFor="edit-patient-breed" className="text-xs text-muted-foreground">Raça</label>
                 <Input
+                  id="edit-patient-breed"
                   value={editForm.breed}
                   onChange={(e) => setEditForm((f) => f ? { ...f, breed: e.target.value } : f)}
                   placeholder="Raça"
@@ -861,8 +868,9 @@ const PatientProfile = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Tutor *</label>
+                <label htmlFor="edit-patient-owner" className="text-xs text-muted-foreground">Tutor *</label>
                 <Input
+                  id="edit-patient-owner"
                   value={editForm.owner_name}
                   onChange={(e) => setEditForm((f) => f ? { ...f, owner_name: e.target.value } : f)}
                   placeholder="Nome do tutor"
@@ -870,8 +878,9 @@ const PatientProfile = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Idade (anos)</label>
+                <label htmlFor="edit-patient-age" className="text-xs text-muted-foreground">Idade (anos)</label>
                 <Input
+                  id="edit-patient-age"
                   type="number"
                   min="0"
                   value={editForm.age}

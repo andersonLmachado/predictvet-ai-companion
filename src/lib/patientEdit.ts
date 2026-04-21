@@ -27,5 +27,8 @@ export function buildPatientUpdatePayload(form: EditForm): PatientUpdatePayload 
 export function validatePatientEdit(form: EditForm): string | null {
   if (!form.name.trim()) return 'O nome do animal é obrigatório.';
   if (!form.owner_name.trim()) return 'O nome do tutor é obrigatório.';
+  if (form.age !== '' && !isNaN(Number(form.age)) && Number(form.age) < 0) {
+    return 'A idade não pode ser negativa.';
+  }
   return null;
 }
