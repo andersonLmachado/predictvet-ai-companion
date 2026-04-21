@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -818,31 +820,118 @@ const PatientProfile = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/patients')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/patients')} disabled={isEditing}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <PawPrint className="h-6 w-6 text-primary" />
-              {patient.name}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {patient.species}{patient.breed ? ` • ${patient.breed}` : ''} • Tutor: {patient.owner_name}
-            </p>
-          </div>
+
+          {isEditing && editForm ? (
+            /* ── Modo edição ── */
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Nome do animal *</label>
+                <Input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm((f) => f ? { ...f, name: e.target.value } : f)}
+                  placeholder="Nome do animal"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Espécie</label>
+                <Select
+                  value={editForm.species}
+                  onValueChange={(v) => setEditForm((f) => f ? { ...f, species: v } : f)}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Espécie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="canina">Canina</SelectItem>
+                    <SelectItem value="felina">Felina</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Raça</label>
+                <Input
+                  value={editForm.breed}
+                  onChange={(e) => setEditForm((f) => f ? { ...f, breed: e.target.value } : f)}
+                  placeholder="Raça"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Tutor *</label>
+                <Input
+                  value={editForm.owner_name}
+                  onChange={(e) => setEditForm((f) => f ? { ...f, owner_name: e.target.value } : f)}
+                  placeholder="Nome do tutor"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Idade (anos)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.age}
+                  onChange={(e) => setEditForm((f) => f ? { ...f, age: e.target.value } : f)}
+                  placeholder="Ex: 5"
+                  className="h-8 text-sm"
+                />
+              </div>
+            </div>
+          ) : (
+            /* ── Modo visualização ── */
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <PawPrint className="h-6 w-6 text-primary" />
+                {patient.name}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {patient.species}{patient.breed ? ` • ${patient.breed}` : ''} • Tutor: {patient.owner_name}
+              </p>
+            </div>
+          )}
         </div>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate(`/patient/${id}/ultrasound`)}>
-            <Scan className="h-4 w-4 mr-1.5" />
-            Novo Laudo US
-          </Button>
-          <Button variant="outline" onClick={() => navigate(`/anamnese/${id}`)}>
-            <Stethoscope className="h-4 w-4 mr-1.5" />
-            Nova Anamnese
-          </Button>
-          <Button onClick={() => navigate(`/paciente/${id}/relatorio-alta`)}>
-            Relatório de Alta
-          </Button>
+          {isEditing ? (
+            /* ── Botões de edição ── */
+            <>
+              <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
+                <X className="h-4 w-4 mr-1.5" />
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-1.5" />
+                )}
+                Salvar
+              </Button>
+            </>
+          ) : (
+            /* ── Botões de navegação ── */
+            <>
+              <Button variant="outline" onClick={handleStartEdit}>
+                <Edit className="h-4 w-4 mr-1.5" />
+                Editar
+              </Button>
+              <Button variant="outline" onClick={() => navigate(`/patient/${id}/ultrasound`)}>
+                <Scan className="h-4 w-4 mr-1.5" />
+                Novo Laudo US
+              </Button>
+              <Button variant="outline" onClick={() => navigate(`/anamnese/${id}`)}>
+                <Stethoscope className="h-4 w-4 mr-1.5" />
+                Nova Anamnese
+              </Button>
+              <Button onClick={() => navigate(`/paciente/${id}/relatorio-alta`)}>
+                Relatório de Alta
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
