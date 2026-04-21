@@ -735,6 +735,62 @@ const PatientProfile = () => {
 
   const patient = contextPatient ?? dbPatient ?? (selectedPatient?.id === id ? selectedPatient : null);
 
+  const handleStartEdit = () => {
+    if (!patient) return;
+    setEditForm({
+      name: patient.name,
+      owner_name: patient.owner_name,
+      species: patient.species ?? '',
+      breed: patient.breed ?? '',
+      age: patient.age != null ? String(patient.age) : '',
+    });
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditForm(null);
+  };
+
+  const handleSave = async () => {
+    if (!editForm || !id) return;
+
+    const validationError = validatePatientEdit(editForm);
+    if (validationError) {
+      toast({ title: 'Campo obrigatório', description: validationError, variant: 'destructive' });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = buildPatientUpdatePayload(editForm);
+      const { error } = await supabase.from('patients').update(payload).eq('id', id);
+
+      if (error) throw error;
+
+      // Atualizar estado local imediatamente (evita flash de dados antigos)
+      if (dbPatient) {
+        setDbPatient({ ...dbPatient, ...payload, age: payload.age });
+      }
+
+      // Sincronizar selectedPatient no localStorage se for o mesmo paciente
+      if (selectedPatient?.id === id) {
+        setSelectedPatient({ ...selectedPatient, ...payload, age: payload.age ?? undefined });
+      }
+
+      // Recarregar lista global
+      await loadPatients();
+
+      toast({ title: 'Dados salvos!', description: `${payload.name} foi atualizado com sucesso.` });
+      setIsEditing(false);
+      setEditForm(null);
+    } catch (err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message ?? 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!patientsLoaded || dbLoading) {
     return (
       <div className="flex items-center justify-center h-full py-20">
