@@ -9,7 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, Stethoscope, Scan } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { buildPatientUpdatePayload, validatePatientEdit, type EditForm } from '@/lib/patientEdit';
+import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, Stethoscope, Scan, Edit, X, Save } from 'lucide-react';
 import PatientSummary from '@/components/dashboard/PatientSummary';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
@@ -692,9 +694,12 @@ const UltrasoundHistoryTab: React.FC<{ patientId: string; patientName: string; o
 const PatientProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { patients, patientsLoaded, selectedPatient } = usePatient();
+  const { patients, patientsLoaded, selectedPatient, loadPatients, setSelectedPatient } = usePatient();
   const [dbPatient, setDbPatient] = useState<PatientInfo | null>(null);
   const [dbLoading, setDbLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<EditForm | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // First try from context list, then from DB directly
   const contextPatient = useMemo(() => {
