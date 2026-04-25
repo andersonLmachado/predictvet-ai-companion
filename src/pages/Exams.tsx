@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateVetNotesAndLaboratory } from "@/lib/vetNotes";
 import { extractExamDate, updateExamDate, formatExamDate, type ExamExtraction } from "@/lib/examDate";
+import { findDuplicateExam } from "@/lib/examDuplicateCheck";
 import { Input } from "@/components/ui/input";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 import ClinicalSignsSection from "@/components/dashboard/ClinicalSignsSection";
@@ -149,6 +150,9 @@ const Exams = () => {
   };
 
   const handleSaveExam = async () => {
+    // Guard: already saved — prevent duplicate inserts from double-clicks
+    if (savedExamId) return;
+
     const patient = selectedPatient;
     if (!result || !patient) {
       toast({
@@ -182,6 +186,24 @@ const Exams = () => {
 
     setIsSavingExam(true);
     try {
+      // Pre-save duplicate check: if the same patient + date + lab already
+      // exists in exams_history, reuse that record instead of inserting again.
+      if (extractedExamDate) {
+        const existingId = await findDuplicateExam(
+          patientId,
+          extractedExamDate,
+          laboratory || null,
+        );
+        if (existingId) {
+          setSavedExamId(existingId);
+          toast({
+            title: "Exame já registrado",
+            description: "Este exame já existe no histórico do paciente.",
+          });
+          return;
+        }
+      }
+
       const response = await fetch("https://n8nvet.predictlab.com.br/webhook/salvar-exame", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -339,10 +361,10 @@ const Exams = () => {
                 />
                 <Button
                   onClick={handleSaveExam}
-                  disabled={isSavingExam}
+                  disabled={isSavingExam || !!savedExamId}
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  {isSavingExam ? "Salvando..." : "Salvar Exame"}
+                  {isSavingExam ? "Salvando..." : savedExamId ? "Exame salvo" : "Salvar Exame"}
                 </Button>
               </div>
             </div>
