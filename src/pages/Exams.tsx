@@ -194,6 +194,8 @@ const Exams = () => {
         );
         if (existingId) {
           setSavedExamId(existingId);
+          updateVetNotesAndLaboratory(existingId, vetNotes, laboratory || null)
+            .catch((err) => console.warn('[Exams] Could not persist vet_notes on duplicate:', err));
           toast({
             title: "Exame já registrado",
             description: "Este exame já existe no histórico do paciente.",
