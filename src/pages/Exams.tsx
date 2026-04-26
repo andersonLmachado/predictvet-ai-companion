@@ -105,7 +105,6 @@ const Exams = () => {
     setIsLoading(true);
     setResult(null);
     setSavedExamId(null);
-    setVetNotes('');
     setExtractedExamDate(null);
     setLaboratory('');
 
