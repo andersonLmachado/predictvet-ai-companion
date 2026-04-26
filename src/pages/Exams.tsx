@@ -38,7 +38,6 @@ const Exams = () => {
   const [isSavingExam, setIsSavingExam] = useState(false);
   const [savedExamId, setSavedExamId] = useState<string | null>(null);
   const [vetNotes, setVetNotes] = useState<string>('');
-  const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [extractedExamDate, setExtractedExamDate] = useState<string | null>(null);
   const [laboratory, setLaboratory] = useState<string>('');
 
@@ -213,6 +212,11 @@ const Exams = () => {
       const responseData = await response.json();
       const examId = responseData?.id ?? responseData?.exam_id ?? null;
       setSavedExamId(examId);
+      // Auto-save vet_notes + laboratory junto com o registro do exame
+      if (examId) {
+        updateVetNotesAndLaboratory(examId, vetNotes, laboratory || null)
+          .catch((err) => console.warn('[Exams] Could not persist vet_notes:', err));
+      }
       toast({
         title: "Exame salvo",
         description: "O exame foi salvo com sucesso.",
@@ -231,19 +235,6 @@ const Exams = () => {
       });
     } finally {
       setIsSavingExam(false);
-    }
-  };
-
-  const handleSaveNotes = async () => {
-    if (!savedExamId) return;
-    setIsSavingNotes(true);
-    try {
-      await updateVetNotesAndLaboratory(savedExamId, vetNotes, laboratory || null);
-      toast({ title: 'Observação salva', description: 'As observações clínicas foram registradas.' });
-    } catch {
-      toast({ title: 'Erro ao salvar observação', description: 'Tente novamente.', variant: 'destructive' });
-    } finally {
-      setIsSavingNotes(false);
     }
   };
 
@@ -294,6 +285,24 @@ const Exams = () => {
           </div>
           <PatientHeader patient={selectedPatient} />
         </div>
+
+        {/* Contexto clínico — aparece após selecionar paciente, antes do upload */}
+        {selectedPatient && (
+          <div className="space-y-2">
+            <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
+              <NotebookPen className="h-4 w-4" />
+              Contexto clínico do exame
+            </Label>
+            <Textarea
+              id="vet-notes"
+              placeholder="Ex: Histórico do paciente, motivo da solicitação, medicamentos em uso..."
+              value={vetNotes}
+              onChange={(e) => setVetNotes(e.target.value)}
+              rows={3}
+              className="resize-y"
+            />
+          </div>
+        )}
 
         {selectedPatient ? (
           <FileDropzone onFileSelect={handleFileSelect} isLoading={isLoading} />
@@ -373,46 +382,17 @@ const Exams = () => {
             {/* Sinais Clínicos do Dia */}
             <ClinicalSignsSection patientId={selectedPatientId || null} />
 
-            {/* Observações Clínicas do Veterinário */}
-            <div className="space-y-4 pt-2">
-              {/* Laboratório */}
-              <div className="space-y-2">
-                <Label htmlFor="laboratory" className="text-sm font-medium">
-                  Laboratório
-                </Label>
-                <Input
-                  id="laboratory"
-                  placeholder="Ex: Centro Vet Canoas, LabCenter Vet..."
-                  value={laboratory}
-                  onChange={(e) => setLaboratory(e.target.value)}
-                />
-              </div>
-              {/* Observações clínicas */}
-              <div className="space-y-2">
-                <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
-                  <NotebookPen className="h-4 w-4" />
-                  Observações clínicas
-                </Label>
-                <Textarea
-                  id="vet-notes"
-                  placeholder="Ex: Dia 2 — melhorou apetite, porém ainda com febre..."
-                  value={vetNotes}
-                  onChange={(e) => setVetNotes(e.target.value)}
-                  rows={4}
-                  className="resize-y"
-                />
-                <div className="flex justify-end">
-                  <Button onClick={handleSaveNotes} disabled={!savedExamId || isSavingNotes} variant="secondary">
-                    <Save className="mr-2 h-4 w-4" />
-                    {isSavingNotes ? 'Salvando...' : 'Salvar observação'}
-                  </Button>
-                </div>
-                {!savedExamId && (
-                  <p className="text-xs text-muted-foreground text-right">
-                    Salve o exame primeiro para habilitar as observações.
-                  </p>
-                )}
-              </div>
+            {/* Laboratório — permanece aqui pois é extraído do PDF */}
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="laboratory" className="text-sm font-medium">
+                Laboratório
+              </Label>
+              <Input
+                id="laboratory"
+                placeholder="Ex: Centro Vet Canoas, LabCenter Vet..."
+                value={laboratory}
+                onChange={(e) => setLaboratory(e.target.value)}
+              />
             </div>
           </div>
         )}
