@@ -31,13 +31,13 @@ interface NavbarProps {
   onLogout?: () => void;
 }
 
-const NAV_ITEMS = [
-  { label: 'Home',             icon: Home,           path: '/home' },
-  { label: 'Consulta Guiada',  icon: ClipboardList,  path: '/chat',         tourId: 'nav-chat' },
-  { label: 'Cadastrar Pet',    icon: UserPlus,       path: '/register-pet', tourId: 'nav-register-pet' },
-  { label: 'Meus Pacientes',   icon: Users,          path: '/patients' },
-  { label: 'Exames',           icon: FileText,       path: '/exams',        tourId: 'nav-exams' },
-  { label: 'Laudo US',         icon: ScanLine,       path: '/ultrasound',   tourId: 'nav-ultrasound' },
+export const NAV_ITEMS = [
+  { label: 'Home',             icon: Home,            path: '/home' },
+  { label: 'Cadastrar Pet',    icon: UserPlus,        path: '/register-pet', tourId: 'nav-register-pet' },
+  { label: 'Meus Pacientes',   icon: Users,           path: '/patients' },
+  { label: 'Consulta Guiada',  icon: ClipboardList,   path: '/chat',         tourId: 'nav-chat' },
+  { label: 'Exames',           icon: FileText,        path: '/exams',        tourId: 'nav-exams' },
+  { label: 'Laudo US',         icon: ScanLine,        path: '/ultrasound',   tourId: 'nav-ultrasound' },
   { label: 'Comparativo',      icon: LayoutDashboard, path: '/dashboard',    tourId: 'nav-dashboard' },
 ];
 
