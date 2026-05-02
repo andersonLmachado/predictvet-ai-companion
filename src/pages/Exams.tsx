@@ -22,6 +22,7 @@ import { findDuplicateExam } from "@/lib/examDuplicateCheck";
 import { Input } from "@/components/ui/input";
 import { PatientHeader, Patient } from "@/components/pets/PatientHeader";
 import ClinicalSignsSection from "@/components/dashboard/ClinicalSignsSection";
+import ClinicalHistoryCard from '@/components/patient/ClinicalHistoryCard';
 
 type ExamType = "sangue" | "urina";
 
@@ -287,12 +288,17 @@ const Exams = () => {
           <PatientHeader patient={selectedPatient} />
         </div>
 
+        {/* Histórico clínico do paciente — aparece após selecionar paciente */}
+        {selectedPatient && (
+          <ClinicalHistoryCard mode="edit" patientId={selectedPatientId} />
+        )}
+
         {/* Contexto clínico — aparece após selecionar paciente, antes do upload */}
         {selectedPatient && (
           <div className="space-y-2">
             <Label htmlFor="vet-notes" className="text-sm font-medium flex items-center gap-2">
               <NotebookPen className="h-4 w-4" />
-              Contexto clínico do exame
+              Contexto deste exame
             </Label>
             <Textarea
               id="vet-notes"
