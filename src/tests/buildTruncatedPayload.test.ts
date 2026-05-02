@@ -102,3 +102,45 @@ describe('buildTruncatedPayload', () => {
     expect(console.warn).toHaveBeenCalled();
   });
 });
+
+describe('clinical_history injection', () => {
+  it('inclui clinical_history no payload quando preenchido', () => {
+    const result = buildTruncatedPayload({
+      consultationId: 'c1',
+      patientId: 'p1',
+      chiefComplaint: 'tosse',
+      followupAnswers: [],
+      transcription: '',
+      dynamicAnswers: [],
+      clinicalHistory: 'Diabetes tipo 2',
+    });
+    expect(result.clinical_history).toBe('Diabetes tipo 2');
+  });
+
+  it('omite clinical_history quando vazio', () => {
+    const result = buildTruncatedPayload({
+      consultationId: 'c1',
+      patientId: 'p1',
+      chiefComplaint: 'tosse',
+      followupAnswers: [],
+      transcription: '',
+      dynamicAnswers: [],
+      clinicalHistory: '',
+    });
+    expect(result.clinical_history).toBeUndefined();
+  });
+
+  it('trunca clinical_history para 500 chars', () => {
+    const longText = 'A'.repeat(600);
+    const result = buildTruncatedPayload({
+      consultationId: 'c1',
+      patientId: 'p1',
+      chiefComplaint: 'tosse',
+      followupAnswers: [],
+      transcription: '',
+      dynamicAnswers: [],
+      clinicalHistory: longText,
+    });
+    expect(result.clinical_history).toHaveLength(500);
+  });
+});

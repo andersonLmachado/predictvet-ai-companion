@@ -22,6 +22,7 @@ export interface ExtendedAnamnesisPayload extends AnamnesisPayload {
   respostas_truncadas?: true; // flag literal: apenas presente (true) quando truncamento ocorreu; omitida caso contrário
   weight_kg?: number | null;
   temperature_c?: number | null;
+  clinical_history?: string;
 }
 
 // ─── Payload builder ─────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ export function buildTruncatedPayload(params: {
   dynamicAnswers: FollowUpAnswer[];
   weightKg?: number | null;
   temperatureC?: number | null;
+  clinicalHistory?: string;
 }): ExtendedAnamnesisPayload {
   let { transcription } = params;
 
@@ -93,6 +95,10 @@ export function buildTruncatedPayload(params: {
 
   if (params.weightKg != null) result.weight_kg = params.weightKg;
   if (params.temperatureC != null) result.temperature_c = params.temperatureC;
+
+  if (params.clinicalHistory) {
+    result.clinical_history = params.clinicalHistory.slice(0, 500);
+  }
 
   return result;
 }
