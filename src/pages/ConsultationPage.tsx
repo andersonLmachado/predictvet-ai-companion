@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import ClinicalHistoryCard from '@/components/patient/ClinicalHistoryCard';
 
 // ─── Stepper config ──────────────────────────────────────────────────────────
 
@@ -47,6 +48,7 @@ const ConsultationPage: React.FC = () => {
   const { send } = useAnamnesisWebhook();
   const [session, dispatch] = useReducer(sessionReducer, initialSession);
   const [dynamicAnswers, setDynamicAnswers] = useState<FollowUpAnswer[]>([]);
+  const [clinicalHistory, setClinicalHistory] = useState('');
 
   // Dynamic steps — step 4 is added once we enter step 3
   const steps =
@@ -98,6 +100,7 @@ const ConsultationPage: React.FC = () => {
         followupAnswers: session.followupAnswers,
         transcription: session.transcription,
         dynamicAnswers: answers,
+        clinicalHistory: clinicalHistory || undefined,
       });
 
       const { ok, error } = await send(payload);
@@ -113,7 +116,7 @@ const ConsultationPage: React.FC = () => {
         });
       }
     },
-    [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send]
+    [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send, clinicalHistory]
   );
 
   // ── Success screen ──────────────────────────────────────────────────────────
@@ -372,6 +375,15 @@ const ConsultationPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Clinical history — readonly, hidden when empty */}
+        {selectedPatient && (
+          <ClinicalHistoryCard
+            mode="readonly"
+            patientId={selectedPatient.id}
+            onLoad={setClinicalHistory}
+          />
+        )}
 
         {/* Stepper */}
         <ConsultationStepper currentStep={session.step} steps={steps} />
