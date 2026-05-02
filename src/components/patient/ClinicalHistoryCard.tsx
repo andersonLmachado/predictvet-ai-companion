@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ClipboardList, ChevronDown, Save } from 'lucide-react';
 import {
@@ -28,6 +28,8 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const onLoadRef = useRef(onLoad);
+  onLoadRef.current = onLoad;
 
   useEffect(() => {
     if (!patientId) return;
@@ -38,10 +40,10 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
       .then((value) => {
         setText(value);
         setOpen(value.trim().length > 0);
-        onLoad?.(value);
+        onLoadRef.current?.(value);
       })
       .catch(() => {
-        onLoad?.('');
+        onLoadRef.current?.('');
       })
       .finally(() => setIsLoading(false));
   }, [patientId]);
