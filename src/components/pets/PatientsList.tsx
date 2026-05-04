@@ -20,6 +20,8 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Search, Loader2 } from 'lucide-react';
+import { useDiagnosisTags } from '@/hooks/useDiagnosisTags';
+import DiagnosisTags from '@/components/patient/DiagnosisTags';
 
 const API_PATIENTS_URL = 'https://n8nvet.predictlab.com.br/webhook/buscar-pacientes';
 
@@ -40,6 +42,8 @@ const PatientsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const patientIds = patients.map((p) => p.id);
+  const diagnosisTags = useDiagnosisTags(patientIds);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -70,12 +74,19 @@ const PatientsList = () => {
     fetchPatients();
   }, [user]);
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (patient.owner_name && patient.owner_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (patient.breed && patient.breed.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (patient.species && patient.species.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredPatients = patients.filter((patient) => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return true;
+    const tags = diagnosisTags[patient.id] ?? [];
+    const tagsText = tags.join(' ').toLowerCase();
+    return (
+      patient.name.toLowerCase().includes(term) ||
+      (patient.owner_name && patient.owner_name.toLowerCase().includes(term)) ||
+      (patient.breed && patient.breed.toLowerCase().includes(term)) ||
+      (patient.species && patient.species.toLowerCase().includes(term)) ||
+      tagsText.includes(term)
+    );
+  });
 
   const openPatientDetails = (patient: PatientRow) => {
     setGlobalPatient({
@@ -137,7 +148,12 @@ const PatientsList = () => {
                 ) : filteredPatients.length > 0 ? (
                   filteredPatients.map((patient) => (
                     <TableRow key={patient.id}>
-                      <TableCell className="font-medium">{patient.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div>
+                          <span>{patient.name}</span>
+                          <DiagnosisTags tags={diagnosisTags[patient.id] ?? []} />
+                        </div>
+                      </TableCell>
                       <TableCell className="hidden md:table-cell">{patient.species}</TableCell>
                       <TableCell className="hidden md:table-cell">{patient.breed}</TableCell>
                       <TableCell className="hidden md:table-cell">{patient.age ?? '—'}</TableCell>
