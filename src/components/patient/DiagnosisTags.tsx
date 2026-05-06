@@ -20,8 +20,8 @@ const DiagnosisTags: React.FC<DiagnosisTagsProps> = ({ tags, maxVisible = 2 }) =
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex flex-wrap gap-1 mt-0.5">
-        {visible.map((tag) => (
-          <Tooltip key={tag}>
+        {visible.map((tag, i) => (
+          <Tooltip key={i}>
             <TooltipTrigger asChild>
               <span
                 className="inline-flex items-center text-xs font-normal px-1.5 rounded-md cursor-default leading-5 h-5"

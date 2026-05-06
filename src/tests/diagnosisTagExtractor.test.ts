@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { extractDiagnosisTags } from '../lib/diagnosisTagExtractor';
 
 describe('extractDiagnosisTags', () => {
-  it('extrai até 3 tags de texto numerado padrão', () => {
-    const soap_a = '1. Anemia\n2. Parasitose\n3. Infecção\n4. Outros';
+  it('extrai até 3 tags, truncando tag com parênteses a 25 chars', () => {
+    const soap_a = '1. Anorexia (falta de apetite)\n2. Anemia\n3. Parasitose\n4. Outros';
     expect(extractDiagnosisTags(soap_a)).toEqual([
+      'Anorexia (falta de apetit',  // 25 chars
       'Anemia',
       'Parasitose',
-      'Infecção',
     ]);
   });
 
