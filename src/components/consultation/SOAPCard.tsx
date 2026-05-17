@@ -62,13 +62,11 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   const [temperatureC, setTemperatureC] = useState(temperatureCProp);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const lastSavedContentRef = useRef(value);
   const [lastSavedContent, setLastSavedContent] = useState(value);
   const isDirty = content !== lastSavedContent;
 
   useEffect(() => {
     setContent(value);
-    lastSavedContentRef.current = value;
     setLastSavedContent(value);
   }, [value]);
 
@@ -252,7 +250,6 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
 
         if (error) throw error;
 
-        lastSavedContentRef.current = content;
         setLastSavedContent(content);
         if (!silent) {
           toast.success(`Bloco ${letter} salvo com sucesso!`);
