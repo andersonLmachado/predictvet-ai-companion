@@ -63,10 +63,13 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const lastSavedContentRef = useRef(value);
+  const [lastSavedContent, setLastSavedContent] = useState(value);
+  const isDirty = content !== lastSavedContent;
 
   useEffect(() => {
     setContent(value);
     lastSavedContentRef.current = value;
+    setLastSavedContent(value);
   }, [value]);
 
   useEffect(() => {
@@ -214,6 +217,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         return { ok: false, letter };
       }
 
+      // Empty blocks are a valid no-op (button is disabled when empty; save-all skips silently).
       if (!content.trim()) {
         return { ok: true, letter };
       }
@@ -249,6 +253,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         if (error) throw error;
 
         lastSavedContentRef.current = content;
+        setLastSavedContent(content);
         if (!silent) {
           toast.success(`Bloco ${letter} salvo com sucesso!`);
         }
@@ -294,7 +299,16 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
             {letter}
           </span>
           <div className="flex-1">
-            <span className="font-semibold">{title}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold">{title}</span>
+              {isDirty && content.trim() && (
+                <span
+                  className="inline-block w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: 'hsl(24, 90%, 55%)' }}
+                  aria-label="alterações não salvas"
+                />
+              )}
+            </div>
             <p className="text-xs font-normal text-muted-foreground">{subtitle}</p>
           </div>
           <span className="text-muted-foreground">{icon}</span>

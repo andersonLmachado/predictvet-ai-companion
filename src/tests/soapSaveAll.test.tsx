@@ -1,5 +1,36 @@
-import { describe, it, expect } from 'vitest';
+// @vitest-environment happy-dom
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { aggregateSaveResults } from '../lib/soapSaveOrchestrator';
+import React, { createRef } from 'react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import SOAPCard, { type SOAPCardHandle } from '../components/consultation/SOAPCard';
+
+// ── Mocks ──────────────────────────────────────────────────────────────────
+
+const { mockUpsert, mockSonnerSuccess } = vi.hoisted(() => ({
+  mockUpsert: vi.fn().mockResolvedValue({ error: null }),
+  mockSonnerSuccess: vi.fn(),
+}));
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null }) },
+    from: vi.fn().mockReturnValue({ upsert: mockUpsert }),
+  },
+}));
+
+vi.mock('@/contexts/PatientContext', () => ({
+  usePatient: () => ({ refreshPatientState: vi.fn() }),
+}));
+
+vi.mock('sonner', () => ({
+  toast: Object.assign(vi.fn(), { success: mockSonnerSuccess, error: vi.fn(), warning: vi.fn() }),
+}));
+
+vi.mock('@/hooks/use-toast', () => ({ toast: vi.fn() }));
+
+// ── Pure function tests ──────────────────────────────────────────────────────
 
 describe('aggregateSaveResults', () => {
   it('retorna success:true quando todos os cards salvam', () => {
@@ -30,5 +61,84 @@ describe('aggregateSaveResults', () => {
       undefined,
     ];
     expect(aggregateSaveResults(results)).toEqual({ success: true, failedLetters: [] });
+  });
+});
+
+// ── SOAPCard helpers ─────────────────────────────────────────────────────────
+
+const baseProps = {
+  letter: 'S',
+  title: 'Subjetivo',
+  subtitle: 'Anamnese',
+  placeholder: 'Digite aqui...',
+  value: 'conteúdo inicial',
+  onChange: vi.fn(),
+  accentColor: 'hsl(210,70%,50%)',
+  icon: null,
+  patientId: 'patient-123',
+};
+
+// ── save() via ref ───────────────────────────────────────────────────────────
+
+describe('SOAPCard — save() via ref', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsert.mockResolvedValue({ error: null });
+  });
+
+  it('retorna ok:true e não chama upsert quando conteúdo está vazio', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...baseProps} value="" ref={ref} />);
+
+    const result = await act(() => ref.current!.save());
+
+    expect(result).toEqual({ ok: true, letter: 'S' });
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('retorna ok:true e chama upsert quando há conteúdo', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...baseProps} ref={ref} />);
+
+    const result = await act(() => ref.current!.save());
+
+    expect(result).toEqual({ ok: true, letter: 'S' });
+    expect(mockUpsert).toHaveBeenCalledOnce();
+  });
+});
+
+// ── isDirty indicator ────────────────────────────────────────────────────────
+
+describe('SOAPCard — indicador isDirty', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsert.mockResolvedValue({ error: null });
+  });
+
+  it('não exibe o ponto laranja no estado inicial', () => {
+    render(<SOAPCard {...baseProps} />);
+    expect(screen.queryByLabelText('alterações não salvas')).not.toBeInTheDocument();
+  });
+
+  it('exibe o ponto laranja após editar o conteúdo', () => {
+    render(<SOAPCard {...baseProps} />);
+    const textarea = screen.getByPlaceholderText('Digite aqui...');
+
+    fireEvent.change(textarea, { target: { value: 'conteúdo editado' } });
+
+    expect(screen.getByLabelText('alterações não salvas')).toBeInTheDocument();
+  });
+
+  it('remove o ponto laranja após save() via ref com sucesso', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...baseProps} ref={ref} />);
+    const textarea = screen.getByPlaceholderText('Digite aqui...');
+
+    fireEvent.change(textarea, { target: { value: 'conteúdo editado' } });
+    expect(screen.getByLabelText('alterações não salvas')).toBeInTheDocument();
+
+    await act(() => ref.current!.save());
+
+    expect(screen.queryByLabelText('alterações não salvas')).not.toBeInTheDocument();
   });
 });
