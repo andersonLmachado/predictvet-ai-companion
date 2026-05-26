@@ -156,19 +156,18 @@ const GuidedConsultation: React.FC = () => {
   const handleSaveAll = async () => {
     if (!selectedPatient) return;
     setIsSavingAll(true);
-
-    const results = await Promise.all(
-      (['S', 'O', 'A', 'P'] as const).map(l => soapRefs[l].current?.save())
-    );
-
-    setIsSavingAll(false);
-
-    const { success, failedLetters } = aggregateSaveResults(results);
-
-    if (success) {
-      sonnerToast.success('Prontuário salvo com sucesso');
-    } else {
-      sonnerToast.error(`Não foi possível salvar os blocos: ${failedLetters.join(', ')}`);
+    try {
+      const results = await Promise.all(
+        (['S', 'O', 'A', 'P'] as const).map(l => soapRefs[l].current?.save())
+      );
+      const { success, failedLetters } = aggregateSaveResults(results);
+      if (success) {
+        sonnerToast.success('Prontuário salvo com sucesso');
+      } else {
+        sonnerToast.error(`Não foi possível salvar os blocos: ${failedLetters.join(', ')}`);
+      }
+    } finally {
+      setIsSavingAll(false);
     }
   };
 
