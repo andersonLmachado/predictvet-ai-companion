@@ -139,6 +139,13 @@ export function useVoiceConsultation({ patientId }: UseVoiceConsultationOptions)
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { user } } = await supabase.auth.getUser();
 
+        if (!user) {
+          const msg = 'Sessão expirada. Faça login novamente.';
+          setError(msg);
+          toast.error(msg);
+          return;
+        }
+
         // Coluna `source` existe no banco mas está desatualizada nos tipos TS gerados.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { error: dbError } = await (supabase.from('medical_consultations') as any).insert({
