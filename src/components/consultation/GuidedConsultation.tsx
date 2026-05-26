@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { usePatient } from '@/contexts/PatientContext';
-import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle, Sparkles, ArrowRight, Loader2, Save } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import SOAPCard from './SOAPCard';
+import SOAPCard, { type SOAPCardHandle } from './SOAPCard';
+import { aggregateSaveResults } from '@/lib/soapSaveOrchestrator';
 import { Link } from 'react-router-dom';
 import {
   Select,
@@ -23,6 +25,13 @@ const GuidedConsultation: React.FC = () => {
   );
   const isInitialMount = useRef(true);
   const [isPreSelected, setIsPreSelected] = useState(false);
+  const [isSavingAll, setIsSavingAll] = useState(false);
+  const soapRefs = {
+    S: useRef<SOAPCardHandle>(null),
+    O: useRef<SOAPCardHandle>(null),
+    A: useRef<SOAPCardHandle>(null),
+    P: useRef<SOAPCardHandle>(null),
+  };
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -144,6 +153,24 @@ const GuidedConsultation: React.FC = () => {
     setSelectedPatient(null);
   };
 
+  const handleSaveAll = async () => {
+    if (!selectedPatient) return;
+    setIsSavingAll(true);
+    try {
+      const results = await Promise.all(
+        (['S', 'O', 'A', 'P'] as const).map(l => soapRefs[l].current?.save())
+      );
+      const { success, failedLetters } = aggregateSaveResults(results);
+      if (success) {
+        sonnerToast.success('Prontuário salvo com sucesso');
+      } else {
+        sonnerToast.error(`Não foi possível salvar os blocos: ${failedLetters.join(', ')}`);
+      }
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto p-4 pb-8">
       {/* Patient header */}
@@ -251,6 +278,7 @@ const GuidedConsultation: React.FC = () => {
       {/* SOAP Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SOAPCard
+          ref={soapRefs.S}
           letter="S"
           title="Subjetivo — Anamnese"
           subtitle="Relato do tutor, queixa principal, histórico"
@@ -263,6 +291,7 @@ const GuidedConsultation: React.FC = () => {
         />
 
         <SOAPCard
+          ref={soapRefs.O}
           letter="O"
           title="Objetivo — Exame Físico"
           subtitle="Parâmetros clínicos e sinais vitais"
@@ -279,6 +308,7 @@ const GuidedConsultation: React.FC = () => {
         />
 
         <SOAPCard
+          ref={soapRefs.A}
           letter="A"
           title="Avaliação — Diagnóstico"
           subtitle="Suspeitas clínicas e diagnósticos diferenciais"
@@ -291,6 +321,7 @@ const GuidedConsultation: React.FC = () => {
         />
 
         <SOAPCard
+          ref={soapRefs.P}
           letter="P"
           title="Plano — Conduta"
           subtitle="Exames solicitados, prescrições, retorno"
@@ -304,6 +335,34 @@ const GuidedConsultation: React.FC = () => {
           onAiSuggestionsChange={setAiSuggestions}
         />
       </div>
+
+      <button
+        onClick={handleSaveAll}
+        disabled={!selectedPatient || isSavingAll}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold text-white transition-all"
+        style={{
+          background: (!selectedPatient || isSavingAll)
+            ? 'hsl(217,50%,80%)'
+            : 'linear-gradient(135deg, hsl(221,73%,45%), hsl(217,88%,57%))',
+          boxShadow: (!selectedPatient || isSavingAll)
+            ? 'none'
+            : '0 6px 24px -6px hsla(221,73%,45%,0.45)',
+          fontFamily: 'Nunito Sans, sans-serif',
+          cursor: (!selectedPatient || isSavingAll) ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {isSavingAll ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          <>
+            <Save className="w-4 h-4" />
+            Salvar Prontuário Completo
+          </>
+        )}
+      </button>
     </div>
   );
 };

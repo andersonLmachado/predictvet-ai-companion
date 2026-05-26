@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,11 @@ interface SOAPCardProps {
   onTemperatureChange?: (v: string) => void;
 }
 
-const SOAPCard: React.FC<SOAPCardProps> = ({
+export interface SOAPCardHandle {
+  save(): Promise<{ ok: boolean; letter: string }>;
+}
+
+const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   letter,
   title,
   subtitle,
@@ -48,7 +52,7 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   temperatureC: temperatureCProp = '',
   onWeightChange,
   onTemperatureChange,
-}) => {
+}, ref) => {
   const { refreshPatientState } = usePatient();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -58,9 +62,12 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
   const [temperatureC, setTemperatureC] = useState(temperatureCProp);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [lastSavedContent, setLastSavedContent] = useState(value);
+  const isDirty = content !== lastSavedContent;
 
   useEffect(() => {
     setContent(value);
+    setLastSavedContent(value);
   }, [value]);
 
   useEffect(() => {
@@ -193,72 +200,90 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
     }
   };
 
-  const handleSave = async () => {
-    if (!patientId) {
-      uiToast({
-        title: 'Paciente não selecionado',
-        description: 'Selecione um paciente antes de salvar o registro.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleSaveInternal = useCallback(
+    async (opts?: { silent?: boolean }): Promise<{ ok: boolean; letter: string }> => {
+      const silent = opts?.silent ?? false;
 
-    if (!content.trim()) {
-      uiToast({
-        title: 'Campo vazio',
-        description: 'Preencha o campo antes de salvar.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Silent auth refresh before write.
-    const { error: authRefreshError } = await supabase.auth.getUser();
-    if ((authRefreshError as any)?.status === 401) {
-      toast.error('Sua sessão expirou. Por favor, recarregue a página.');
-      return;
-    }
-
-    if (letter === 'O') {
-      validateVitals(weightKg, temperatureC);
-    }
-
-    setIsSaving(true);
-    try {
-      const weightVal = letter === 'O' && weightKg.trim() ? parseFloat(weightKg) : null;
-      const tempVal = letter === 'O' && temperatureC.trim() ? parseFloat(temperatureC) : null;
-
-      const { error } = await supabase
-        .from('medical_consultations')
-        .upsert(
-          {
-            patient_id: patientId,
-            soap_block: letter,
-            content: content.trim(),
-            ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
-            ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
-          } as any,
-          { onConflict: 'patient_id,soap_block' }
-        );
-
-      if (error) throw error;
-
-      toast.success(`Bloco ${letter} salvo com sucesso!`);
-      refreshPatientState();
-    } catch (err: any) {
-      if (err?.status === 401 || err?.code === '401') {
-        toast.error('Sua sessão expirou. Por favor, recarregue a página.');
-      } else {
-        uiToast({
-          title: 'Erro ao salvar',
-          description: 'Não foi possível salvar o registro. Tente novamente.',
-          variant: 'destructive',
-        });
+      if (!patientId) {
+        if (!silent) {
+          uiToast({
+            title: 'Paciente não selecionado',
+            description: 'Selecione um paciente antes de salvar o registro.',
+            variant: 'destructive',
+          });
+        }
+        return { ok: false, letter };
       }
-    } finally {
-      setIsSaving(false);
-    }
-  };
+
+      // Empty blocks are a valid no-op (button is disabled when empty; save-all skips silently).
+      if (!content.trim()) {
+        return { ok: true, letter };
+      }
+
+      const { error: authRefreshError } = await supabase.auth.getUser();
+      if ((authRefreshError as any)?.status === 401) {
+        toast.error('Sua sessão expirou. Por favor, recarregue a página.');
+        return { ok: false, letter };
+      }
+
+      if (letter === 'O') {
+        validateVitals(weightKg, temperatureC);
+      }
+
+      setIsSaving(true);
+      try {
+        const weightVal = letter === 'O' && weightKg.trim() ? parseFloat(weightKg) : null;
+        const tempVal = letter === 'O' && temperatureC.trim() ? parseFloat(temperatureC) : null;
+
+        const { error } = await supabase
+          .from('medical_consultations')
+          .upsert(
+            {
+              patient_id: patientId,
+              soap_block: letter,
+              content: content.trim(),
+              ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
+              ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
+            } as any,
+            { onConflict: 'patient_id,soap_block' }
+          );
+
+        if (error) throw error;
+
+        setLastSavedContent(content);
+        if (!silent) {
+          toast.success(`Bloco ${letter} salvo com sucesso!`);
+        }
+        refreshPatientState();
+        return { ok: true, letter };
+      } catch (err: any) {
+        if (err?.status === 401 || err?.code === '401') {
+          toast.error('Sua sessão expirou. Por favor, recarregue a página.');
+        } else {
+          uiToast({
+            title: 'Erro ao salvar',
+            description: 'Não foi possível salvar o registro. Tente novamente.',
+            variant: 'destructive',
+          });
+        }
+        return { ok: false, letter };
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [patientId, content, letter, weightKg, temperatureC, aiSuggestions, refreshPatientState]
+  );
+
+  const handleSave = useCallback(
+    () => handleSaveInternal({ silent: false }),
+    [handleSaveInternal]
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({ save: () => handleSaveInternal({ silent: true }) }),
+    [handleSaveInternal]
+  );
 
   return (
     <Card className="relative overflow-hidden border-l-4" style={{ borderLeftColor: accentColor }}>
@@ -271,7 +296,16 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
             {letter}
           </span>
           <div className="flex-1">
-            <span className="font-semibold">{title}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold">{title}</span>
+              {isDirty && content.trim() && (
+                <span
+                  className="inline-block w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: 'hsl(24, 90%, 55%)' }}
+                  aria-label="alterações não salvas"
+                />
+              )}
+            </div>
             <p className="text-xs font-normal text-muted-foreground">{subtitle}</p>
           </div>
           <span className="text-muted-foreground">{icon}</span>
@@ -444,6 +478,8 @@ const SOAPCard: React.FC<SOAPCardProps> = ({
       </CardFooter>
     </Card>
   );
-};
+});
+
+SOAPCard.displayName = 'SOAPCard';
 
 export default SOAPCard;
