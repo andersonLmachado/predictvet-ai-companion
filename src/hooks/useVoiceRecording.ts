@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 // ─── Tipos exportados (testáveis em node) ────────────────────────────────────
 
@@ -43,7 +43,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     typeof navigator !== 'undefined' &&
     !!navigator.mediaDevices;
 
-  const [state, setState] = useState<RecordingState>('idle');
+  const [state, dispatch] = useReducer(recordingReducer, 'idle');
   const [duration, setDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -60,21 +60,22 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
   }, []);
 
   const startTimer = useCallback(() => {
+    stopTimer(); // clear any existing before starting
     timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
-  }, []);
+  }, [stopTimer]);
 
   const stop = useCallback(() => {
     const mr = mediaRecorderRef.current;
     if (mr && (mr.state === 'recording' || mr.state === 'paused')) mr.stop();
     stopTimer();
     if (maxTimerRef.current) { clearTimeout(maxTimerRef.current); maxTimerRef.current = null; }
-    setState('stopped');
+    dispatch('STOP');
   }, [stopTimer]);
 
   const start = useCallback(async () => {
     if (!isSupported) {
       console.warn('[useVoiceRecording] MediaRecorder não suportado neste navegador.');
-      setState('error');
+      dispatch('ERROR');
       return;
     }
     try {
@@ -100,7 +101,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       };
 
       mediaRecorder.start(1000); // chunk a cada 1s
-      setState('recording');
+      dispatch('START');
       startTimer();
 
       // Guard de duração máxima (30 min)
@@ -111,7 +112,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
         stop();
       }, MAX_RECORDING_MS);
     } catch {
-      setState('error');
+      dispatch('ERROR');
     }
   }, [isSupported, startTimer, stop]);
 
@@ -119,7 +120,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     if (mediaRecorderRef.current?.state === 'recording') {
       mediaRecorderRef.current.pause();
       stopTimer();
-      setState('paused');
+      dispatch('PAUSE');
     }
   }, [stopTimer]);
 
@@ -127,7 +128,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     if (mediaRecorderRef.current?.state === 'paused') {
       mediaRecorderRef.current.resume();
       startTimer();
-      setState('recording');
+      dispatch('RESUME');
     }
   }, [startTimer]);
 
@@ -137,7 +138,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     setAudioBlob(null);
     setAudioUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
     setDuration(0);
-    setState('idle');
+    dispatch('RESET');
     mediaRecorderRef.current = null;
     chunksRef.current = [];
   }, [stop]);
