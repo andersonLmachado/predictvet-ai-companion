@@ -193,3 +193,9 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: hsl(221, 73%, 50%);
 }
+
+/* ── Voice recording waveform ─────────────────────────────────────── */
+@keyframes waveBar {
+  from { height: 6px; }
+  to   { height: 28px; }
+}
