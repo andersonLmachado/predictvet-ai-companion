@@ -87,7 +87,9 @@ const GuidedConsultation: React.FC = () => {
       if (!isMounted) return;
 
       // Guided flow: single row with flat soap_s/o/a/p fields
-      const guidedRecord = (data ?? []).find((row: any) => row.source === 'guided');
+      const guidedRecord = (data ?? []).find(
+        (row: any) => row.source === 'guided' || row.source === 'voice'
+      );
       if (guidedRecord) {
         setSoapData({
           S: (guidedRecord as any).soap_s ?? '',

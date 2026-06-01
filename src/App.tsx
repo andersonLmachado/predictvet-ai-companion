@@ -21,6 +21,8 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import DischargeSummary from "./pages/DischargeSummary";
 import ConsultationPage from "./pages/ConsultationPage";
+import ConsultationModeSelectorPage from "./pages/ConsultationModeSelectorPage";
+import VoiceConsultationPage from "./pages/VoiceConsultationPage";
 import ProfilePage from "./pages/ProfilePage";
 import UltrasoundPage from './pages/UltrasoundPage';
 import MainLayout from "./components/layout/MainLayout";
@@ -122,12 +124,13 @@ const App = () => (
                 }
               />
 
+              {/* ── Ponto de entrada: seletor de modo ──────────────────── */}
               <Route
                 path="/anamnese"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <ConsultationPage />
+                      <ConsultationModeSelectorPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -137,7 +140,29 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
+                      <ConsultationModeSelectorPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              {/* ── Consulta Guiada (fluxo original inalterado) ────────── */}
+              <Route
+                path="/anamnese-guiada/:patientId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
                       <ConsultationPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              {/* ── Registro por Voz ────────────────────────────────────── */}
+              <Route
+                path="/consultation/:patientId/voice"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <VoiceConsultationPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
