@@ -1,3 +1,5 @@
+import { serializeVaccines, type Vaccine } from './medicalHistory';
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface FollowUpAnswer {
@@ -23,6 +25,9 @@ export interface ExtendedAnamnesisPayload extends AnamnesisPayload {
   weight_kg?: number | null;
   temperature_c?: number | null;
   clinical_history?: string;
+  allergies?: string;
+  previous_diseases?: string;
+  vaccines?: string;
 }
 
 // ─── Payload builder ─────────────────────────────────────────────────────────
@@ -55,6 +60,9 @@ export function buildTruncatedPayload(params: {
   weightKg?: number | null;
   temperatureC?: number | null;
   clinicalHistory?: string;
+  allergies?: string;
+  previousDiseases?: string;
+  vaccines?: Vaccine[];
 }): ExtendedAnamnesisPayload {
   let { transcription } = params;
 
@@ -99,6 +107,10 @@ export function buildTruncatedPayload(params: {
   if (params.clinicalHistory) {
     result.clinical_history = params.clinicalHistory.slice(0, 500);
   }
+
+  if (params.allergies) result.allergies = params.allergies.slice(0, 300);
+  if (params.previousDiseases) result.previous_diseases = params.previousDiseases.slice(0, 300);
+  if (params.vaccines?.length) result.vaccines = serializeVaccines(params.vaccines);
 
   return result;
 }

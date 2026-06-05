@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildTruncatedPayload } from '../lib/anamnesisApi';
+import { serializeVaccines } from '../lib/medicalHistory';
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: { from: vi.fn() },
+}));
 
 const BASE_PARAMS = {
   consultationId: 'uuid-123',
@@ -142,5 +147,59 @@ describe('clinical_history injection', () => {
       clinicalHistory: longText,
     });
     expect(result.clinical_history).toHaveLength(500);
+  });
+});
+
+describe('medical history injection', () => {
+  it('inclui allergies quando preenchido, truncado a 300 chars', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      allergies: 'Dipirona',
+    });
+    expect(result.allergies).toBe('Dipirona');
+  });
+
+  it('omite allergies quando vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, allergies: '' });
+    expect(result.allergies).toBeUndefined();
+  });
+
+  it('trunca allergies a 300 chars', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      allergies: 'A'.repeat(400),
+    });
+    expect(result.allergies).toHaveLength(300);
+  });
+
+  it('inclui previous_diseases quando preenchido', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      previousDiseases: 'Cinomose (2022)',
+    });
+    expect(result.previous_diseases).toBe('Cinomose (2022)');
+  });
+
+  it('omite previous_diseases quando vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, previousDiseases: '' });
+    expect(result.previous_diseases).toBeUndefined();
+  });
+
+  it('inclui vaccines serializado quando array não-vazio', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      vaccines: [{ name: 'V8', date: '2024-03-15' }],
+    });
+    expect(result.vaccines).toBe('V8 (15/03/2024)');
+  });
+
+  it('omite vaccines quando array vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, vaccines: [] });
+    expect(result.vaccines).toBeUndefined();
+  });
+
+  it('omite vaccines quando undefined', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS });
+    expect(result.vaccines).toBeUndefined();
   });
 });

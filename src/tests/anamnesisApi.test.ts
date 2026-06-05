@@ -5,6 +5,10 @@ import {
   type AnamnesisPayload,
 } from '../lib/anamnesisApi';
 
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: { from: vi.fn() },
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const basePayload: AnamnesisPayload = {
