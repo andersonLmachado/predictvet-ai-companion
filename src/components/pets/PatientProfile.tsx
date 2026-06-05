@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import { buildPatientUpdatePayload, validatePatientEdit, type EditForm } from '@/lib/patientEdit';
 import { ArrowLeft, PawPrint, User, Calendar, ClipboardList, Activity, Sparkles, Loader2, Stethoscope, Scan, Edit, X, Save } from 'lucide-react';
 import PatientSummary from '@/components/dashboard/PatientSummary';
+import PatientMedicalHistory from '@/components/patient/PatientMedicalHistory';
 import EvolutionReportCard from '@/components/dashboard/EvolutionReportCard';
 import TrendChart, { TrendDataPoint } from '@/components/dashboard/TrendChart';
 import ClinicalSignsSection from '@/components/dashboard/ClinicalSignsSection';
@@ -517,6 +518,8 @@ const ClinicalSummaryTab: React.FC<{ patient: PatientInfo; patientId: string }> 
   return (
     <div className="space-y-6">
       <PatientSummary patient={patient} />
+
+      <PatientMedicalHistory patientId={patientId} />
 
       <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
         <CardHeader className="pb-3">
