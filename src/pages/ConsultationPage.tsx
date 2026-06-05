@@ -14,6 +14,7 @@ import {
 import { usePatient } from '@/contexts/PatientContext';
 import { useAnamnesisWebhook } from '@/hooks/useAnamnesisWebhook';
 import { buildTruncatedPayload, type FollowUpAnswer } from '@/lib/anamnesisApi';
+import { fetchMedicalHistory, type MedicalHistory } from '@/lib/medicalHistory';
 import {
   sessionReducer,
   initialSession,
@@ -49,6 +50,18 @@ const ConsultationPage: React.FC = () => {
   const [session, dispatch] = useReducer(sessionReducer, initialSession);
   const [dynamicAnswers, setDynamicAnswers] = useState<FollowUpAnswer[]>([]);
   const [clinicalHistory, setClinicalHistory] = useState('');
+  const [medicalHistory, setMedicalHistory] = useState<MedicalHistory>({
+    allergies: '',
+    previousDiseases: '',
+    vaccines: [],
+  });
+
+  useEffect(() => {
+    if (!selectedPatient?.id) return;
+    fetchMedicalHistory(selectedPatient.id)
+      .then(setMedicalHistory)
+      .catch(() => {});
+  }, [selectedPatient?.id]);
 
   // Dynamic steps — step 4 is added once we enter step 3
   const steps =
@@ -101,6 +114,9 @@ const ConsultationPage: React.FC = () => {
         transcription: session.transcription,
         dynamicAnswers: answers,
         clinicalHistory: clinicalHistory || undefined,
+        allergies: medicalHistory.allergies || undefined,
+        previousDiseases: medicalHistory.previousDiseases || undefined,
+        vaccines: medicalHistory.vaccines.length ? medicalHistory.vaccines : undefined,
       });
 
       const { ok, error } = await send(payload);
@@ -116,7 +132,7 @@ const ConsultationPage: React.FC = () => {
         });
       }
     },
-    [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send, clinicalHistory]
+    [selectedPatient, session.complaint, session.followupAnswers, session.transcription, send, clinicalHistory, medicalHistory]
   );
 
   // ── Success screen ──────────────────────────────────────────────────────────
