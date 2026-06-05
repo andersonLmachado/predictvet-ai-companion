@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { fetchClinicalHistory, saveClinicalHistory } from '@/lib/clinicalHistory';
+import { fetchMedicalHistory } from '@/lib/medicalHistory';
 
 export interface ClinicalHistoryCardProps {
   patientId: string;
@@ -25,6 +26,8 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
 }) => {
   const { toast } = useToast();
   const [text, setText] = useState('');
+  const [allergies, setAllergies] = useState('');
+  const [previousDiseases, setPreviousDiseases] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [open, setOpen] = useState(false);
@@ -35,12 +38,19 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
     if (!patientId) return;
     setIsLoading(true);
     setText('');
+    setAllergies('');
+    setPreviousDiseases('');
     setOpen(false);
-    fetchClinicalHistory(patientId)
-      .then((value) => {
-        setText(value);
-        setOpen(value.trim().length > 0);
-        onLoadRef.current?.(value);
+    Promise.all([
+      fetchClinicalHistory(patientId),
+      fetchMedicalHistory(patientId),
+    ])
+      .then(([historyText, medical]) => {
+        setText(historyText);
+        setAllergies(medical.allergies);
+        setPreviousDiseases(medical.previousDiseases);
+        setOpen(historyText.trim().length > 0);
+        onLoadRef.current?.(historyText);
       })
       .catch(() => {
         onLoadRef.current?.('');
@@ -61,7 +71,8 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
   };
 
   if (mode === 'readonly') {
-    if (isLoading || !text.trim()) return null;
+    const hasContent = text.trim() || allergies.trim() || previousDiseases.trim();
+    if (isLoading || !hasContent) return null;
     return (
       <Card className="border-blue-200 bg-blue-50/50">
         <CardHeader className="py-3 pb-2">
@@ -78,8 +89,22 @@ const ClinicalHistoryCard: React.FC<ClinicalHistoryCardProps> = ({
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="pt-0 pb-3">
-          <p className="text-sm text-foreground whitespace-pre-wrap">{text}</p>
+        <CardContent className="pt-0 pb-3 space-y-1">
+          {allergies.trim() && (
+            <p className="text-sm text-foreground">
+              <span className="font-medium">Alergias:</span> {allergies}
+            </p>
+          )}
+          {previousDiseases.trim() && (
+            <p className="text-sm text-foreground">
+              <span className="font-medium">Doenças anteriores:</span> {previousDiseases}
+            </p>
+          )}
+          {text.trim() && (
+            <p className="text-sm text-foreground whitespace-pre-wrap">
+              <span className="font-medium">Histórico:</span> {text}
+            </p>
+          )}
         </CardContent>
       </Card>
     );
