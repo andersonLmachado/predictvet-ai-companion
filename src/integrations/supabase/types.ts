@@ -179,6 +179,8 @@ export type Database = {
       medical_consultations: {
         Row: {
           ai_suggestions: string | null
+          approved_exams: Json | null
+          approved_treatments: Json | null
           content: string | null
           created_at: string | null
           id: string
@@ -189,6 +191,8 @@ export type Database = {
         }
         Insert: {
           ai_suggestions?: string | null
+          approved_exams?: Json | null
+          approved_treatments?: Json | null
           content?: string | null
           created_at?: string | null
           id?: string
@@ -199,6 +203,8 @@ export type Database = {
         }
         Update: {
           ai_suggestions?: string | null
+          approved_exams?: Json | null
+          approved_treatments?: Json | null
           content?: string | null
           created_at?: string | null
           id?: string
