@@ -42,6 +42,7 @@ const GuidedConsultation: React.FC = () => {
     }
   }, []);
 
+  const [consultationId, setConsultationId] = useState<string | null>(null);
   const [soapData, setSoapData] = useState({
     S: '',
     O: '',
@@ -71,7 +72,7 @@ const GuidedConsultation: React.FC = () => {
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c')
+        .select('id, soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
@@ -91,6 +92,7 @@ const GuidedConsultation: React.FC = () => {
         (row: any) => row.source === 'guided' || row.source === 'voice'
       );
       if (guidedRecord) {
+        setConsultationId((guidedRecord as any).id ?? null);
         setSoapData({
           S: (guidedRecord as any).soap_s ?? '',
           O: (guidedRecord as any).soap_o ?? '',
@@ -99,6 +101,7 @@ const GuidedConsultation: React.FC = () => {
         });
         setAiSuggestions('');
       } else {
+        setConsultationId(null);
         // Legacy flow: one row per soap_block
         const nextSoapData = { S: '', O: '', A: '', P: '' };
         let nextAiSuggestions = '';
@@ -121,11 +124,11 @@ const GuidedConsultation: React.FC = () => {
         setAiSuggestions(nextAiSuggestions);
       }
 
-      // Load vital signs from the O block row (works for both guided and legacy flows)
-      const oRow = (data ?? []).find((row: any) => row.soap_block === 'O');
+      // Load vital signs: prefer guided/voice record (same row), fall back to legacy soap_block='O' row
+      const vitalsSource = guidedRecord ?? (data ?? []).find((row: any) => row.soap_block === 'O');
       setVitalSigns({
-        weightKg: (oRow as any)?.weight_kg != null ? String((oRow as any).weight_kg) : '',
-        temperatureC: (oRow as any)?.temperature_c != null ? String((oRow as any).temperature_c) : '',
+        weightKg: (vitalsSource as any)?.weight_kg != null ? String((vitalsSource as any).weight_kg) : '',
+        temperatureC: (vitalsSource as any)?.temperature_c != null ? String((vitalsSource as any).temperature_c) : '',
       });
     };
 
@@ -290,6 +293,7 @@ const GuidedConsultation: React.FC = () => {
           accentColor="hsl(210, 70%, 50%)"
           icon={<ClipboardList className="h-5 w-5" />}
           patientId={selectedPatient?.id}
+          consultationId={consultationId ?? undefined}
         />
 
         <SOAPCard
@@ -307,6 +311,7 @@ const GuidedConsultation: React.FC = () => {
           temperatureC={vitalSigns.temperatureC}
           onWeightChange={(v) => setVitalSigns((prev) => ({ ...prev, weightKg: v }))}
           onTemperatureChange={(v) => setVitalSigns((prev) => ({ ...prev, temperatureC: v }))}
+          consultationId={consultationId ?? undefined}
         />
 
         <SOAPCard
@@ -320,6 +325,7 @@ const GuidedConsultation: React.FC = () => {
           accentColor="hsl(35, 80%, 50%)"
           icon={<Brain className="h-5 w-5" />}
           patientId={selectedPatient?.id}
+          consultationId={consultationId ?? undefined}
         />
 
         <SOAPCard
@@ -335,6 +341,7 @@ const GuidedConsultation: React.FC = () => {
           patientId={selectedPatient?.id}
           aiSuggestions={aiSuggestions}
           onAiSuggestionsChange={setAiSuggestions}
+          consultationId={consultationId ?? undefined}
         />
       </div>
 

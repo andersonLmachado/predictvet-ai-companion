@@ -24,6 +24,7 @@ interface SOAPCardProps {
   accentColor: string;
   icon: React.ReactNode;
   patientId?: string;
+  consultationId?: string;
   aiSuggestions?: string;
   onAiSuggestionsChange?: (value: string) => void;
   weightKg?: string;
@@ -46,6 +47,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   accentColor,
   icon,
   patientId,
+  consultationId,
   aiSuggestions,
   onAiSuggestionsChange,
   weightKg: weightKgProp = '',
@@ -215,8 +217,9 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         return { ok: false, letter };
       }
 
-      // Empty blocks are a valid no-op (button is disabled when empty; save-all skips silently).
-      if (!content.trim()) {
+      // For O card, vitals alone are enough to justify a save even with empty textarea
+      const hasVitals = letter === 'O' && (weightKg.trim() !== '' || temperatureC.trim() !== '');
+      if (!content.trim() && !hasVitals) {
         return { ok: true, letter };
       }
 
@@ -235,20 +238,39 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         const weightVal = letter === 'O' && weightKg.trim() ? parseFloat(weightKg) : null;
         const tempVal = letter === 'O' && temperatureC.trim() ? parseFloat(temperatureC) : null;
 
-        const { error } = await supabase
-          .from('medical_consultations')
-          .upsert(
-            {
-              patient_id: patientId,
-              soap_block: letter,
-              content: content.trim(),
-              ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
-              ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
-            } as any,
-            { onConflict: 'patient_id,soap_block' }
-          );
+        if (consultationId) {
+          // Guided/voice record exists: UPDATE the flat soap_* columns on that row
+          const soapKey = `soap_${letter.toLowerCase()}`;
+          const payload: Record<string, unknown> = {};
+          if (content.trim()) payload[soapKey] = content.trim();
+          if (letter === 'O') {
+            payload.weight_kg = weightVal;
+            payload.temperature_c = tempVal;
+          }
+          if (letter === 'P' && aiSuggestions) {
+            payload.ai_suggestions = aiSuggestions;
+          }
 
-        if (error) throw error;
+          const { error } = await (supabase.from('medical_consultations') as any)
+            .update(payload)
+            .eq('id', consultationId);
+          if (error) throw error;
+        } else {
+          // No guided record: legacy upsert per soap_block
+          const { error } = await supabase
+            .from('medical_consultations')
+            .upsert(
+              {
+                patient_id: patientId,
+                soap_block: letter,
+                content: content.trim(),
+                ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
+                ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
+              } as any,
+              { onConflict: 'patient_id,soap_block' }
+            );
+          if (error) throw error;
+        }
 
         setLastSavedContent(content);
         if (!silent) {
@@ -271,7 +293,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         setIsSaving(false);
       }
     },
-    [patientId, content, letter, weightKg, temperatureC, aiSuggestions, refreshPatientState]
+    [patientId, content, letter, weightKg, temperatureC, aiSuggestions, consultationId, refreshPatientState]
   );
 
   const handleSave = useCallback(
@@ -468,7 +490,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
       <CardFooter className="pt-0">
         <Button
           onClick={handleSave}
-          disabled={isSaving || !content.trim()}
+          disabled={isSaving || (!content.trim() && !(letter === 'O' && (weightKg.trim() || temperatureC.trim())))}
           className="gap-2"
           style={{ backgroundColor: accentColor }}
         >
