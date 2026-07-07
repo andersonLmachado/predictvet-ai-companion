@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { usePatient } from '@/contexts/PatientContext';
-import { Stethoscope, ClipboardList, Eye, Brain, FileCheck, RefreshCw, PlusCircle, Sparkles, ArrowRight, Loader2, Save } from 'lucide-react';
+import { Stethoscope, ClipboardList, Eye, Brain, RefreshCw, PlusCircle, Sparkles, ArrowRight, Loader2, Save } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import SOAPCard, { type SOAPCardHandle } from './SOAPCard';
+import PlanCard from './PlanCard';
 import { aggregateSaveResults } from '@/lib/soapSaveOrchestrator';
 import { Link } from 'react-router-dom';
 import {
@@ -50,7 +51,7 @@ const GuidedConsultation: React.FC = () => {
     P: '',
   });
 
-  const [aiSuggestions, setAiSuggestions] = useState('');
+  const [approvedState, setApprovedState] = useState<{ exams: string[]; treatments: string[] }>({ exams: [], treatments: [] });
   const [vitalSigns, setVitalSigns] = useState({ weightKg: '', temperatureC: '' });
 
   const updateField = (field: keyof typeof soapData) => (value: string) => {
@@ -64,7 +65,7 @@ const GuidedConsultation: React.FC = () => {
       if (!selectedPatient?.id) {
         if (isMounted) {
           setSoapData({ S: '', O: '', A: '', P: '' });
-          setAiSuggestions('');
+          setApprovedState({ exams: [], treatments: [] });
           setVitalSigns({ weightKg: '', temperatureC: '' });
         }
         return;
@@ -72,7 +73,7 @@ const GuidedConsultation: React.FC = () => {
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('id, soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c')
+        .select('id, soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c, approved_exams, approved_treatments')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
@@ -99,12 +100,10 @@ const GuidedConsultation: React.FC = () => {
           A: (guidedRecord as any).soap_a ?? '',
           P: (guidedRecord as any).soap_p ?? '',
         });
-        setAiSuggestions('');
       } else {
         setConsultationId(null);
         // Legacy flow: one row per soap_block
         const nextSoapData = { S: '', O: '', A: '', P: '' };
-        let nextAiSuggestions = '';
         const filledBlocks = new Set<string>();
 
         for (const row of data ?? []) {
@@ -112,16 +111,12 @@ const GuidedConsultation: React.FC = () => {
           if (!block || !['S', 'O', 'A', 'P'].includes(block) || filledBlocks.has(block)) continue;
 
           nextSoapData[block as keyof typeof nextSoapData] = row.content ?? '';
-          if (block === 'P') {
-            nextAiSuggestions = row.ai_suggestions ?? '';
-          }
           filledBlocks.add(block);
 
           if (filledBlocks.size === 4) break;
         }
 
         setSoapData(nextSoapData);
-        setAiSuggestions(nextAiSuggestions);
       }
 
       // Load vital signs: prefer guided/voice record (same row), fall back to legacy soap_block='O' row
@@ -129,6 +124,16 @@ const GuidedConsultation: React.FC = () => {
       setVitalSigns({
         weightKg: (vitalsSource as any)?.weight_kg != null ? String((vitalsSource as any).weight_kg) : '',
         temperatureC: (vitalsSource as any)?.temperature_c != null ? String((vitalsSource as any).temperature_c) : '',
+      });
+
+      // Load approved plan items: prefer the guided/voice record's own columns, fall back to the legacy P-block row
+      const legacyPRow = (data ?? []).find((row: any) => row.soap_block === 'P');
+      const approvedSource = (guidedRecord && ((guidedRecord as any).approved_exams?.length || (guidedRecord as any).approved_treatments?.length))
+        ? guidedRecord
+        : legacyPRow;
+      setApprovedState({
+        exams:      (approvedSource as any)?.approved_exams      ?? [],
+        treatments: (approvedSource as any)?.approved_treatments ?? [],
       });
     };
 
@@ -328,20 +333,14 @@ const GuidedConsultation: React.FC = () => {
           consultationId={consultationId ?? undefined}
         />
 
-        <SOAPCard
+        <PlanCard
           ref={soapRefs.P}
-          letter="P"
-          title="Plano — Conduta"
-          subtitle="Exames solicitados, prescrições, retorno"
-          placeholder="Solicitar hemograma completo, bioquímico renal... Prescrever: ___ | Retorno em: ___"
           value={soapData.P}
           onChange={updateField('P')}
-          accentColor="hsl(270, 50%, 55%)"
-          icon={<FileCheck className="h-5 w-5" />}
           patientId={selectedPatient?.id}
-          aiSuggestions={aiSuggestions}
-          onAiSuggestionsChange={setAiSuggestions}
           consultationId={consultationId ?? undefined}
+          initialApprovedExams={approvedState.exams}
+          initialApprovedTreatments={approvedState.treatments}
         />
       </div>
 
