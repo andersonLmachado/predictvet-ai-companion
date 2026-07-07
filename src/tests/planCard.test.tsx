@@ -6,14 +6,16 @@ import '@testing-library/jest-dom';
 import PlanCard from '../components/consultation/PlanCard';
 import type { SOAPCardHandle } from '../components/consultation/SOAPCard';
 
-const { mockUpsert } = vi.hoisted(() => ({
+const { mockUpsert, mockUpdate, mockEq } = vi.hoisted(() => ({
   mockUpsert: vi.fn().mockResolvedValue({ error: null }),
+  mockEq: vi.fn().mockResolvedValue({ error: null }),
+  mockUpdate: vi.fn(),
 }));
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null }) },
-    from: vi.fn().mockReturnValue({ upsert: mockUpsert }),
+    from: vi.fn().mockReturnValue({ upsert: mockUpsert, update: mockUpdate }),
   },
 }));
 
@@ -116,6 +118,8 @@ describe('PlanCard — save() via ref', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpsert.mockResolvedValue({ error: null });
+    mockEq.mockResolvedValue({ error: null });
+    mockUpdate.mockReturnValue({ eq: mockEq });
   });
 
   it('retorna ok:true sem chamar upsert quando value está vazio', async () => {
@@ -179,5 +183,34 @@ describe('PlanCard — save() via ref', () => {
     const result = await act(() => ref.current!.save());
 
     expect(result).toEqual({ ok: false, letter: 'P' });
+  });
+
+  it('quando consultationId é fornecido, chama update com soap_p e approved_* em vez de upsert', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(
+      <PlanCard
+        ref={ref}
+        value={PLAN_TEXT}
+        onChange={vi.fn()}
+        patientId="p-1"
+        consultationId="c-1"
+      />,
+    );
+
+    fireEvent.click(screen.getByText('Hemograma completo — triagem inicial'));
+
+    const result = await act(() => ref.current!.save());
+
+    expect(result).toEqual({ ok: true, letter: 'P' });
+    expect(mockUpsert).not.toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalledOnce();
+
+    const [[payload]] = mockUpdate.mock.calls;
+    expect(payload.soap_p).toBeDefined();
+    expect(payload.content).toBeUndefined();
+    expect(payload.approved_exams).toContain('Hemograma completo — triagem inicial');
+    expect(payload.approved_treatments).toEqual([]);
+
+    expect(mockEq).toHaveBeenCalledWith('id', 'c-1');
   });
 });

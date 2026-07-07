@@ -15,6 +15,7 @@ interface PlanCardProps {
   value: string;
   onChange: (v: string) => void;
   patientId?: string;
+  consultationId?: string;
   initialApprovedExams?: string[];
   initialApprovedTreatments?: string[];
 }
@@ -28,6 +29,7 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
       value,
       onChange,
       patientId,
+      consultationId,
       initialApprovedExams = EMPTY_STRING_ARRAY,
       initialApprovedTreatments = EMPTY_STRING_ARRAY,
     },
@@ -98,20 +100,35 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
 
         setIsSaving(true);
         try {
-          const { error } = await supabase
-            .from('medical_consultations')
-            .upsert(
-              {
-                patient_id: patientId,
-                soap_block: 'P',
-                content: contentToSave,
-                approved_exams: approvedExams,
-                approved_treatments: approvedTreatments,
-              } as any,
-              { onConflict: 'patient_id,soap_block' },
-            );
+          if (consultationId) {
+            // Guided/voice record exists: UPDATE the flat soap_p column on that row
+            const payload: Record<string, unknown> = {
+              soap_p: contentToSave,
+              approved_exams: approvedExams,
+              approved_treatments: approvedTreatments,
+            };
 
-          if (error) throw error;
+            const { error } = await (supabase.from('medical_consultations') as any)
+              .update(payload)
+              .eq('id', consultationId);
+            if (error) throw error;
+          } else {
+            // No guided record: legacy upsert per soap_block
+            const { error } = await supabase
+              .from('medical_consultations')
+              .upsert(
+                {
+                  patient_id: patientId,
+                  soap_block: 'P',
+                  content: contentToSave,
+                  approved_exams: approvedExams,
+                  approved_treatments: approvedTreatments,
+                } as any,
+                { onConflict: 'patient_id,soap_block' },
+              );
+
+            if (error) throw error;
+          }
 
           setLastSavedValue(value);
           if (!silent) toast.success('Bloco P salvo com sucesso!');
@@ -132,7 +149,7 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
           setIsSaving(false);
         }
       },
-      [patientId, value, parsed, monitoringOverride, approvedExams, approvedTreatments, refreshPatientState],
+      [patientId, consultationId, value, parsed, monitoringOverride, approvedExams, approvedTreatments, refreshPatientState],
     );
 
     useImperativeHandle(ref, () => ({ save: () => handleSaveInternal({ silent: true }) }), [
