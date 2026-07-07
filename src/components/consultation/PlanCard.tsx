@@ -42,7 +42,6 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
     const [isMonitoringEditing, setIsMonitoringEditing] = useState(false);
     const [monitoringOverride, setMonitoringOverride] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [lastSavedValue, setLastSavedValue] = useState(value);
     const [fallbackContent, setFallbackContent] = useState(value);
 
     // Sync approved state when parent reloads data (e.g. patient switch)
@@ -50,15 +49,9 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
     useEffect(() => { setApprovedTreatments(initialApprovedTreatments); }, [initialApprovedTreatments]);
     useEffect(() => {
       setFallbackContent(value);
-      setLastSavedValue(value);
     }, [value]);
 
     const parsed = useMemo(() => parseSoapP(value), [value]);
-
-    // isDirty depends on mode
-    const isDirty = parsed
-      ? value !== lastSavedValue
-      : fallbackContent !== lastSavedValue;
 
     const toggleExam = (item: string) =>
       setApprovedExams((prev) =>
@@ -130,7 +123,6 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
             if (error) throw error;
           }
 
-          setLastSavedValue(value);
           if (!silent) toast.success('Bloco P salvo com sucesso!');
           refreshPatientState();
           return { ok: true, letter: 'P' };
@@ -168,13 +160,6 @@ const PlanCard = forwardRef<SOAPCardHandle, PlanCardProps>(
           <div className="flex-1">
             <div className="flex items-center gap-1.5">
               <span className="font-semibold">Plano — Conduta</span>
-              {isDirty && value.trim() && (
-                <span
-                  className="inline-block w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: 'hsl(24, 90%, 55%)' }}
-                  aria-label="alterações não salvas"
-                />
-              )}
             </div>
             <p className="text-xs font-normal text-muted-foreground">
               Exames solicitados, prescrições, retorno

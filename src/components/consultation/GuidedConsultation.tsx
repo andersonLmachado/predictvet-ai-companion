@@ -73,7 +73,7 @@ const GuidedConsultation: React.FC = () => {
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('id, soap_block, content, ai_suggestions, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c, approved_exams, approved_treatments')
+        .select('id, soap_block, content, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c, approved_exams, approved_treatments')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
