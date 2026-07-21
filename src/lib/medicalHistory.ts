@@ -115,3 +115,34 @@ export function serializeVaccines(vaccines: Vaccine[]): string {
     })
     .join(', ');
 }
+
+export function serializeContinuousMedications(medications: ContinuousMedication[]): string {
+  return medications
+    .filter((m) => m.name.trim())
+    .map((m) => {
+      let result = m.name;
+      const doseFrequency = [m.dose, m.frequency].filter(Boolean).join(' ');
+      if (doseFrequency) result += ` ${doseFrequency}`;
+      if (m.indication) result += ` (${m.indication})`;
+      return result;
+    })
+    .join(', ');
+}
+
+export function serializeInfectiousDiseases(diseases: InfectiousDisease[]): string {
+  return diseases
+    .filter((d) => d.disease.trim())
+    .map((d) => {
+      let result = d.disease;
+      if (d.status) result += `: ${d.status}`;
+      const details: string[] = [];
+      if (d.method) details.push(d.method);
+      if (d.testDate) {
+        const [year, month, day] = d.testDate.split('-');
+        details.push(`${day}/${month}/${year}`);
+      }
+      if (details.length) result += ` (${details.join(', ')})`;
+      return result;
+    })
+    .join(', ');
+}

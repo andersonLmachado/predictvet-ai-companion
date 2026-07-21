@@ -3,6 +3,8 @@ import {
   fetchMedicalHistory,
   saveMedicalHistory,
   serializeVaccines,
+  serializeContinuousMedications,
+  serializeInfectiousDiseases,
   type Vaccine,
 } from '../lib/medicalHistory';
 
@@ -285,5 +287,74 @@ describe('serializeVaccines', () => {
   it('exibe apenas o nome quando data está vazia', () => {
     const vaccines: Vaccine[] = [{ name: 'V8', date: '' }];
     expect(serializeVaccines(vaccines)).toBe('V8');
+  });
+});
+
+describe('serializeContinuousMedications', () => {
+  it('retorna string vazia para array vazio', () => {
+    expect(serializeContinuousMedications([])).toBe('');
+  });
+
+  it('serializa nome, dose, frequência e indicação', () => {
+    expect(
+      serializeContinuousMedications([
+        { name: 'Enrofloxacino', dose: '10mg', frequency: '2x/dia', indication: 'Piometra' },
+      ])
+    ).toBe('Enrofloxacino 10mg 2x/dia (Piometra)');
+  });
+
+  it('omite indicação quando vazia', () => {
+    expect(
+      serializeContinuousMedications([
+        { name: 'Levotiroxina', dose: '0.1mg', frequency: '1x/dia', indication: '' },
+      ])
+    ).toBe('Levotiroxina 0.1mg 1x/dia');
+  });
+
+  it('omite medicamentos com nome vazio', () => {
+    expect(
+      serializeContinuousMedications([
+        { name: '', dose: '10mg', frequency: '2x/dia', indication: '' },
+        { name: 'Enrofloxacino', dose: '10mg', frequency: '2x/dia', indication: 'Piometra' },
+      ])
+    ).toBe('Enrofloxacino 10mg 2x/dia (Piometra)');
+  });
+
+  it('serializa múltiplos medicamentos separados por vírgula', () => {
+    expect(
+      serializeContinuousMedications([
+        { name: 'Enrofloxacino', dose: '10mg', frequency: '2x/dia', indication: 'Piometra' },
+        { name: 'Levotiroxina', dose: '0.1mg', frequency: '1x/dia', indication: '' },
+      ])
+    ).toBe('Enrofloxacino 10mg 2x/dia (Piometra), Levotiroxina 0.1mg 1x/dia');
+  });
+});
+
+describe('serializeInfectiousDiseases', () => {
+  it('retorna string vazia para array vazio', () => {
+    expect(serializeInfectiousDiseases([])).toBe('');
+  });
+
+  it('serializa doença, status, método e data do teste', () => {
+    expect(
+      serializeInfectiousDiseases([
+        { disease: 'Leishmaniose', status: 'Positivo', testDate: '2024-03-15', method: 'ELISA' },
+      ])
+    ).toBe('Leishmaniose: Positivo (ELISA, 15/03/2024)');
+  });
+
+  it('omite parênteses quando método e data ausentes', () => {
+    expect(
+      serializeInfectiousDiseases([{ disease: 'FIV', status: 'Negativo', testDate: '', method: '' }])
+    ).toBe('FIV: Negativo');
+  });
+
+  it('omite doenças com nome vazio', () => {
+    expect(
+      serializeInfectiousDiseases([
+        { disease: '', status: 'Positivo', testDate: '', method: '' },
+        { disease: 'FeLV', status: 'Não testado', testDate: '', method: '' },
+      ])
+    ).toBe('FeLV: Não testado');
   });
 });
