@@ -87,7 +87,7 @@ const ClinicalIntelligenceSection = () => {
             fontFamily: 'Nunito Sans, sans-serif',
           }}
         >
-          O PredictLab analisa os dados clínicos do paciente ao longo do tempo e
+          O PredictVet analisa os dados clínicos do paciente ao longo do tempo e
           identifica padrões que seriam difíceis de perceber consulta a consulta. Não
           são predições absolutas — são alertas baseados em tendências reais, para que
           o veterinário tome decisões com mais informação.
@@ -211,7 +211,7 @@ const ClinicalIntelligenceSection = () => {
             fontFamily: 'Nunito Sans, sans-serif',
           }}
         >
-          O PredictLab é uma ferramenta de apoio à decisão clínica. Os alertas e
+          O PredictVet é uma ferramenta de apoio à decisão clínica. Os alertas e
           insights gerados não substituem o julgamento do médico veterinário
           habilitado. A prescrição, o diagnóstico e a conduta terapêutica são de
           responsabilidade exclusiva do profissional.
