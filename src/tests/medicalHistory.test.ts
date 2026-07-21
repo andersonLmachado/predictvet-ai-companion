@@ -87,14 +87,40 @@ describe('saveMedicalHistory', () => {
   it('resolve sem erro no sucesso', async () => {
     vi.mocked(supabase.from as any).mockReturnValue(makeUpdateChain({ error: null }));
     await expect(
-      saveMedicalHistory('pat-001', { allergies: 'Dipirona', previousDiseases: '', vaccines: [] })
+      saveMedicalHistory('pat-001', {
+        allergies: 'Dipirona',
+        previousDiseases: '',
+        vaccines: [],
+        deworming: [],
+        continuousMedications: [],
+        surgeries: [],
+        reproductiveStatus: '',
+        reproductiveDate: '',
+        bloodType: '',
+        transfusionHistory: '',
+        infectiousDiseases: [],
+        drugRestrictions: '',
+      })
     ).resolves.toBeUndefined();
   });
 
   it('envia allergies como null quando vazio', async () => {
     const chain = makeUpdateChain({ error: null });
     vi.mocked(supabase.from as any).mockReturnValue(chain);
-    await saveMedicalHistory('pat-002', { allergies: '', previousDiseases: '', vaccines: [] });
+    await saveMedicalHistory('pat-002', {
+      allergies: '',
+      previousDiseases: '',
+      vaccines: [],
+      deworming: [],
+      continuousMedications: [],
+      surgeries: [],
+      reproductiveStatus: '',
+      reproductiveDate: '',
+      bloodType: '',
+      transfusionHistory: '',
+      infectiousDiseases: [],
+      drugRestrictions: '',
+    });
     expect(chain.update).toHaveBeenCalledWith(
       expect.objectContaining({ allergies: null, previous_diseases: null })
     );
@@ -105,7 +131,20 @@ describe('saveMedicalHistory', () => {
       makeUpdateChain({ error: { message: 'RLS violation' } })
     );
     await expect(
-      saveMedicalHistory('pat-003', { allergies: '', previousDiseases: '', vaccines: [] })
+      saveMedicalHistory('pat-003', {
+        allergies: '',
+        previousDiseases: '',
+        vaccines: [],
+        deworming: [],
+        continuousMedications: [],
+        surgeries: [],
+        reproductiveStatus: '',
+        reproductiveDate: '',
+        bloodType: '',
+        transfusionHistory: '',
+        infectiousDiseases: [],
+        drugRestrictions: '',
+      })
     ).rejects.toThrow('RLS violation');
   });
 });
