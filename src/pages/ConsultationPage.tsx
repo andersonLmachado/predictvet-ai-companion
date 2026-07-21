@@ -54,6 +54,15 @@ const ConsultationPage: React.FC = () => {
     allergies: '',
     previousDiseases: '',
     vaccines: [],
+    deworming: [],
+    continuousMedications: [],
+    surgeries: [],
+    reproductiveStatus: '',
+    reproductiveDate: '',
+    bloodType: '',
+    transfusionHistory: '',
+    infectiousDiseases: [],
+    drugRestrictions: '',
   });
 
   useEffect(() => {
@@ -117,6 +126,14 @@ const ConsultationPage: React.FC = () => {
         allergies: medicalHistory.allergies || undefined,
         previousDiseases: medicalHistory.previousDiseases || undefined,
         vaccines: medicalHistory.vaccines.length ? medicalHistory.vaccines : undefined,
+        continuousMedications: medicalHistory.continuousMedications.length
+          ? medicalHistory.continuousMedications
+          : undefined,
+        drugRestrictions: medicalHistory.drugRestrictions || undefined,
+        reproductiveStatus: medicalHistory.reproductiveStatus || undefined,
+        infectiousDiseases: medicalHistory.infectiousDiseases.length
+          ? medicalHistory.infectiousDiseases
+          : undefined,
       });
 
       const { ok, error } = await send(payload);

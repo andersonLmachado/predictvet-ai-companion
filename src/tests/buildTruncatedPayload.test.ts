@@ -203,3 +203,71 @@ describe('medical history injection', () => {
     expect(result.vaccines).toBeUndefined();
   });
 });
+
+describe('extended medical history injection', () => {
+  it('inclui continuous_medications serializado e truncado a 300 chars', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      continuousMedications: [
+        { name: 'Enrofloxacino', dose: '10mg', frequency: '2x/dia', indication: 'Piometra' },
+      ],
+    });
+    expect(result.continuous_medications).toBe('Enrofloxacino 10mg 2x/dia (Piometra)');
+  });
+
+  it('omite continuous_medications quando array vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, continuousMedications: [] });
+    expect(result.continuous_medications).toBeUndefined();
+  });
+
+  it('trunca continuous_medications a 300 chars', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      continuousMedications: [{ name: 'A'.repeat(400), dose: '', frequency: '', indication: '' }],
+    });
+    expect(result.continuous_medications).toHaveLength(300);
+  });
+
+  it('inclui drug_restrictions quando preenchido, truncado a 300 chars', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      drugRestrictions: 'MDR1/ABCB1 em raças pastoras',
+    });
+    expect(result.drug_restrictions).toBe('MDR1/ABCB1 em raças pastoras');
+  });
+
+  it('omite drug_restrictions quando vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, drugRestrictions: '' });
+    expect(result.drug_restrictions).toBeUndefined();
+  });
+
+  it('trunca drug_restrictions a 300 chars', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, drugRestrictions: 'A'.repeat(400) });
+    expect(result.drug_restrictions).toHaveLength(300);
+  });
+
+  it('inclui reproductive_status quando preenchido', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, reproductiveStatus: 'Castrado' });
+    expect(result.reproductive_status).toBe('Castrado');
+  });
+
+  it('omite reproductive_status quando vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, reproductiveStatus: '' });
+    expect(result.reproductive_status).toBeUndefined();
+  });
+
+  it('inclui infectious_diseases serializado quando array não-vazio', () => {
+    const result = buildTruncatedPayload({
+      ...BASE_PARAMS,
+      infectiousDiseases: [
+        { disease: 'Leishmaniose', status: 'Positivo', testDate: '2024-03-15', method: 'ELISA' },
+      ],
+    });
+    expect(result.infectious_diseases).toBe('Leishmaniose: Positivo (ELISA, 15/03/2024)');
+  });
+
+  it('omite infectious_diseases quando array vazio', () => {
+    const result = buildTruncatedPayload({ ...BASE_PARAMS, infectiousDiseases: [] });
+    expect(result.infectious_diseases).toBeUndefined();
+  });
+});

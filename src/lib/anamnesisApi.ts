@@ -1,4 +1,11 @@
-import { serializeVaccines, type Vaccine } from './medicalHistory';
+import {
+  serializeVaccines,
+  serializeContinuousMedications,
+  serializeInfectiousDiseases,
+  type Vaccine,
+  type ContinuousMedication,
+  type InfectiousDisease,
+} from './medicalHistory';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +35,10 @@ export interface ExtendedAnamnesisPayload extends AnamnesisPayload {
   allergies?: string;
   previous_diseases?: string;
   vaccines?: string;
+  continuous_medications?: string;
+  drug_restrictions?: string;
+  reproductive_status?: string;
+  infectious_diseases?: string;
 }
 
 // ─── Payload builder ─────────────────────────────────────────────────────────
@@ -63,6 +74,10 @@ export function buildTruncatedPayload(params: {
   allergies?: string;
   previousDiseases?: string;
   vaccines?: Vaccine[];
+  continuousMedications?: ContinuousMedication[];
+  drugRestrictions?: string;
+  reproductiveStatus?: string;
+  infectiousDiseases?: InfectiousDisease[];
 }): ExtendedAnamnesisPayload {
   let { transcription } = params;
 
@@ -111,6 +126,14 @@ export function buildTruncatedPayload(params: {
   if (params.allergies) result.allergies = params.allergies.slice(0, 300);
   if (params.previousDiseases) result.previous_diseases = params.previousDiseases.slice(0, 300);
   if (params.vaccines?.length) result.vaccines = serializeVaccines(params.vaccines);
+  if (params.continuousMedications?.length) {
+    result.continuous_medications = serializeContinuousMedications(params.continuousMedications).slice(0, 300);
+  }
+  if (params.drugRestrictions) result.drug_restrictions = params.drugRestrictions.slice(0, 300);
+  if (params.reproductiveStatus) result.reproductive_status = params.reproductiveStatus;
+  if (params.infectiousDiseases?.length) {
+    result.infectious_diseases = serializeInfectiousDiseases(params.infectiousDiseases).slice(0, 300);
+  }
 
   return result;
 }
