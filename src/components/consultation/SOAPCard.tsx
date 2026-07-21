@@ -13,6 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface SOAPCardProps {
   letter: string;
@@ -31,6 +38,8 @@ interface SOAPCardProps {
   temperatureC?: string;
   onWeightChange?: (v: string) => void;
   onTemperatureChange?: (v: string) => void;
+  bodyConditionScore?: string;
+  onBodyConditionScoreChange?: (v: string) => void;
 }
 
 export interface SOAPCardHandle {
@@ -54,6 +63,8 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   temperatureC: temperatureCProp = '',
   onWeightChange,
   onTemperatureChange,
+  bodyConditionScore: bodyConditionScoreProp = '',
+  onBodyConditionScoreChange,
 }, ref) => {
   const { refreshPatientState } = usePatient();
   const [isRecording, setIsRecording] = useState(false);
@@ -62,6 +73,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   const [content, setContent] = useState(value);
   const [weightKg, setWeightKg] = useState(weightKgProp);
   const [temperatureC, setTemperatureC] = useState(temperatureCProp);
+  const [bodyConditionScore, setBodyConditionScore] = useState(bodyConditionScoreProp);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [lastSavedContent, setLastSavedContent] = useState(value);
@@ -79,6 +91,10 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
   useEffect(() => {
     setTemperatureC(temperatureCProp);
   }, [temperatureCProp]);
+
+  useEffect(() => {
+    setBodyConditionScore(bodyConditionScoreProp);
+  }, [bodyConditionScoreProp]);
 
   const normalizeAiText = (text: string) => text.replace(/\*\*/g, '').trim();
 
@@ -218,7 +234,9 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
       }
 
       // For O card, vitals alone are enough to justify a save even with empty textarea
-      const hasVitals = letter === 'O' && (weightKg.trim() !== '' || temperatureC.trim() !== '');
+      const hasVitals =
+        letter === 'O' &&
+        (weightKg.trim() !== '' || temperatureC.trim() !== '' || bodyConditionScore.trim() !== '');
       if (!content.trim() && !hasVitals) {
         return { ok: true, letter };
       }
@@ -237,6 +255,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
       try {
         const weightVal = letter === 'O' && weightKg.trim() ? parseFloat(weightKg) : null;
         const tempVal = letter === 'O' && temperatureC.trim() ? parseFloat(temperatureC) : null;
+        const eccVal = letter === 'O' && bodyConditionScore.trim() ? parseInt(bodyConditionScore, 10) : null;
 
         if (consultationId) {
           // Guided/voice record exists: UPDATE the flat soap_* columns on that row
@@ -246,6 +265,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
           if (letter === 'O') {
             payload.weight_kg = weightVal;
             payload.temperature_c = tempVal;
+            payload.body_condition_score = eccVal;
           }
           if (letter === 'P' && aiSuggestions) {
             payload.ai_suggestions = aiSuggestions;
@@ -265,7 +285,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
                 soap_block: letter,
                 content: content.trim(),
                 ...(letter === 'P' && aiSuggestions ? { ai_suggestions: aiSuggestions } : {}),
-                ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal } : {}),
+                ...(letter === 'O' ? { weight_kg: weightVal, temperature_c: tempVal, body_condition_score: eccVal } : {}),
               } as any,
               { onConflict: 'patient_id,soap_block' }
             );
@@ -293,7 +313,7 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
         setIsSaving(false);
       }
     },
-    [patientId, content, letter, weightKg, temperatureC, aiSuggestions, consultationId, refreshPatientState]
+    [patientId, content, letter, weightKg, temperatureC, bodyConditionScore, aiSuggestions, consultationId, refreshPatientState]
   );
 
   const handleSave = useCallback(
@@ -407,6 +427,36 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
                 </span>
               </div>
             </div>
+            {/* ECC */}
+            <div className="flex flex-col gap-1">
+              <label
+                className="text-xs font-semibold uppercase tracking-wide"
+                style={{ color: 'hsl(222,30%,45%)', fontFamily: 'Nunito Sans, sans-serif' }}
+              >
+                ECC (1-9)
+              </label>
+              <Select
+                value={bodyConditionScore || undefined}
+                onValueChange={(v) => {
+                  setBodyConditionScore(v);
+                  onBodyConditionScoreChange?.(v);
+                }}
+              >
+                <SelectTrigger
+                  className="h-9 w-16 text-sm"
+                  style={{ borderColor: 'hsl(217,50%,85%)', background: 'hsl(213,100%,99%)' }}
+                >
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
         <div className="relative">
@@ -490,7 +540,11 @@ const SOAPCard = forwardRef<SOAPCardHandle, SOAPCardProps>(({
       <CardFooter className="pt-0">
         <Button
           onClick={handleSave}
-          disabled={isSaving || (!content.trim() && !(letter === 'O' && (weightKg.trim() || temperatureC.trim())))}
+          disabled={
+            isSaving ||
+            (!content.trim() &&
+              !(letter === 'O' && (weightKg.trim() || temperatureC.trim() || bodyConditionScore.trim())))
+          }
           className="gap-2"
           style={{ backgroundColor: accentColor }}
         >

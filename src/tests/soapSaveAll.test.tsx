@@ -142,3 +142,58 @@ describe('SOAPCard — indicador isDirty', () => {
     expect(screen.queryByLabelText('alterações não salvas')).not.toBeInTheDocument();
   });
 });
+
+// ── ECC (body_condition_score) ─────────────────────────────────────────────
+
+const oBaseProps = {
+  letter: 'O',
+  title: 'Objetivo',
+  subtitle: 'Exame físico',
+  placeholder: 'Digite aqui...',
+  value: '',
+  onChange: vi.fn(),
+  accentColor: 'hsl(160,60%,40%)',
+  icon: null,
+  patientId: 'patient-123',
+};
+
+describe('SOAPCard — Escore de Condição Corporal (ECC)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsert.mockResolvedValue({ error: null });
+  });
+
+  it('inclui body_condition_score no upsert quando preenchido no bloco O', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...oBaseProps} bodyConditionScore="7" ref={ref} />);
+
+    await act(() => ref.current!.save());
+
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ body_condition_score: 7 }),
+      expect.anything()
+    );
+  });
+
+  it('envia body_condition_score null quando não preenchido no bloco O', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...oBaseProps} weightKg="4.5" ref={ref} />);
+
+    await act(() => ref.current!.save());
+
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ body_condition_score: null }),
+      expect.anything()
+    );
+  });
+
+  it('não inclui body_condition_score para blocos que não são O', async () => {
+    const ref = createRef<SOAPCardHandle>();
+    render(<SOAPCard {...baseProps} bodyConditionScore="7" value="conteúdo" ref={ref} />);
+
+    await act(() => ref.current!.save());
+
+    const [payload] = mockUpsert.mock.calls[0];
+    expect(payload).not.toHaveProperty('body_condition_score');
+  });
+});
