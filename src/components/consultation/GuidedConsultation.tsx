@@ -52,7 +52,7 @@ const GuidedConsultation: React.FC = () => {
   });
 
   const [approvedState, setApprovedState] = useState<{ exams: string[]; treatments: string[] }>({ exams: [], treatments: [] });
-  const [vitalSigns, setVitalSigns] = useState({ weightKg: '', temperatureC: '' });
+  const [vitalSigns, setVitalSigns] = useState({ weightKg: '', temperatureC: '', bodyConditionScore: '' });
 
   const updateField = (field: keyof typeof soapData) => (value: string) => {
     setSoapData((prev) => ({ ...prev, [field]: value }));
@@ -66,14 +66,14 @@ const GuidedConsultation: React.FC = () => {
         if (isMounted) {
           setSoapData({ S: '', O: '', A: '', P: '' });
           setApprovedState({ exams: [], treatments: [] });
-          setVitalSigns({ weightKg: '', temperatureC: '' });
+          setVitalSigns({ weightKg: '', temperatureC: '', bodyConditionScore: '' });
         }
         return;
       }
 
       const { data, error } = await supabase
         .from('medical_consultations')
-        .select('id, soap_block, content, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c, approved_exams, approved_treatments')
+        .select('id, soap_block, content, created_at, source, soap_s, soap_o, soap_a, soap_p, weight_kg, temperature_c, body_condition_score, approved_exams, approved_treatments')
         .eq('patient_id', selectedPatient.id)
         .order('created_at', { ascending: false });
 
@@ -124,6 +124,10 @@ const GuidedConsultation: React.FC = () => {
       setVitalSigns({
         weightKg: (vitalsSource as any)?.weight_kg != null ? String((vitalsSource as any).weight_kg) : '',
         temperatureC: (vitalsSource as any)?.temperature_c != null ? String((vitalsSource as any).temperature_c) : '',
+        bodyConditionScore:
+          (vitalsSource as any)?.body_condition_score != null
+            ? String((vitalsSource as any).body_condition_score)
+            : '',
       });
 
       // Load approved plan items: prefer the guided/voice record's own columns, fall back to the legacy P-block row
@@ -316,6 +320,8 @@ const GuidedConsultation: React.FC = () => {
           temperatureC={vitalSigns.temperatureC}
           onWeightChange={(v) => setVitalSigns((prev) => ({ ...prev, weightKg: v }))}
           onTemperatureChange={(v) => setVitalSigns((prev) => ({ ...prev, temperatureC: v }))}
+          bodyConditionScore={vitalSigns.bodyConditionScore}
+          onBodyConditionScoreChange={(v) => setVitalSigns((prev) => ({ ...prev, bodyConditionScore: v }))}
           consultationId={consultationId ?? undefined}
         />
 
