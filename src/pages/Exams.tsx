@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileSearch, RefreshCw, Save, NotebookPen, Calendar, Home } from "lucide-react";
+import { Loader2, FileSearch, RefreshCw, Save, NotebookPen, Calendar, Home, CheckCircle2, AlertCircle, FilePlus2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import FileDropzone from "@/components/analysis/FileDropzone";
@@ -26,13 +26,24 @@ import ClinicalHistoryCard from '@/components/patient/ClinicalHistoryCard';
 
 type ExamType = "sangue" | "urina";
 
+// Sobrevive a remontagens da página (ex: navegar para outra tela e voltar)
+// dentro da mesma aba, sem misturar com o paciente "ativo" global usado em
+// outras telas (Dashboard, Consulta, etc.), que é um contexto separado.
+const SELECTED_PATIENT_STORAGE_KEY = 'predictlab_exams_selected_patient_id';
+
 const Exams = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [examType, setExamType] = useState<ExamType>("sangue");
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem(SELECTED_PATIENT_STORAGE_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
   const [patients, setPatients] = useState<Patient[]>([]);
 
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
@@ -41,6 +52,8 @@ const Exams = () => {
   const [vetNotes, setVetNotes] = useState<string>('');
   const [extractedExamDate, setExtractedExamDate] = useState<string | null>(null);
   const [laboratory, setLaboratory] = useState<string>('');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fetchPatients = useCallback(async () => {
     if (!user?.id) return;
@@ -82,7 +95,33 @@ const Exams = () => {
     if (user?.id) fetchPatients();
   }, [fetchPatients, user]);
 
-  const handlePatientChange = (value: string) => setSelectedPatientId(value);
+  const handlePatientChange = (value: string) => {
+    setSelectedPatientId(value);
+    try {
+      sessionStorage.setItem(SELECTED_PATIENT_STORAGE_KEY, value);
+    } catch {
+      // sessionStorage indisponível (ex: modo privado) — segue apenas em memória
+    }
+  };
+
+  // Reinicia o fluxo de exame para um novo paciente/upload. É o único gatilho
+  // explícito para limpar o seletor de paciente — o salvamento nunca limpa
+  // automaticamente.
+  const handleNewExam = () => {
+    setSelectedPatientId("");
+    try {
+      sessionStorage.removeItem(SELECTED_PATIENT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    setResult(null);
+    setSavedExamId(null);
+    setExtractedExamDate(null);
+    setLaboratory('');
+    setVetNotes('');
+    setSaveError(null);
+    setUploadError(null);
+  };
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
@@ -108,6 +147,7 @@ const Exams = () => {
     setSavedExamId(null);
     setExtractedExamDate(null);
     setLaboratory('');
+    setUploadError(null);
 
     try {
       const formData = new FormData();
@@ -138,9 +178,11 @@ const Exams = () => {
       });
     } catch (error) {
       console.error("Erro:", error);
+      const message = "Não foi possível analisar o arquivo. Verifique o arquivo e tente novamente.";
+      setUploadError(message);
       toast({
         title: "Erro na análise",
-        description: "Não foi possível analisar o arquivo.",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -151,6 +193,7 @@ const Exams = () => {
   const handleSaveExam = async () => {
     // Guard: already saved — prevent duplicate inserts from double-clicks
     if (savedExamId) return;
+    setSaveError(null);
 
     const patient = selectedPatient;
     if (!result || !patient) {
@@ -230,9 +273,11 @@ const Exams = () => {
       }
     } catch (error) {
       console.error("Erro ao salvar exame:", error);
+      const message = "Não foi possível salvar o exame. Tente novamente.";
+      setSaveError(message);
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o exame. Tente novamente.",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -322,6 +367,17 @@ const Exams = () => {
           </Card>
         )}
 
+        {uploadError && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-lg border p-3 text-sm"
+            style={{ borderColor: 'hsl(352,76%,85%)', background: 'hsl(352,76%,97%)', color: 'hsl(352,76%,35%)' }}
+          >
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{uploadError}</span>
+          </div>
+        )}
+
         {isLoading && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -365,23 +421,57 @@ const Exams = () => {
                   )}
                 </div>
               )}
-              <div className="flex items-center gap-3">
-                <ExamReport
-                  clinical_summary={result.resumo_clinico}
-                  analysis_data={result.resultados}
-                  patientData={patientData}
-                  examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
-                  vet_notes={vetNotes}
-                  exam_date={extractedExamDate}
-                  laboratory={laboratory || null}
-                />
-                <Button
-                  onClick={handleSaveExam}
-                  disabled={isSavingExam || !!savedExamId}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSavingExam ? "Salvando..." : savedExamId ? "Exame salvo" : "Salvar Exame"}
-                </Button>
+              <div
+                className="sticky bottom-4 z-20 flex flex-col gap-2 rounded-xl border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 p-3 shadow-lg"
+              >
+                <div className="flex flex-wrap items-center gap-3">
+                  <ExamReport
+                    clinical_summary={result.resumo_clinico}
+                    analysis_data={result.resultados}
+                    patientData={patientData}
+                    examType={examType === "sangue" ? "Hemograma Completo" : "Urinálise (EAS)"}
+                    vet_notes={vetNotes}
+                    exam_date={extractedExamDate}
+                    laboratory={laboratory || null}
+                  />
+                  <Button
+                    onClick={handleSaveExam}
+                    disabled={isSavingExam || !!savedExamId}
+                    className="flex-1 sm:flex-none min-w-[160px]"
+                    style={savedExamId ? { backgroundColor: 'hsl(162,70%,38%)' } : undefined}
+                  >
+                    {isSavingExam ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : savedExamId ? (
+                      <>
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Exame salvo
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar Exame
+                      </>
+                    )}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={handleNewExam}>
+                    <FilePlus2 className="mr-2 h-4 w-4" />
+                    Novo Exame
+                  </Button>
+                </div>
+                {saveError && (
+                  <p
+                    role="alert"
+                    className="flex items-center gap-1.5 text-sm"
+                    style={{ color: 'hsl(352,76%,40%)' }}
+                  >
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    {saveError}
+                  </p>
+                )}
               </div>
             </div>
             <AnalysisResults result={result} patientData={patientData} />
