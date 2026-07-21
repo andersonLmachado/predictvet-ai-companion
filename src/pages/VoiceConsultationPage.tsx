@@ -79,6 +79,13 @@ const VoiceConsultationPage: React.FC = () => {
     return () => clearInterval(id);
   }, [consultation.loading]);
 
+  // Redireciona para o SOAP do paciente após sucesso, dando tempo de ler a confirmação
+  useEffect(() => {
+    if (!consultation.success) return;
+    const id = setTimeout(() => navigate(`/patient/${patientId ?? ''}`), 2500);
+    return () => clearTimeout(id);
+  }, [consultation.success, navigate, patientId]);
+
   const handleGenerateSOAP = async () => {
     if (!recording.audioBlob) return;
     await consultation.submit(recording.audioBlob, context, clinicalHistory);
@@ -153,7 +160,7 @@ const VoiceConsultationPage: React.FC = () => {
               Nova consulta
             </button>
             <Link
-              to="/chat"
+              to={`/patient/${patientId ?? ''}`}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
               style={{
                 background: 'linear-gradient(135deg, hsl(221,73%,45%), hsl(217,88%,57%))',
@@ -202,7 +209,7 @@ const VoiceConsultationPage: React.FC = () => {
             >
               <Mic className="w-5 h-5 text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1
                 className="text-2xl font-bold"
                 style={{ fontFamily: 'Sora, sans-serif', color: 'hsl(213,100%,97%)' }}
@@ -211,7 +218,7 @@ const VoiceConsultationPage: React.FC = () => {
               </h1>
               {selectedPatient && (
                 <p
-                  className="text-sm mt-0.5"
+                  className="text-sm mt-0.5 truncate"
                   style={{
                     color: 'hsla(213,100%,85%,0.55)',
                     fontFamily: 'Nunito Sans, sans-serif',

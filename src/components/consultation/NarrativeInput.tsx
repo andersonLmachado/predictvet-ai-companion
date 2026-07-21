@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { AlertCircle, Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 // ─── SpeechRecognition browser types ───────────────────────────────────────
@@ -108,7 +108,6 @@ const NarrativeInput: React.FC<NarrativeInputProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Row: label + Whisper pending badge */}
       <div className="flex items-center justify-between">
         <label
           className="text-xs font-semibold uppercase tracking-wide"
@@ -116,21 +115,6 @@ const NarrativeInput: React.FC<NarrativeInputProps> = ({
         >
           Relato do Tutor
         </label>
-
-        {/* ── Whisper/n8n flag ─────────────────────────────────────────── */}
-        <span
-          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg"
-          style={{
-            background: 'hsl(38,88%,96%)',
-            color: 'hsl(38,70%,38%)',
-            border: '1px solid hsl(38,60%,82%)',
-            fontFamily: 'Nunito Sans, sans-serif',
-          }}
-        >
-          <AlertCircle className="w-3 h-3" />
-          Whisper/n8n — pendente
-        </span>
-        {/* ─────────────────────────────────────────────────────────────── */}
       </div>
 
       {/* Textarea with floating mic button */}

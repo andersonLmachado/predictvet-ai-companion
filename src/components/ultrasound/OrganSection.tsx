@@ -93,7 +93,7 @@ const OrganSection: React.FC<OrganSectionProps> = ({
     </AccordionTrigger>
 
     <AccordionContent className="px-3 pb-4">
-      <div className="grid grid-cols-2 gap-3 mb-3">{children}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">{children}</div>
       <Textarea
         value={notes}
         onChange={(e) => onNotesChange(e.target.value)}

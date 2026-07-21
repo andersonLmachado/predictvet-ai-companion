@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { UltrasoundReportData, UltrasoundSex, UltrasoundSpecies } from '@/types/ultrasound';
 import { CANIS_REFS, FELIS_REFS, checkReference, getAdrenalReference, getPancreasDuctReference } from '@/lib/ultrasoundReferences';
 import { generateReport, buildPrintableHtml } from '@/lib/ultrasoundReportGenerator';
+import { saveUltrasoundReport } from '@/lib/ultrasoundReportSave';
 import { parseVoiceMeasurements } from '@/lib/ultrasoundVoiceParser';
 import { useUltrasoundWhisper } from '@/hooks/useUltrasoundWhisper';
 import OrganSection from './OrganSection';
@@ -210,15 +211,20 @@ const UltrasoundForm: React.FC<Props> = ({ patient }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { error } = await supabase.from('ultrasound_reports').insert({
+      const result = await saveUltrasoundReport({
         ...data,
         veterinarian_id: user.id,
         generated_report: report,
       });
 
-      if (error) throw error;
+      if (!result.ok) {
+        console.error('[UltrasoundForm] falha ao salvar laudo:', result.error);
+        toast.error(`Erro ao salvar: ${result.error ?? 'tente novamente'}`);
+        return;
+      }
       toast.success('Laudo salvo com sucesso!');
     } catch (err: any) {
+      console.error('[UltrasoundForm] falha ao salvar laudo:', err);
       toast.error(`Erro ao salvar: ${err.message ?? 'tente novamente'}`);
     } finally {
       setIsSaving(false);

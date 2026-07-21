@@ -1,7 +1,12 @@
 // src/hooks/useUltrasoundWhisper.ts
 import { useCallback, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const WEBHOOK_URL = import.meta.env.VITE_N8N_ULTRASOUND_WEBHOOK_URL as
+  | string
+  | undefined;
+
+const WEBHOOK_SECRET = import.meta.env.VITE_N8N_WEBHOOK_SECRET as
   | string
   | undefined;
 
@@ -16,6 +21,51 @@ export interface UseUltrasoundWhisperReturn {
   webhookConfigured: boolean;
   startRecording: (organ: string) => Promise<void>;
   stopRecording: () => void;
+}
+
+export interface UltrasoundTranscriptionResult {
+  ok: boolean;
+  transcription: string | null;
+  error: string | null;
+}
+
+// ─── Função pura (testável em node) ─────────────────────────────────────────
+
+export async function sendUltrasoundAudio(
+  webhookUrl: string | undefined,
+  secret: string | undefined,
+  audio: string,
+  organ: string,
+): Promise<UltrasoundTranscriptionResult> {
+  if (!webhookUrl) {
+    return {
+      ok: false,
+      transcription: null,
+      error: 'VITE_N8N_ULTRASOUND_WEBHOOK_URL não configurado. Defina a variável no .env.',
+    };
+  }
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(secret && { Authorization: `Bearer ${secret}` }),
+      },
+      body: JSON.stringify({ audio, organ }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => response.statusText);
+      return { ok: false, transcription: null, error: `n8n respondeu ${response.status}: ${text}` };
+    }
+
+    const data = await response.json();
+    const transcription = typeof data?.transcription === 'string' ? data.transcription : null;
+    return { ok: true, transcription, error: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro desconhecido ao chamar o webhook.';
+    return { ok: false, transcription: null, error: message };
+  }
 }
 
 export function useUltrasoundWhisper({
@@ -42,20 +92,14 @@ export function useUltrasoundWhisper({
         bytes.forEach((b) => { binary += String.fromCharCode(b); });
         const base64 = btoa(binary);
 
-        const response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audio: base64, organ }),
-        });
+        const result = await sendUltrasoundAudio(WEBHOOK_URL, WEBHOOK_SECRET, base64, organ);
 
-        if (!response.ok) return;
-
-        const data = await response.json();
-        const transcript =
-          typeof data?.transcription === 'string' ? data.transcription : '';
-        if (transcript) onTranscription(organ, transcript);
-      } catch {
-        // Silent fail — vet can type manually
+        if (result.ok && result.transcription) {
+          onTranscription(organ, result.transcription);
+        } else if (!result.ok) {
+          console.error('[useUltrasoundWhisper] falha ao transcrever áudio:', result.error);
+          toast.error('Não foi possível processar o áudio. Preencha as medidas manualmente.');
+        }
       } finally {
         setIsProcessing(false);
       }

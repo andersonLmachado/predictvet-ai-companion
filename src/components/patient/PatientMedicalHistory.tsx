@@ -174,36 +174,38 @@ const PatientMedicalHistory: React.FC<Props> = ({ patientId }) => {
               ) : (
                 <div className="space-y-2">
                   {vaccines.map((vaccine, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <Input
                         value={vaccine.name}
                         onChange={(e) => updateVaccine(index, 'name', e.target.value)}
                         placeholder="Nome da vacina"
-                        className="h-9 text-sm flex-1"
+                        className="h-9 text-sm flex-1 min-w-0"
                         style={{
                           borderColor: 'hsl(217,50%,85%)',
                           fontFamily: 'Nunito Sans, sans-serif',
                         }}
                       />
-                      <Input
-                        type="date"
-                        value={vaccine.date}
-                        onChange={(e) => updateVaccine(index, 'date', e.target.value)}
-                        className="h-9 text-sm w-40"
-                        style={{
-                          borderColor: 'hsl(217,50%,85%)',
-                          fontFamily: 'Nunito Sans, sans-serif',
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeVaccine(index)}
-                        className="flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-red-50"
-                        style={{ color: 'hsl(352,76%,44%)' }}
-                        aria-label="Remover vacina"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="date"
+                          value={vaccine.date}
+                          onChange={(e) => updateVaccine(index, 'date', e.target.value)}
+                          className="h-9 text-sm w-full sm:w-40"
+                          style={{
+                            borderColor: 'hsl(217,50%,85%)',
+                            fontFamily: 'Nunito Sans, sans-serif',
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeVaccine(index)}
+                          className="flex-shrink-0 p-1.5 rounded-lg transition-colors hover:bg-red-50"
+                          style={{ color: 'hsl(352,76%,44%)' }}
+                          aria-label="Remover vacina"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

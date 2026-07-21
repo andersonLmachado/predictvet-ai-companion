@@ -129,6 +129,7 @@ export function useVoiceConsultation({ patientId }: UseVoiceConsultationOptions)
 
         if (!result.ok || !result.data) {
           const msg = result.error ?? 'Erro desconhecido ao processar o áudio.';
+          console.error('[useVoiceConsultation] falha ao processar áudio:', result.error);
           setError(msg);
           toast.error(msg);
           return;
@@ -160,6 +161,7 @@ export function useVoiceConsultation({ patientId }: UseVoiceConsultationOptions)
 
         if (dbError) {
           const msg = 'Erro ao salvar consulta no prontuário.';
+          console.error('[useVoiceConsultation] falha ao salvar no Supabase:', dbError);
           setError(msg);
           toast.error(msg);
           return;

@@ -65,11 +65,11 @@ export const FileDropzone = ({
   if (selectedFile && !isLoading) {
     return (
       <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
-        <CardContent className="flex items-center justify-between p-6">
-          <div className="flex items-center gap-4">
+        <CardContent className="flex items-center justify-between gap-3 p-6">
+          <div className="flex items-center gap-4 min-w-0">
             {getFileIcon(selectedFile)}
-            <div>
-              <p className="font-medium text-foreground">{selectedFile.name}</p>
+            <div className="min-w-0">
+              <p className="font-medium text-foreground truncate">{selectedFile.name}</p>
               <p className="text-sm text-muted-foreground">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
@@ -77,7 +77,7 @@ export const FileDropzone = ({
           </div>
           <button
             onClick={clearFile}
-            className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+            className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
           >
             <X className="h-5 w-5" />
           </button>
