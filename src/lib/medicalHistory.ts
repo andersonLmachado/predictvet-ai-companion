@@ -5,16 +5,58 @@ export interface Vaccine {
   date: string; // "YYYY-MM-DD"
 }
 
+export interface Deworming {
+  date: string; // "YYYY-MM-DD"
+  activeIngredient: string;
+  weightKg: string;
+}
+
+export interface ContinuousMedication {
+  name: string;
+  dose: string;
+  frequency: string;
+  indication: string;
+}
+
+export interface Surgery {
+  date: string; // "YYYY-MM-DD"
+  procedure: string;
+  anesthesiaReaction: string;
+}
+
+export type InfectiousDiseaseStatus = 'Positivo' | 'Negativo' | 'Não testado' | '';
+
+export interface InfectiousDisease {
+  disease: string;
+  status: InfectiousDiseaseStatus;
+  testDate: string; // "YYYY-MM-DD"
+  method: string;
+}
+
+export type ReproductiveStatus = 'Inteiro' | 'Castrado' | '';
+
 export interface MedicalHistory {
   allergies: string;
   previousDiseases: string;
   vaccines: Vaccine[];
+  deworming: Deworming[];
+  continuousMedications: ContinuousMedication[];
+  surgeries: Surgery[];
+  reproductiveStatus: ReproductiveStatus;
+  reproductiveDate: string;
+  bloodType: string;
+  transfusionHistory: string;
+  infectiousDiseases: InfectiousDisease[];
+  drugRestrictions: string;
 }
 
 export async function fetchMedicalHistory(patientId: string): Promise<MedicalHistory> {
   const { data, error } = await supabase
     .from('patients' as any)
-    .select('allergies, previous_diseases, vaccines')
+    .select(
+      'allergies, previous_diseases, vaccines, deworming, continuous_medications, surgeries, ' +
+        'reproductive_status, reproductive_date, blood_type, transfusion_history, infectious_diseases, drug_restrictions'
+    )
     .eq('id', patientId)
     .limit(1)
     .maybeSingle();
@@ -26,6 +68,15 @@ export async function fetchMedicalHistory(patientId: string): Promise<MedicalHis
     allergies: row?.allergies ?? '',
     previousDiseases: row?.previous_diseases ?? '',
     vaccines: Array.isArray(row?.vaccines) ? row.vaccines : [],
+    deworming: Array.isArray(row?.deworming) ? row.deworming : [],
+    continuousMedications: Array.isArray(row?.continuous_medications) ? row.continuous_medications : [],
+    surgeries: Array.isArray(row?.surgeries) ? row.surgeries : [],
+    reproductiveStatus: row?.reproductive_status ?? '',
+    reproductiveDate: row?.reproductive_date ?? '',
+    bloodType: row?.blood_type ?? '',
+    transfusionHistory: row?.transfusion_history ?? '',
+    infectiousDiseases: Array.isArray(row?.infectious_diseases) ? row.infectious_diseases : [],
+    drugRestrictions: row?.drug_restrictions ?? '',
   };
 }
 
@@ -39,6 +90,15 @@ export async function saveMedicalHistory(
       allergies: history.allergies || null,
       previous_diseases: history.previousDiseases || null,
       vaccines: history.vaccines,
+      deworming: history.deworming,
+      continuous_medications: history.continuousMedications,
+      surgeries: history.surgeries,
+      reproductive_status: history.reproductiveStatus || null,
+      reproductive_date: history.reproductiveDate || null,
+      blood_type: history.bloodType || null,
+      transfusion_history: history.transfusionHistory || null,
+      infectious_diseases: history.infectiousDiseases,
+      drug_restrictions: history.drugRestrictions || null,
     } as any)
     .eq('id', patientId);
 
